@@ -1,0 +1,2 @@
+export function buildArtworkQuery(q){const filter={published:true}; if(q.category)filter.category=q.category;if(q.artist)filter.artist=q.artist;if(q.availability)filter.availability=q.availability;if(q.minPrice||q.maxPrice)filter.price={...(q.minPrice&&{$gte:+q.minPrice}),...(q.maxPrice&&{$lte:+q.maxPrice})};if(q.search)filter.$text={$search:q.search};return filter}
+export const pageInfo=(page,limit,total)=>({page,limit,total,pages:Math.ceil(total/limit),hasMore:page*limit<total});

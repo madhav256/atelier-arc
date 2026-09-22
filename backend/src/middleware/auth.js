@@ -1,0 +1,3 @@
+import jwt from 'jsonwebtoken';import {env} from '../config/env.js';import {AppError} from '../lib/errors.js';
+export function authenticate(req,res,next){const token=req.cookies?.accessToken||req.headers.authorization?.replace(/^Bearer /,'');if(!token)return next(new AppError(401,'Authentication required','AUTH_REQUIRED'));try{req.user=jwt.verify(token,env.accessSecret);next()}catch{return next(new AppError(401,'Invalid or expired token','INVALID_TOKEN'))}}
+export const authorize=(...roles)=>(req,res,next)=>roles.includes(req.user?.role)?next():next(new AppError(403,'You do not have permission','FORBIDDEN'));

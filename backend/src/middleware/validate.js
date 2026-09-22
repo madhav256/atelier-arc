@@ -1,0 +1,1 @@
+import {AppError} from '../lib/errors.js';export const validate=schema=>(req,res,next)=>{const out=schema.safeParse({body:req.body,query:req.query,params:req.params});if(!out.success)return next(new AppError(422,'Validation failed','VALIDATION_ERROR',out.error.flatten()));Object.assign(req,out.data);next()};

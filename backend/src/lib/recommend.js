@@ -1,0 +1,1 @@
+export function scoreArtwork(candidate, source){let score=0;if(candidate.artist?.toString()===source.artist?.toString())score+=5;if(candidate.category===source.category)score+=3;if(candidate.medium===source.medium)score+=2;const tags=new Set(source.tags||[]);score+=(candidate.tags||[]).filter(t=>tags.has(t)).length;return score}

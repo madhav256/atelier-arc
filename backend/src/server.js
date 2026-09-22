@@ -1,0 +1,1 @@
+import mongoose from 'mongoose';import {app} from './app.js';import {env} from './config/env.js';await mongoose.connect(env.mongoUri);const server=app.listen(env.port,()=>console.log(`Atelier Arc API on :${env.port}`));const shutdown=async()=>{server.close();await mongoose.disconnect();process.exit(0)};process.on('SIGTERM',shutdown);process.on('SIGINT',shutdown);
