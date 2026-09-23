@@ -4,7 +4,7 @@ A production-oriented MERN foundation for a luxury contemporary art dealership. 
 
 ## Quick start
 
-Requirements: Node 20+, npm 10+, MongoDB 7+.
+Requirements: Node 20.19+ (22 recommended), npm 10+, MongoDB 7+ (run it as a replica set, even single-node, so orders use transactions).
 
 ```bash
 cp .env.example .env
@@ -21,9 +21,13 @@ The seed creates 15 fictional artists, 50 original fictional artworks, 8 collect
 
 - `npm run dev` - run API and storefront
 - `npm run build` - production storefront build
-- `npm test` - backend and frontend tests
+- `npm test` - backend (27, incl. integration tests on an in-memory MongoDB replica set) and frontend tests
 - `npm run lint` - static checks
 - `npm run seed -w backend` - reset and seed MongoDB
+- `npm run test:e2e` - Playwright end-to-end and axe accessibility suite (41 tests, desktop and mobile). Starts its own in-memory MongoDB replica set, seeded API and Vite dev server. First run: `npx playwright install chromium`
+- `npm run test:load` - autocannon load test against a running, seeded API; see [docs/LOAD_TEST.md](docs/LOAD_TEST.md)
+
+CI (GitHub Actions, `.github/workflows/ci.yml`) runs lint, tests, build, the dependency audit gate, SBOM generation and the Playwright suite on every push and pull request.
 
 ## Structure
 
@@ -37,14 +41,16 @@ backend/src/models        Mongoose schemas and indexes
 backend/src/middleware    auth, authorization, validation
 backend/src/lib           errors, filtering, recommendation scoring
 backend/src/routes        versioned REST routing
-docs/                     architecture, API, deployment, audit
+e2e/                      Playwright + axe end-to-end suite
+backend/load/             autocannon load test
+docs/                     architecture, API, deployment, audit, runbooks
 ```
 
 ## Implemented flows
 
-Luxury homepage and animated price discovery, URL-driven catalog filtering/sorting/search, artwork detail and simulated room viewer, My Collection client experience, cart and six-stage acquisition flow, authentication endpoints and role middleware, artist pages/timeline, editorial index, collector inquiry/advisory, admin dashboard foundation, deterministic recommendations, notification model/API, responsive layouts, reduced motion, metadata/canonical support, seed data, and core unit/component tests.
+Editorial homepage, URL-driven catalogue with facets, sorting and typo-tolerant search, artwork detail with JSON-LD and a simulated room viewer, artist and collection pages, journal, saved works and taste-based recommendations, server-side cart, signed shipping/insurance/GST quotes, checkout through the payment adapters with inventory holds and webhook-only confirmation, order status lookup, collector account (orders, inquiries with message thread, viewings, private offers, notifications, settings), advisor inquiry pipeline, admin CRUD, uploads, analytics and audit log, and full auth (verification, reset, lockout, rotating refresh tokens, CSRF).
 
-Provider-dependent systems are honest adapters, not fake integrations. Payment card collection, transactional email/SMS/push, cloud image transforms, address validation, tax/shipping quotes, refunds, and real AR must be connected before launch. See `docs/PRODUCTION_INTEGRATIONS.md`.
+Provider-dependent systems are honest adapters, not fake integrations. Locally, payments use a mock gateway with signed webhooks, email is written to the console, and images are stored on disk. Real Stripe or Razorpay keys, an SMTP provider, Cloudinary and MongoDB Atlas are free signups for the owner; real AR, address validation and carrier-rated shipping are not built. See `docs/PRODUCTION_INTEGRATIONS.md`.
 
 ## Documentation
 
@@ -52,4 +58,7 @@ Provider-dependent systems are honest adapters, not fake integrations. Payment c
 - [API](docs/API.md)
 - [Deployment](docs/DEPLOYMENT.md)
 - [Production integrations](docs/PRODUCTION_INTEGRATIONS.md)
+- [Runbooks](docs/runbooks/README.md): deploy, rollback, incident response, payments, backup and restore, secret rotation, staff access
+- [Load test](docs/LOAD_TEST.md)
+- [Dependency audit and SBOM](docs/SECURITY_AUDIT.md)
 - [Final audit](docs/FINAL_AUDIT.md)

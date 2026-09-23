@@ -1,6 +1,6 @@
 # Final audit
 
-Status as of the backend hardening phase. Items move to "Done" only when code and tests exist in this repository.
+Status at completion (Sept 24, 2026). Items move to "Done" only when code and tests exist in this repository.
 
 ## Done
 
@@ -17,13 +17,22 @@ Status as of the backend hardening phase. Items move to "Done" only when code an
 - Recommendations: personal taste profile from saves, cart, views, purchases, follows and stated preferences, with price-band fit and artist variety cap; similar-works and popular fallback
 - Admin: policy-driven CRUD for artworks, artists, collections, articles, customers; read access to orders and inquiries; search, filters, sort, pagination, bulk publish/feature; slug generation; delete guards; self-lockout protection; session revocation on role change; image upload pipeline (type sniffing, pixel limits, EXIF strip, WebP/AVIF derivatives, optional ClamAV); analytics dashboard; immutable audit log
 - Ops: `/health` and `/ready`, graceful shutdown, index sync on boot, production config guard that refuses mock payments and missing secrets, seed guard against wiping production
-- Tests: 27 backend tests including 19 integration tests on a real in-memory MongoDB replica set
+- Tests: 27 backend tests including 19 integration tests on a real in-memory MongoDB replica set; frontend component tests
+- Frontend wired to the API: admin CRUD screens, advisor inquiry dashboard, account area (orders, inquiries, viewings, offers, notifications, settings), checkout with the payment adapters, per-page SEO and JSON-LD, accessibility pass
+- End-to-end: 41 Playwright tests (desktop and mobile) against a seeded database, including guest checkout to confirmed order, declined card, the full inquiry to private offer to paid order flow, and axe checks with no serious violations on public, account and admin screens
+- CI: GitHub Actions runs lint, tests, build, production dependency audit gate, SBOM artifact and the Playwright suite
+- Load: autocannon test of the public API, zero errors and p99 under 200 ms at 25 connections on a 2 vCPU box ([LOAD_TEST.md](LOAD_TEST.md))
+- Supply chain: 0 production vulnerabilities, dev tooling upgraded (Vite 8, Vitest 5), CycloneDX SBOM ([SECURITY_AUDIT.md](SECURITY_AUDIT.md))
+- Runbooks: deploy, rollback, incident response, payments, backup and restore, secret rotation, staff access ([runbooks](runbooks/README.md))
 
-## In progress (next phases)
+## Honest abstractions and known limits
 
-- Frontend wired to the new API: admin CRUD screens, advisor inquiry dashboard, account area (orders, inquiries, notifications, settings), checkout with the payment adapters, per-page SEO and JSON-LD, accessibility pass
-- Playwright end-to-end suite with axe checks against a seeded database
-- CI workflow, load-test script (autocannon), dependency audit and SBOM, backup/restore and incident runbooks
+- Payments run on the mock gateway locally and in CI. Stripe and Razorpay adapters are written and signature-verified but have not been run against real test-mode keys.
+- Email goes to the console and images to local disk until SMTP and Cloudinary credentials are added.
+- Tax and shipping are rule-based quotes, not carrier or tax-service rates. No address validation service.
+- The room viewer is a simulated 2D placement, not real AR.
+- One moderate advisory remains in a dev-only load-test dependency (see SECURITY_AUDIT.md).
+- Load numbers come from a small shared sandbox; rerun on production-like hardware before a launch event.
 
 ## Needs the owner (only for launch)
 

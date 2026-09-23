@@ -1,0 +1,89 @@
+{
+  "target": "http://localhost:4100",
+  "connections": 25,
+  "durationSeconds": 12,
+  "at": "2026-09-23T19:14:10.625Z",
+  "node": "v22.23.2",
+  "results": [
+    {
+      "name": "Health check",
+      "path": "/health",
+      "rps": 3380,
+      "p50": 6,
+      "p97_5": 17,
+      "p99": 29,
+      "errors": 0,
+      "non2xx": 0
+    },
+    {
+      "name": "Catalogue page (24 works)",
+      "path": "/api/v1/artworks?limit=24",
+      "rps": 242,
+      "p50": 99,
+      "p97_5": 158,
+      "p99": 175,
+      "errors": 0,
+      "non2xx": 0
+    },
+    {
+      "name": "Catalogue, filtered and sorted",
+      "path": "/api/v1/artworks?category=Paintings&sort=price_asc&limit=24",
+      "rps": 369,
+      "p50": 64,
+      "p97_5": 106,
+      "p99": 122,
+      "errors": 0,
+      "non2xx": 0
+    },
+    {
+      "name": "Catalogue search",
+      "path": "/api/v1/artworks?search=geometry",
+      "rps": 438,
+      "p50": 55,
+      "p97_5": 82,
+      "p99": 89,
+      "errors": 0,
+      "non2xx": 0
+    },
+    {
+      "name": "Facets",
+      "path": "/api/v1/artworks/facets",
+      "rps": 396,
+      "p50": 60,
+      "p97_5": 97,
+      "p99": 105,
+      "errors": 0,
+      "non2xx": 0
+    },
+    {
+      "name": "Artwork detail",
+      "path": "/api/v1/artworks/night-orchard-35",
+      "rps": 198,
+      "p50": 120,
+      "p97_5": 172,
+      "p99": 185,
+      "errors": 0,
+      "non2xx": 0
+    },
+    {
+      "name": "Artists with counts",
+      "path": "/api/v1/artists",
+      "rps": 566,
+      "p50": 40,
+      "p97_5": 76,
+      "p99": 84,
+      "errors": 0,
+      "non2xx": 0
+    },
+    {
+      "name": "Journal list",
+      "path": "/api/v1/articles",
+      "rps": 700,
+      "p50": 33,
+      "p97_5": 58,
+      "p99": 66,
+      "errors": 0,
+      "non2xx": 0
+    }
+  ]
+}

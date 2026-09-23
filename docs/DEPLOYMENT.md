@@ -11,4 +11,4 @@
 
 Set production secrets only in the host secret store. Restrict CORS to exact storefront/admin origins. Terminate TLS at the edge, enable secure cookies, configure proxy trust, and use a persistent distributed rate limiter. Run `npm test`, `npm run lint`, and `npm run build` in CI. Seed data is not a migration system; use reviewed idempotent migrations for production.
 
-Deploy frontend and API independently. Set `VITE_API_URL` at frontend build time. The API needs `MONGODB_URI`, strong distinct JWT secrets, origin allowlist, provider credentials, and a production log sink. `/health` is the liveness probe; add a separate readiness endpoint that checks Mongo and essential providers.
+Deploy frontend and API independently. Set `VITE_API_URL` at frontend build time. The API needs `MONGODB_URI`, strong distinct JWT secrets, origin allowlist, provider credentials, and a production log sink. `/health` is the liveness probe (process up, no dependencies). `/ready` is the readiness probe: it returns 503 until MongoDB is connected, so point load-balancer health checks at `/ready`. Operational procedures are in [runbooks](runbooks/README.md).

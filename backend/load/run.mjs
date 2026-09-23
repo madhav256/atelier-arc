@@ -1,6 +1,6 @@
 // Load test for the read-heavy public API. Run against a seeded, non-production API:
 //   TARGET=http://localhost:4000 node backend/load/run.mjs
-// Rate limits are disabled only when the API runs with NODE_ENV=test, so numbers reflect app + database capacity.
+// Start the API with NODE_ENV=test RATE_LIMIT_TEST_CEILING=100000000 so rate limits do not cap the run; numbers then reflect app + database capacity.
 import autocannon from 'autocannon';
 import { writeFileSync } from 'node:fs';
 
@@ -17,7 +17,7 @@ const scenarios = [
   ['Health check', '/health'],
   ['Catalogue page (24 works)', '/api/v1/artworks?limit=24'],
   ['Catalogue, filtered and sorted', '/api/v1/artworks?category=Paintings&sort=price_asc&limit=24'],
-  ['Catalogue search', '/api/v1/artworks?q=geometry'],
+  ['Catalogue search', '/api/v1/artworks?search=geometry'],
   ['Facets', '/api/v1/artworks/facets'],
   ['Artwork detail', `/api/v1/artworks/${slug}`],
   ['Artists with counts', '/api/v1/artists'],

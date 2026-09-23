@@ -34,6 +34,14 @@ jobs:
       - run: npm run build
       - name: Dependency audit (fails on high or critical in production deps)
         run: npm audit --omit=dev --audit-level=high
+      - name: Dependency audit (all deps, reported but not blocking)
+        run: npm audit || true
+      - name: Software bill of materials (CycloneDX, production deps)
+        run: npm sbom --sbom-format cyclonedx --omit dev > sbom.cdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.cdx.json
 
   e2e:
     name: End-to-end and accessibility (Playwright + axe)

@@ -4,7 +4,8 @@ import { env } from '../config/env.js';
 const make = (windowMs, limit, message) =>
   rateLimit({
     windowMs,
-    limit: env.isTest ? 10_000 : limit,
+    // Test mode keeps a high ceiling so e2e suites never trip it; RATE_LIMIT_TEST_CEILING raises it further for load tests.
+    limit: env.isTest ? Number(process.env.RATE_LIMIT_TEST_CEILING || 10_000) : limit,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     handler: (req, res) =>
