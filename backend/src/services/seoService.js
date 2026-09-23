@@ -1,6 +1,8 @@
 import { Artwork, Artist, Article, Collection } from '../models/index.js';
 import { env } from '../config/env.js';
 
+// Root-relative asset paths (storefront /art/...) become absolute for crawlers.
+const abs = (u) => (u && u.startsWith('/') ? `${env.publicSiteUrl.replace(/\/$/, '')}${u}` : u);
 const esc = (s) => String(s).replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]);
 
 export async function sitemap() {
@@ -14,7 +16,7 @@ export async function sitemap() {
   const staticPages = ['/', '/artworks', '/artists', '/collections', '/journal', '/advisory', '/about', '/contact'].map((p) => ({ loc: p, priority: p === '/' ? '1.0' : '0.8' }));
   const urls = [
     ...staticPages.map((p) => ({ ...p, changefreq: 'weekly' })),
-    ...artworks.map((a) => ({ loc: `/artworks/${a.slug}`, lastmod: a.updatedAt, priority: '0.9', image: a.images?.[0]?.url })),
+    ...artworks.map((a) => ({ loc: `/artworks/${a.slug}`, lastmod: a.updatedAt, priority: '0.9', image: abs(a.images?.[0]?.url) })),
     ...artists.map((a) => ({ loc: `/artists/${a.slug}`, lastmod: a.updatedAt, priority: '0.7' })),
     ...collections.map((c) => ({ loc: `/collections/${c.slug}`, lastmod: c.updatedAt, priority: '0.6' })),
     ...articles.map((a) => ({ loc: `/journal/${a.slug}`, lastmod: a.updatedAt, priority: '0.6' })),
@@ -39,7 +41,7 @@ export function artworkJsonLd(artwork) {
     '@type': ['VisualArtwork', 'Product'],
     name: artwork.title,
     url,
-    image: artwork.images?.map((i) => i.url),
+    image: artwork.images?.map((i) => abs(i.url)),
     description: artwork.description,
     creator: artwork.artist?.name ? { '@type': 'Person', name: artwork.artist.name, url: `${env.publicSiteUrl}/artists/${artwork.artist.slug}` } : undefined,
     artMedium: artwork.medium,

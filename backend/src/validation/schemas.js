@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 export const objectId = z.string().refine((v) => mongoose.isValidObjectId(v), 'Invalid id');
 const text = (max = 200) => z.string().trim().max(max);
 const url = z.string().trim().url().max(1000);
+// Images may be absolute URLs or root-relative paths to assets served with the storefront (e.g. /art/work-01.jpg).
+const assetUrl = z.string().trim().max(1000).refine((v) => /^https?:\/\//.test(v) || /^\/[^/]/.test(v), 'Must be a URL or a root-relative path');
 const email = z.string().trim().toLowerCase().email().max(200);
 export const password = z
   .string()
@@ -95,7 +97,7 @@ export const collection = {
   note: z.object({ note: text(500) }),
 };
 
-const image = z.object({ url, alt: text(300).default(''), width: z.number().int().positive().optional(), height: z.number().int().positive().optional(), variants: z.array(z.object({ url, width: z.number(), format: z.string() })).optional() });
+const image = z.object({ url: assetUrl, alt: text(300).default(''), width: z.number().int().positive().optional(), height: z.number().int().positive().optional(), variants: z.array(z.object({ url: assetUrl, width: z.number(), format: z.string() })).optional() });
 
 const artwork = z.object({
   title: text(200).min(1),
@@ -131,7 +133,7 @@ const artwork = z.object({
 const artist = z.object({
   name: text(120).min(2),
   slug: text(100).regex(/^[a-z0-9-]+$/).optional(),
-  portrait: url.optional().or(z.literal('')),
+  portrait: assetUrl.optional().or(z.literal('')),
   biography: text(8000).optional(),
   statement: text(4000).optional(),
   nationality: text(80).optional(),
@@ -149,7 +151,7 @@ const curated = z.object({
   name: text(120).min(2),
   slug: text(100).regex(/^[a-z0-9-]+$/).optional(),
   description: text(2000).optional(),
-  coverImage: url.optional().or(z.literal('')),
+  coverImage: assetUrl.optional().or(z.literal('')),
   artworks: z.array(objectId).max(200).optional(),
   order: z.number().int().optional(),
   published: z.boolean().default(true),
@@ -159,7 +161,7 @@ const article = z.object({
   title: text(200).min(2),
   slug: text(100).regex(/^[a-z0-9-]+$/).optional(),
   subtitle: text(300).optional(),
-  coverImage: url.optional().or(z.literal('')),
+  coverImage: assetUrl.optional().or(z.literal('')),
   author: text(120).optional(),
   publishedAt: z.coerce.date().optional(),
   readingTime: z.number().int().min(1).max(120).optional(),

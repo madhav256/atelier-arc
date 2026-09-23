@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { login, fillAddress, expectAccessible } from './helpers';
 
-// Seed: artwork index 1 ("Quiet Geometry 2") is an available original with a fixed price.
-const WORK = '/artworks/quiet-geometry-2';
+// Seed: artwork index 1 ("Quiet Geometry") is an available original with a fixed price.
+const WORK = '/artworks/quiet-geometry';
 
 test('guest completes a full checkout with the test gateway, and staff see a confirmed order', async ({ page, browser }) => {
   await page.goto(WORK);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Quiet Geometry 2/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Quiet Geometry/);
   await page.getByRole('button', { name: 'Add to acquisition bag' }).click();
   await page.goto('/cart');
-  await expect(page.getByText('Quiet Geometry 2').first()).toBeVisible();
+  await expect(page.getByText('Quiet Geometry').first()).toBeVisible();
   await expectAccessible(page, 'cart');
   await page.getByRole('link', { name: 'Continue to checkout' }).click();
 
@@ -49,7 +49,7 @@ test('guest completes a full checkout with the test gateway, and staff see a con
 });
 
 test('a declined test card leaves the order unpaid and the work available', async ({ page }) => {
-  await page.goto('/artworks/blue-interval-4');
+  await page.goto('/artworks/blue-interval');
   await page.getByRole('button', { name: 'Add to acquisition bag' }).click();
   await page.goto('/checkout');
   await page.getByLabel('Email').fill('declined@example.com');
@@ -62,6 +62,6 @@ test('a declined test card leaves the order unpaid and the work available', asyn
   await page.getByRole('button', { name: 'Place order and pay' }).click();
   await page.getByRole('button', { name: 'Simulate a declined card' }).click();
   await expect(page.getByText(/declined|not completed|failed/i).first()).toBeVisible();
-  await page.goto('/artworks/blue-interval-4');
+  await page.goto('/artworks/blue-interval');
   await expect(page.getByText(/available/i).first()).toBeVisible();
 });

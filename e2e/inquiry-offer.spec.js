@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { login, fillAddress } from './helpers';
 
-// Seed: artwork index 2 ("Memory of Stone 3") is available with a list price.
+// Seed: artwork index 2 ("Memory of Stone") is available with a list price.
 test('inquiry moves through the advisor pipeline and the collector accepts and pays a private offer', async ({ browser }) => {
   const collector = await (await browser.newContext()).newPage();
   await login(collector, 'collector@atelierarc.example');
-  await collector.goto('/artworks/memory-of-stone-3');
+  await collector.goto('/artworks/memory-of-stone');
   await collector.getByRole('button', { name: 'Speak with an advisor' }).click();
   const dialog = collector.getByRole('dialog');
   await dialog.getByLabel('Message').fill('I would love to see this work in person before deciding.');
@@ -54,7 +54,7 @@ test('inquiry moves through the advisor pipeline and the collector accepts and p
   await expect(collector.getByRole('heading', { name: 'Thank you.' })).toBeVisible();
 
   await collector.goto('/account/orders');
-  await collector.getByRole('link', { name: /Memory of Stone 3/ }).first().click();
+  await collector.getByRole('link', { name: /Memory of Stone/ }).first().click();
   await expect(collector.getByText(/95,000/).first()).toBeVisible(); // agreed offer price, not the list price
 
   await admin.goto('/admin/audit');

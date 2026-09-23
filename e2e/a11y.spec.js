@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login, expectAccessible } from './helpers';
 
-const PUBLIC = ['/', '/artworks', '/artworks/soft-architecture-9', '/artists', '/artists/mira-khanna', '/collections', '/collections/works-on-paper', '/journal', '/journal/journal-story-1', '/advisory', '/login', '/register', '/order-status', '/cart', '/does-not-exist'];
+const PUBLIC = ['/', '/artworks', '/artworks/soft-architecture', '/artists', '/artists/mira-khanna', '/collections', '/collections/works-on-paper', '/journal', '/journal/inside-the-studio-of-leela-iyer', '/advisory', '/login', '/register', '/order-status', '/cart', '/does-not-exist'];
 
 for (const path of PUBLIC) {
   test(`public page ${path} has no serious accessibility violations`, async ({ page }) => {
