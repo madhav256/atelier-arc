@@ -3,11 +3,12 @@ import { asyncHandler, AppError } from '../lib/errors.js';
 import { ok, pick } from '../lib/util.js';
 import { authenticate } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
-import { profile, taste, collection as cs, inquiry as is, checkout as co, idParam, objectId } from '../validation/schemas.js';
+import { profile, taste, bid, collection as cs, inquiry as is, checkout as co, idParam, objectId } from '../validation/schemas.js';
 import { z } from 'zod';
 import { User, Notification, Order, AvailabilityAlert, Artist, Artwork } from '../models/index.js';
 import * as collections from '../services/collectionService.js';
 import * as inquiries from '../services/inquiryService.js';
+import * as bids from '../services/bidService.js';
 import { forUser } from '../services/recommendationService.js';
 import { checkoutOffer } from '../services/orderService.js';
 
@@ -121,6 +122,11 @@ r.get('/inquiries', asyncHandler(async (req, res) => ok(res, await inquiries.cli
 r.get('/inquiries/:id', validate({ params: idParam }), asyncHandler(async (req, res) => ok(res, await inquiries.clientInquiry(req.user.sub, req.params.id))));
 r.post('/inquiries/:id/messages', validate({ params: idParam, body: is.message }), asyncHandler(async (req, res) => ok(res, await inquiries.clientReply(req.user.sub, req.params.id, req.body.text))));
 r.post('/inquiries/:id/appointments/:appointmentId', validate({ params: z.object({ id: objectId, appointmentId: objectId }), body: is.appointmentResponse }), asyncHandler(async (req, res) => ok(res, await inquiries.respondToAppointment(req.user.sub, req.params.id, req.params.appointmentId, req.body.status))));
+// Collector offers on listed works
+r.post('/offers', validate({ body: bid.create }), asyncHandler(async (req, res) => ok(res, await bids.createBid(req.user.sub, req.body), undefined, 201)));
+r.post('/inquiries/:id/bid/accept-counter', validate({ params: idParam }), asyncHandler(async (req, res) => ok(res, await bids.clientAcceptCounter(req.user.sub, req.params.id))));
+r.post('/inquiries/:id/bid/revise', validate({ params: idParam, body: bid.amount }), asyncHandler(async (req, res) => ok(res, await bids.clientRevise(req.user.sub, req.params.id, req.body))));
+r.post('/inquiries/:id/bid/withdraw', validate({ params: idParam }), asyncHandler(async (req, res) => ok(res, await bids.clientWithdraw(req.user.sub, req.params.id))));
 r.post('/inquiries/:id/offer/decline', validate({ params: idParam }), asyncHandler(async (req, res) => ok(res, await inquiries.declineOffer(req.user.sub, req.params.id))));
 r.post('/inquiries/:id/offer/accept', validate({ params: idParam, body: co.offer }), asyncHandler(async (req, res) => ok(res, await checkoutOffer(req.user.sub, req.params.id, req.body), undefined, 201)));
 

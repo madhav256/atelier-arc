@@ -104,6 +104,12 @@ export const inquiry = {
   offer: z.object({ amount: z.number().positive().max(1e10), expiresInDays: z.number().int().min(1).max(30).default(7) }),
 };
 
+export const bid = {
+  create: z.object({ artworkId: objectId, amount: z.number().positive().max(1e10), note: text(1000).optional() }),
+  amount: z.object({ amount: z.number().positive().max(1e10), note: text(1000).optional() }),
+  note: z.object({ note: text(1000).optional() }),
+};
+
 export const collection = {
   create: z.object({ name: text(80).min(1), description: text(500).optional(), isPublic: z.boolean().optional() }),
   update: z.object({ name: text(80).min(1).optional(), description: text(500).optional(), isPublic: z.boolean().optional() }),

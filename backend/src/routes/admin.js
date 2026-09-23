@@ -6,9 +6,10 @@ import { ok } from '../lib/util.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { uploadLimiter } from '../middleware/rateLimits.js';
-import { admin as as, inquiry as is, idParam, listQuery, objectId } from '../validation/schemas.js';
+import { admin as as, inquiry as is, bid as bidSchemas, idParam, listQuery, objectId } from '../validation/schemas.js';
 import * as adminService from '../services/adminService.js';
 import * as inquiries from '../services/inquiryService.js';
+import * as bids from '../services/bidService.js';
 import { dashboard } from '../services/analyticsService.js';
 import { updateOrderStatus, refundOrder, expireHolds } from '../services/orderService.js';
 import { audit } from '../services/auditService.js';
@@ -66,6 +67,9 @@ r.post('/inquiries/:id/notes', validate({ params: idParam, body: is.message }), 
 r.post('/inquiries/:id/messages', validate({ params: idParam, body: is.message }), withAudit('reply', (req) => inquiries.staffReply(req.user, req.params.id, req.body.text)));
 r.post('/inquiries/:id/appointments', validate({ params: idParam, body: is.appointment }), withAudit('appointment', (req) => inquiries.scheduleAppointment(req.user, req.params.id, req.body)));
 r.post('/inquiries/:id/offer', validate({ params: idParam, body: is.offer }), withAudit('offer', (req) => inquiries.makeOffer(req.user, req.params.id, req.body)));
+r.post('/inquiries/:id/bid/accept', validate({ params: idParam, body: bidSchemas.note }), withAudit('bid:accept', (req) => bids.staffAccept(req.user, req.params.id, req.body)));
+r.post('/inquiries/:id/bid/counter', validate({ params: idParam, body: bidSchemas.amount }), withAudit('bid:counter', (req) => bids.staffCounter(req.user, req.params.id, req.body)));
+r.post('/inquiries/:id/bid/decline', validate({ params: idParam, body: bidSchemas.note }), withAudit('bid:decline', (req) => bids.staffDecline(req.user, req.params.id, req.body)));
 r.delete('/inquiries/:id/offer', validate({ params: idParam }), withAudit('offer:withdraw', (req) => inquiries.withdrawOffer(req.user, req.params.id)));
 
 // Generic resource CRUD

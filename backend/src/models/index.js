@@ -298,7 +298,7 @@ const inquirySchema = new Schema(
     artwork: { type: ObjectId, ref: 'Artwork' },
     type: {
       type: String,
-      enum: ['artwork', 'advisory', 'commission', 'viewing', 'general'],
+      enum: ['artwork', 'advisory', 'commission', 'viewing', 'general', 'offer'],
       default: 'artwork',
     },
     name: { type: String, required: true },
@@ -342,6 +342,22 @@ const inquirySchema = new Schema(
       expiresAt: Date,
       status: { type: String, enum: ['open', 'accepted', 'declined', 'expired', 'withdrawn'] },
       order: { type: ObjectId, ref: 'Order' },
+    },
+    // Collector-initiated offer on a listed work. Acceptance opens a private offer (above).
+    bid: {
+      amount: Number,
+      currency: String,
+      counterAmount: Number,
+      status: { type: String, enum: ['pending', 'countered', 'accepted', 'declined', 'withdrawn'] },
+      events: [
+        {
+          by: { type: String, enum: ['client', 'staff'] },
+          action: { type: String, enum: ['offered', 'revised', 'countered', 'accepted', 'declined', 'withdrawn'] },
+          amount: Number,
+          note: String,
+          at: { type: Date, default: Date.now },
+        },
+      ],
     },
     history: [{ status: String, at: { type: Date, default: Date.now }, by: { type: ObjectId, ref: 'User' } }],
     lastActivityAt: { type: Date, default: Date.now, index: true },
