@@ -1,1 +1,41 @@
-import {Heart,Plus} from 'lucide-react';import {Link} from 'react-router-dom';import {money} from '../lib/api';import {useStore} from '../store';export function ArtworkCard({artwork,index=0}){const toggle=useStore(s=>s.toggleCollection),saved=useStore(s=>s.collection.some(x=>x.slug===artwork.slug));return <article className="art-card reveal" style={{'--delay':`${index*60}ms`}}><div className="art-image"><Link to={`/artworks/${artwork.slug}`}><img src={artwork.images?.[0]?.url} alt={artwork.images?.[0]?.alt||artwork.title} loading="lazy" width="900" height="1100"/></Link><button className={saved?'saved':''} onClick={()=>toggle(artwork)} aria-label={saved?'Remove from My Collection':'Add to My Collection'}><Heart fill={saved?'currentColor':'none'}/></button><span>{artwork.availability}</span></div><div className="art-meta"><div><Link to={`/artworks/${artwork.slug}`}><h3>{artwork.title}</h3></Link><p>{artwork.artist?.name} · {artwork.year}</p></div><div><p>{money(artwork.price,artwork.currency)}</p><Plus aria-hidden="true"/></div></div></article>}
+import { Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { money, label } from '../lib/api';
+import { useCollection } from '../hooks/useCollection';
+
+export function ArtworkCard({ artwork, index = 0 }) {
+  const { isSaved, toggle } = useCollection();
+  const saved = isSaved(artwork);
+  const image = artwork.images?.[0];
+  const webp = image?.variants?.filter((v) => v.format === 'webp');
+  return (
+    <article className="art-card reveal" style={{ '--delay': `${index * 60}ms` }}>
+      <div className="art-image">
+        <Link to={`/artworks/${artwork.slug}`} aria-label={`${artwork.title} by ${artwork.artist?.name || 'the artist'}`}>
+          <picture>
+            {webp?.length > 0 && <source type="image/webp" srcSet={webp.map((v) => `${v.url} ${v.width}w`).join(', ')} sizes="(max-width: 768px) 100vw, 33vw" />}
+            <img src={image?.url} alt={image?.alt || artwork.title} loading={index < 3 ? 'eager' : 'lazy'} decoding="async" width="900" height="1100" />
+          </picture>
+        </Link>
+        <button className={saved ? 'saved' : ''} onClick={() => toggle.mutate(artwork)} aria-pressed={saved} aria-label={saved ? `Remove ${artwork.title} from My Collection` : `Save ${artwork.title} to My Collection`}>
+          <Heart fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
+        </button>
+        {artwork.availability && artwork.availability !== 'available' && <span>{label(artwork.availability)}</span>}
+      </div>
+      <div className="art-meta">
+        <div>
+          <Link to={`/artworks/${artwork.slug}`}>
+            <h3>{artwork.title}</h3>
+          </Link>
+          <p>
+            {artwork.artist?.name}
+            {artwork.year ? ` · ${artwork.year}` : ''}
+          </p>
+        </div>
+        <div>
+          <p>{artwork.priceOnRequest ? 'Price on request' : money(artwork.price, artwork.currency)}</p>
+        </div>
+      </div>
+    </article>
+  );
+}

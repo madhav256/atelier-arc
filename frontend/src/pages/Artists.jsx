@@ -1,1 +1,41 @@
-import {Link} from 'react-router-dom';import {artists} from '../lib/demo';import {useDocumentMeta} from '../hooks/useDocumentMeta';const portraits=['1494790108377-be9c29b29330','1500648767791-00dcc994a43e','1534528741775-53994a69daeb'];export default function Artists(){useDocumentMeta('Artists');return <section className="plain-page"><span className="eyebrow">THE ARTISTS</span><h1>Distinct voices.<br/><em>Enduring practices.</em></h1><div className="artist-grid">{Array.from({length:15},(_,i)=>{let a=artists[i%3];return <Link to={`/artists/${a[0].toLowerCase().replaceAll(' ','-')}`} key={i}><img src={`https://images.unsplash.com/photo-${portraits[i%3]}?auto=format&fit=crop&w=800&q=80`} alt="" loading="lazy"/><h2>{a[0]}</h2><p>{a[1]} · Contemporary abstraction</p></Link>})}</div></section>}
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../lib/api';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
+import { Loading, ErrorState } from '../components/States';
+
+export default function Artists() {
+  useDocumentMeta('Artists', 'The artists represented by Atelier Arc.');
+  const q = useQuery({ queryKey: ['artists'], queryFn: () => api('/artists') });
+  return (
+    <section className="plain-page">
+      <span className="eyebrow">THE ARTISTS</span>
+      <h1>
+        Distinct voices.
+        <br />
+        <em>Enduring practices.</em>
+      </h1>
+      {q.isLoading ? (
+        <Loading />
+      ) : q.error ? (
+        <ErrorState error={q.error} retry={q.refetch} />
+      ) : (
+        <div className="artist-grid">
+          {q.data.map((a) => (
+            <Link to={`/artists/${a.slug}`} key={a._id}>
+              <img src={a.portrait} alt="" loading="lazy" width="800" height="1000" />
+              <h2>{a.name}</h2>
+              <p>
+                {[a.location, a.movement].filter(Boolean).join(' · ')}
+                <br />
+                <small>
+                  {a.available} of {a.works} works available
+                </small>
+              </p>
+            </Link>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}

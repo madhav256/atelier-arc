@@ -1,1 +1,164 @@
-import {useState} from 'react';import {useSearchParams} from 'react-router-dom';import {Search,SlidersHorizontal,X} from 'lucide-react';import {useQuery} from '@tanstack/react-query';import {api} from '../lib/api';import {demoArtworks} from '../lib/demo';import {ArtworkCard} from '../components/ArtworkCard';import {Loading,ErrorState,Empty} from '../components/States';import {useDocumentMeta} from '../hooks/useDocumentMeta';export default function Catalog(){useDocumentMeta('Artworks','Browse original paintings, sculpture, works on paper, photography, and editions.');const [params,setParams]=useSearchParams(),[drawer,setDrawer]=useState(false);const query=useQuery({queryKey:['artworks',params.toString()],queryFn:()=>api(`/artworks?${params}`),retry:1});const works=query.data||demoArtworks;const set=(k,v)=>{const n=new URLSearchParams(params);v?n.set(k,v):n.delete(k);setParams(n)};return <section className="catalog"><div className="catalog-title"><span className="eyebrow">THE COLLECTION</span><h1>Artworks</h1><p>Singular works, selected for depth, material intelligence, and enduring presence.</p></div><div className="catalog-tools"><label className="search"><Search/><input aria-label="Search artworks" placeholder="Search artist, title, medium…" defaultValue={params.get('search')||''} onKeyDown={e=>e.key==='Enter'&&set('search',e.currentTarget.value)}/></label><button className="filter-button" onClick={()=>setDrawer(true)}><SlidersHorizontal/> Filter</button><select aria-label="Sort artworks" value={params.get('sort')||'newest'} onChange={e=>set('sort',e.target.value)}><option value="newest">Newest</option><option value="price_asc">Price: Low to high</option><option value="price_desc">Price: High to low</option><option value="featured">Most collected</option></select></div><div className="catalog-body"><aside className={drawer?'drawer':''}><button className="drawer-x" onClick={()=>setDrawer(false)}><X/> Close</button>{[['Category',['Paintings','Sculptures','Photography','Works on Paper']],['Availability',['available','reserved','sold']],['Medium',['Oil on linen','Cast bronze','Archival pigment print']]].map(([name,items])=><fieldset key={name}><legend>{name}</legend>{items.map(x=><label key={x}><input type="radio" name={name} checked={params.get(name.toLowerCase())===x} onChange={()=>set(name.toLowerCase(),x)}/>{x}</label>)}</fieldset>)}<button className="text-link" onClick={()=>setParams({})}>Clear all filters</button></aside><div className="results"><div className="results-count"><span>{works.length} works</span><span>Showing available and request-only works</span></div>{query.isLoading?<Loading/>:query.error&&works.length===0?<ErrorState error={query.error}/>:works.length?<div className="art-grid catalog-grid">{works.map((x,i)=><ArtworkCard key={x.slug} artwork={x} index={i}/>)}</div>:<Empty title="No works match these filters"/>}</div></div></section>}
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { api, label, money } from '../lib/api';
+import { ArtworkCard } from '../components/ArtworkCard';
+import { Loading, ErrorState, Empty } from '../components/States';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
+
+const PRICE_BANDS = [
+  ['', '', 'Any price'],
+  ['', '250000', `Under ${money(250000)}`],
+  ['250000', '1000000', `${money(250000)} – ${money(1000000)}`],
+  ['1000000', '', `Above ${money(1000000)}`],
+];
+
+export default function Catalog() {
+  useDocumentMeta('Artworks', 'Browse original paintings, sculpture, works on paper, photography and editions.');
+  const [params, setParams] = useSearchParams();
+  const [drawer, setDrawer] = useState(false);
+  const search = useRef(null);
+  const apiParams = new URLSearchParams(params);
+  apiParams.delete('focus');
+  if (!apiParams.get('limit')) apiParams.set('limit', '24');
+  const query = useQuery({ queryKey: ['artworks', apiParams.toString()], queryFn: () => api(`/artworks?${apiParams}`, { raw: true }), placeholderData: keepPreviousData });
+  const facets = useQuery({ queryKey: ['facets'], queryFn: () => api('/artworks/facets'), staleTime: 5 * 60_000 });
+  useEffect(() => {
+    if (params.get('focus') === 'search') search.current?.focus();
+  }, [params]);
+  const works = query.data?.data || [];
+  const meta = query.data?.meta;
+  const set = (updates) => {
+    const n = new URLSearchParams(params);
+    n.delete('focus');
+    for (const [k, v] of Object.entries(updates)) (v ? n.set(k, v) : n.delete(k));
+    if (!('page' in updates)) n.delete('page');
+    setParams(n);
+  };
+  const toggleList = (key, value) => {
+    const current = (params.get(key) || '').split(',').filter(Boolean);
+    const next = current.includes(value) ? current.filter((x) => x !== value) : [...current, value];
+    set({ [key]: next.join(',') });
+  };
+  const active = ['category', 'medium', 'availability', 'artist', 'minPrice', 'maxPrice', 'search', 'orientation'].filter((k) => params.get(k));
+  const f = facets.data;
+  return (
+    <section className="catalog">
+      <div className="catalog-title">
+        <span className="eyebrow">THE COLLECTION</span>
+        <h1>Artworks</h1>
+        <p>Singular works, selected for depth, material intelligence, and enduring presence.</p>
+      </div>
+      <div className="catalog-tools">
+        <form className="search" role="search" onSubmit={(e) => (e.preventDefault(), set({ search: search.current.value.trim() }))}>
+          <Search aria-hidden="true" />
+          <input ref={search} type="search" aria-label="Search artworks" placeholder="Search artist, title, medium…" defaultValue={params.get('search') || ''} key={params.get('search') || ''} />
+        </form>
+        <button className="filter-button" onClick={() => setDrawer(true)} aria-expanded={drawer} aria-controls="filters">
+          <SlidersHorizontal aria-hidden="true" /> Filter{active.length ? ` (${active.length})` : ''}
+        </button>
+        <select aria-label="Sort artworks" value={params.get('sort') || (params.get('search') ? '' : 'newest')} onChange={(e) => set({ sort: e.target.value })}>
+          {params.get('search') && <option value="">Best match</option>}
+          <option value="newest">Newest</option>
+          <option value="featured">Featured</option>
+          <option value="popular">Most viewed</option>
+          <option value="price_asc">Price: low to high</option>
+          <option value="price_desc">Price: high to low</option>
+          <option value="year_desc">Year: newest first</option>
+        </select>
+      </div>
+      <div className="catalog-body">
+        <aside className={drawer ? 'drawer' : ''} id="filters" aria-label="Filters">
+          <button className="drawer-x" onClick={() => setDrawer(false)}>
+            <X aria-hidden="true" /> Close
+          </button>
+          {f &&
+            [
+              ['category', 'Category', f.categories],
+              ['medium', 'Medium', f.mediums],
+              ['availability', 'Availability', f.availability],
+            ].map(([key, name, items]) => (
+              <fieldset key={key}>
+                <legend>{name}</legend>
+                {items.map((x) => (
+                  <label key={x._id}>
+                    <input type="checkbox" checked={(params.get(key) || '').split(',').includes(x._id)} onChange={() => toggleList(key, x._id)} />
+                    {label(x._id)} <small>({x.count})</small>
+                  </label>
+                ))}
+              </fieldset>
+            ))}
+          <fieldset>
+            <legend>Price</legend>
+            {PRICE_BANDS.map(([min, max, text]) => (
+              <label key={text}>
+                <input type="radio" name="price" checked={(params.get('minPrice') || '') === min && (params.get('maxPrice') || '') === max} onChange={() => set({ minPrice: min, maxPrice: max })} />
+                {text}
+              </label>
+            ))}
+          </fieldset>
+          <fieldset>
+            <legend>Orientation</legend>
+            {['portrait', 'landscape', 'square'].map((o) => (
+              <label key={o}>
+                <input type="checkbox" checked={(params.get('orientation') || '').split(',').includes(o)} onChange={() => toggleList('orientation', o)} />
+                {label(o)}
+              </label>
+            ))}
+          </fieldset>
+          {f?.artists?.length > 0 && (
+            <fieldset>
+              <legend>Artist</legend>
+              <select aria-label="Artist" value={params.get('artist') || ''} onChange={(e) => set({ artist: e.target.value })}>
+                <option value="">All artists</option>
+                {f.artists.map((a) => (
+                  <option key={a._id} value={a._id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
+          )}
+          <button className="text-link" onClick={() => setParams({})}>
+            Clear all filters
+          </button>
+        </aside>
+        <div className="results">
+          <div className="results-count" role="status" aria-live="polite">
+            <span>{meta ? `${meta.total} work${meta.total === 1 ? '' : 's'}` : ''}</span>
+            {meta?.fuzzy && <span>Showing close matches for “{params.get('search')}”</span>}
+          </div>
+          {query.isLoading ? (
+            <Loading />
+          ) : query.error ? (
+            <ErrorState error={query.error} retry={query.refetch} />
+          ) : works.length ? (
+            <>
+              <div className="art-grid catalog-grid" aria-busy={query.isFetching}>
+                {works.map((x, i) => (
+                  <ArtworkCard key={x.slug} artwork={x} index={i} />
+                ))}
+              </div>
+              {meta.pages > 1 && (
+                <nav className="pagination" aria-label="Pages">
+                  <button className="button ghost" disabled={meta.page <= 1} onClick={() => set({ page: String(meta.page - 1) })}>
+                    Previous
+                  </button>
+                  <span>
+                    Page {meta.page} of {meta.pages}
+                  </span>
+                  <button className="button ghost" disabled={!meta.hasMore} onClick={() => set({ page: String(meta.page + 1) })}>
+                    Next
+                  </button>
+                </nav>
+              )}
+            </>
+          ) : (
+            <Empty title="No works match these filters" action={<button className="button ghost" onClick={() => setParams({})}>Clear filters</button>} />
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
