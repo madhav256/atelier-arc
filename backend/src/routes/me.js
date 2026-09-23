@@ -12,6 +12,7 @@ import * as bids from '../services/bidService.js';
 import { forUser } from '../services/recommendationService.js';
 import { checkoutOffer } from '../services/orderService.js';
 import { certificateForOwner } from '../services/documentService.js';
+import * as viewings from '../services/viewingService.js';
 
 const r = Router();
 r.use(authenticate);
@@ -112,6 +113,17 @@ r.get('/recommendations', asyncHandler(async (req, res) => {
 
 // Orders
 r.get('/orders', asyncHandler(async (req, res) => ok(res, await Order.find({ user: req.user.sub }).sort({ createdAt: -1 }).select('-idempotencyKey').lean())));
+const viewingBody = z.object({
+  location: z.enum(['mumbai', 'new-delhi', 'virtual']),
+  startsAt: z.string().datetime(),
+  artworkId: objectId.optional(),
+  notes: z.string().trim().max(1000).optional(),
+  phone: z.string().trim().max(30).optional(),
+});
+r.get('/viewings', asyncHandler(async (req, res) => ok(res, await viewings.mine(req.user.sub))));
+r.post('/viewings', validate({ body: viewingBody }), asyncHandler(async (req, res) => ok(res, await viewings.book(req.user.sub, req.body), undefined, 201)));
+r.post('/viewings/:id/cancel', validate({ params: idParam }), asyncHandler(async (req, res) => ok(res, await viewings.cancel(req.user.sub, req.params.id))));
+
 r.get('/orders/:number/certificates/:artworkId', validate({ params: z.object({ number: z.string().max(40), artworkId: objectId }) }), asyncHandler(async (req, res) => {
   const { filename, buffer } = await certificateForOwner(req.user.sub, req.params.number, req.params.artworkId, ['admin', 'advisor'].includes(req.user.role));
   res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'private, no-store' });

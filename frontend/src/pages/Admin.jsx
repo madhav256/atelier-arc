@@ -4,6 +4,7 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { Loading } from '../components/States';
 import { ResourceList, ResourceForm } from '../admin/ResourceEditor';
 import { Dashboard, OrdersList, OrderAdmin, InquiriesList, InquiryAdmin, AuditLog } from '../admin/Operations';
+import { ViewingsAdmin } from '../admin/Viewings';
 
 export default function Admin() {
   const { user, loading, isStaff, isAdmin } = useSession();
@@ -26,6 +27,7 @@ export default function Admin() {
     ...(isAdmin ? [['/admin', 'Overview', true]] : []),
     ['/admin/inquiries', isAdmin ? 'Inquiries' : 'My inquiries'],
     ['/admin/orders', 'Orders'],
+    ['/admin/viewings', 'Viewings'],
     ['/admin/artworks', 'Artworks'],
     ['/admin/artists', 'Artists'],
     ['/admin/collections', 'Collections'],
@@ -66,6 +68,7 @@ export default function Admin() {
       <main id="admin-main" tabIndex={-1}>
         <Routes>
           <Route index element={isAdmin ? <Dashboard /> : <Navigate to="/admin/inquiries" replace />} />
+          <Route path="viewings" element={<ViewingsAdmin />} />
           <Route path="inquiries" element={<InquiriesList isAdmin={isAdmin} />} />
           <Route path="inquiries/:id" element={<InquiryAdmin isAdmin={isAdmin} />} />
           <Route path="orders" element={<OrdersList />} />

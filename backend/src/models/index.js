@@ -471,6 +471,30 @@ export const PaymentEvent = model('PaymentEvent', paymentEventSchema);
 export const AuditLog = model('AuditLog', auditLogSchema);
 export const Counter = model('Counter', counterSchema);
 
+// Private viewing booked by a collector into a published slot. The partial unique index
+// makes double-booking a slot impossible even under concurrent requests.
+const viewingSchema = new Schema(
+  {
+    reference: { type: String, unique: true },
+    user: { type: ObjectId, ref: 'User', index: true, required: true },
+    artwork: { type: ObjectId, ref: 'Artwork' },
+    location: { type: String, enum: ['mumbai', 'new-delhi', 'virtual'], required: true },
+    startsAt: { type: Date, required: true, index: true },
+    durationMinutes: { type: Number, default: 45 },
+    name: String,
+    email: String,
+    phone: String,
+    notes: String,
+    status: { type: String, enum: ['confirmed', 'cancelled', 'completed', 'no_show'], default: 'confirmed', index: true },
+    cancelledAt: Date,
+    cancelledBy: { type: String, enum: ['collector', 'gallery'] },
+    staffNote: String,
+  },
+  { timestamps: true },
+);
+viewingSchema.index({ location: 1, startsAt: 1 }, { unique: true, partialFilterExpression: { status: 'confirmed' } });
+export const Viewing = model('Viewing', viewingSchema);
+
 export async function nextSequence(name) {
   const doc = await Counter.findOneAndUpdate({ _id: name }, { $inc: { seq: 1 } }, { upsert: true, new: true });
   return doc.seq;

@@ -10,6 +10,7 @@ import { artworkJsonLd, sitemap } from '../services/seoService.js';
 import { env } from '../config/env.js';
 import { provenanceDossier, verifyCertificate } from '../services/documentService.js';
 import { artworkModel } from '../services/modelService.js';
+import { availableSlots, LOCATIONS } from '../services/viewingService.js';
 
 const r = Router();
 const CARD = 'title slug artist images price priceOnRequest currency availability medium category year dimensions edition tags style featured orientation';
@@ -90,6 +91,8 @@ r.get('/artworks/:slug/model.glb', asyncHandler(async (req, res) => {
   res.set({ 'Content-Type': 'model/gltf-binary', 'Cache-Control': 'public, max-age=3600' });
   res.send(glb);
 }));
+
+r.get('/viewings/slots', asyncHandler(async (req, res) => ok(res, { location: String(req.query.location || 'mumbai'), locations: LOCATIONS, slots: await availableSlots(String(req.query.location || 'mumbai')) })));
 
 r.get('/certificates/:code', asyncHandler(async (req, res) => ok(res, await verifyCertificate(String(req.params.code).slice(0, 64)))));
 

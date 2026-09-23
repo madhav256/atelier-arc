@@ -67,6 +67,19 @@ export const templates = {
       html: layout('New inquiry assigned to you', p(`${inquiry.name} · ${inquiry.email}`) + p(artworkTitle || 'Advisory request') + p(inquiry.message), { url, label: 'Open inquiry' }),
     };
   },
+  viewingConfirmed: ({ viewing, artworkTitle, location, when }) => {
+    const url = `${env.publicSiteUrl}/account/viewings`;
+    const stamp = (d) => new Date(d).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const end = new Date(new Date(viewing.startsAt).getTime() + (viewing.durationMinutes || 45) * 60e3);
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Atelier Arc//Viewings//EN', 'METHOD:PUBLISH', 'BEGIN:VEVENT', `UID:${viewing.reference}@atelierarc`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(viewing.startsAt)}`, `DTEND:${stamp(end)}`, `SUMMARY:Private viewing · Atelier Arc${artworkTitle ? ` · ${artworkTitle}` : ''}`, `LOCATION:${location.address}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    const lines = [`${location.label}`, when + ' IST', artworkTitle ? `To see: ${artworkTitle}` : null, `Reference ${viewing.reference}`].filter(Boolean);
+    return {
+      subject: `Your private viewing · ${when}`,
+      text: `Dear ${viewing.name || 'collector'},\n\nYour private viewing is confirmed.\n\n${lines.join('\n')}\n\n${location.address}\n\nChange or cancel: ${url}`,
+      html: layout('Your private viewing is confirmed', p(`Dear ${viewing.name || 'collector'},`) + lines.map(p).join('') + p(location.address) + p('An advisor will have the work hung and lit for you. The appointment is 45 minutes.'), { url, label: 'Manage viewing' }),
+      attachments: [{ filename: 'viewing.ics', content: ics, contentType: 'text/calendar; charset=utf-8; method=PUBLISH' }],
+    };
+  },
   notification: ({ title, message, link }) => ({
     subject: title,
     text: `${message}${link ? `\n\n${env.publicSiteUrl}${link}` : ''}`,

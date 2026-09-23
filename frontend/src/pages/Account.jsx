@@ -35,6 +35,7 @@ export function AccountLayout() {
     ["/account", "Overview", true],
     ["/account/orders", "Orders"],
     ["/account/inquiries", "Inquiries"],
+    ["/account/viewings", "Viewings"],
     ["/account/notifications", "Notifications"],
     ["/account/recommendations", "For you"],
     ["/my-collection", "My Collection"],

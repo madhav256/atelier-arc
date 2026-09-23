@@ -14,6 +14,7 @@ import { dashboard } from '../services/analyticsService.js';
 import { updateOrderStatus, refundOrder, expireHolds } from '../services/orderService.js';
 import { audit } from '../services/auditService.js';
 import { storeImage, storeVideo, processImage } from '../providers/storage/index.js';
+import * as viewingService from '../services/viewingService.js';
 import { Order, User } from '../models/index.js';
 
 const r = Router();
@@ -43,6 +44,13 @@ r.post('/uploads/video', authorize('admin'), uploadLimiter, filmUpload.fields([{
   const video = await storeVideo(file.buffer, { poster: poster?.buffer, caption: String(req.body.caption || '').slice(0, 200) });
   await audit(req, { action: 'upload', resource: 'videos', resourceId: video.url, changes: { duration: video.duration, width: video.width, height: video.height } });
   ok(res, video, undefined, 201);
+}));
+
+r.get('/viewings', asyncHandler(async (req, res) => ok(res, await viewingService.list({ status: req.query.status ? String(req.query.status) : undefined, upcoming: req.query.upcoming === 'true' }))));
+r.post('/viewings/:id/status', validate({ params: idParam, body: z.object({ status: z.enum(['completed', 'no_show', 'cancelled']), note: z.string().trim().max(500).optional() }) }), asyncHandler(async (req, res) => {
+  const v = await viewingService.setStatus(req.params.id, req.body);
+  await audit(req, { action: 'status', resource: 'viewings', resourceId: String(v._id), changes: { status: v.status } });
+  ok(res, v);
 }));
 
 r.post('/maintenance/expire-holds', authorize('admin'), asyncHandler(async (req, res) => ok(res, { released: await expireHolds() })));

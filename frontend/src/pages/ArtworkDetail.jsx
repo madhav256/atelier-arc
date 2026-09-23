@@ -219,6 +219,14 @@ function Detail({ artwork: a }) {
                 Speak with an advisor
               </button>
             )}
+            {a.availability !== "sold" && (
+              <Link
+                className="text-link"
+                to={`/viewings/book?artwork=${a.slug}`}
+              >
+                Book a private viewing
+              </Link>
+            )}
             <AdvisorChat artwork={a} />
           </div>
           <ArView artwork={a} onFallback={() => setRoom(true)} />
