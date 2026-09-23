@@ -266,14 +266,40 @@ function Detail({ artwork: a }) {
 }
 
 // Scale simulation using the work's real dimensions against a 300 cm wide wall.
+const FRAMES = [
+  { id: "none", label: "Unframed", note: "As the artist presents it." },
+  {
+    id: "black",
+    label: "Thin black",
+    note: "Ebonised hardwood, 2 cm profile.",
+  },
+  { id: "oak", label: "Natural oak", note: "Solid oak, oiled, 3 cm profile." },
+  { id: "gilt", label: "Gilt", note: "Water-gilded moulding, 4 cm profile." },
+];
+// Frame depth in cm, used so the framed work stays at true scale on the wall.
+const FRAME_CM = { none: 0, black: 2, oak: 3, gilt: 4 };
+const MAT_CM = 6;
+const UNFRAMEABLE = ["Sculptures", "Ceramics"];
+
 function RoomViewer({ artwork }) {
   const [wall, setWall] = useState("stone");
   const [wallWidth, setWallWidth] = useState(300);
-  const w =
-    artwork.dimensions?.unit === "in"
-      ? artwork.dimensions.width * 2.54
-      : artwork.dimensions?.width || 80;
-  const pct = Math.min(90, Math.max(8, (w / wallWidth) * 100));
+  const [frame, setFrame] = useState("none");
+  const [mat, setMat] = useState(false);
+  const frameable = !UNFRAMEABLE.includes(artwork.category);
+  const toCm = (v) => (artwork.dimensions?.unit === "in" ? v * 2.54 : v);
+  const w = toCm(artwork.dimensions?.width || 80);
+  const h = toCm(artwork.dimensions?.height || w * 1.25);
+  const f = frameable ? FRAME_CM[frame] : 0;
+  const m = frameable && frame !== "none" && mat ? MAT_CM : 0;
+  const outerW = w + 2 * (f + m);
+  const outerH = h + 2 * (f + m);
+  const pct = Math.min(90, Math.max(8, (outerW / wallWidth) * 100));
+  const chosen = FRAMES.find((x) => x.id === frame);
+  const framingNote =
+    frame === "none"
+      ? null
+      : `Hello, I would like to discuss framing "${artwork.title}" in ${chosen.label.toLowerCase()}${m ? " with a white mount" : ""}.`;
   return (
     <section className={`room-view ${wall}`} aria-label="Room simulation">
       <div className="room-control">
@@ -301,17 +327,76 @@ function RoomViewer({ artwork }) {
             </button>
           ))}
         </div>
+        {frameable && (
+          <fieldset className="frame-picker">
+            <legend>Frame</legend>
+            <div className="frame-options">
+              {FRAMES.map((x) => (
+                <label
+                  key={x.id}
+                  className={`frame-option ${frame === x.id ? "is-on" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="frame"
+                    value={x.id}
+                    checked={frame === x.id}
+                    onChange={() => setFrame(x.id)}
+                  />
+                  <span
+                    className={`frame-swatch swatch-${x.id}`}
+                    aria-hidden="true"
+                  />
+                  <span>{x.label}</span>
+                </label>
+              ))}
+            </div>
+            <p className="frame-note">{chosen.note}</p>
+            {frame !== "none" && (
+              <label className="mat-toggle">
+                <input
+                  type="checkbox"
+                  checked={mat}
+                  onChange={(e) => setMat(e.target.checked)}
+                />
+                White mount ({MAT_CM} cm)
+              </label>
+            )}
+          </fieldset>
+        )}
         <p>
-          Shown at true scale for a {wallWidth} cm wall ({Math.round(w)} cm wide
-          work). Confirm measurements with an advisor before acquisition.
+          Shown at true scale for a {wallWidth} cm wall ({Math.round(outerW)} ×{" "}
+          {Math.round(outerH)} cm{f ? " framed" : ""}). Confirm measurements
+          with an advisor before acquisition.
+          {frameable &&
+            frame !== "none" &&
+            " Bespoke framing is arranged by our advisory team and quoted separately."}
         </p>
+        {framingNote && (
+          <AdvisorChat message={framingNote}>
+            Ask about this frame on WhatsApp
+          </AdvisorChat>
+        )}
       </div>
       <div className="room">
-        <img
-          src={artwork.images?.[0]?.url}
-          alt={`${artwork.title} simulated on a wall`}
-          style={{ width: `${pct}%` }}
-        />
+        <figure
+          className={`framed frame-${frameable ? frame : "none"} ${m ? "has-mat" : ""}`}
+          style={{
+            width: `${pct}%`,
+            "--aspect": (outerW / outerH).toFixed(4),
+            "--frame": `${((f / outerW) * 100).toFixed(3)}cqw`,
+            "--mat": `${((m / outerW) * 100).toFixed(3)}cqw`,
+          }}
+        >
+          <div className="frame-body">
+            <div className="frame-mat">
+              <img
+                src={artwork.images?.[0]?.url}
+                alt={`${artwork.title} simulated on a wall${frameable && frame !== "none" ? `, ${chosen.label.toLowerCase()} frame` : ""}`}
+              />
+            </div>
+          </div>
+        </figure>
         <div className="console" />
         <div className="sofa" />
       </div>
