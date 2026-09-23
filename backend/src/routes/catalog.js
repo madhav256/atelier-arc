@@ -8,6 +8,7 @@ import { buildArtworkQuery, fuzzyFilter, SORTS, pageInfo, paging } from '../lib/
 import { similarTo, trending, recordView } from '../services/recommendationService.js';
 import { artworkJsonLd, sitemap } from '../services/seoService.js';
 import { env } from '../config/env.js';
+import { provenanceDossier, verifyCertificate } from '../services/documentService.js';
 
 const r = Router();
 const CARD = 'title slug artist images price priceOnRequest currency availability medium category year dimensions edition tags style featured orientation';
@@ -75,6 +76,15 @@ r.get('/artworks/:slug', optionalAuth, asyncHandler(async (req, res) => {
   const similar = await similarTo(item);
   ok(res, { ...item, similar, jsonLd: artworkJsonLd(item) });
 }));
+
+const sendPdf = (res, { filename, buffer }, disposition = 'attachment') => {
+  res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `${disposition}; filename="${filename}"`, 'Cache-Control': 'private, max-age=300' });
+  res.send(buffer);
+};
+
+r.get('/artworks/:slug/provenance.pdf', asyncHandler(async (req, res) => sendPdf(res, await provenanceDossier(String(req.params.slug)))));
+
+r.get('/certificates/:code', asyncHandler(async (req, res) => ok(res, await verifyCertificate(String(req.params.code).slice(0, 64)))));
 
 r.get('/artists', asyncHandler(async (req, res) => {
   const filter = { published: true };

@@ -50,6 +50,8 @@ docs/                     architecture, API, deployment, audit, runbooks
 
 Editorial homepage, URL-driven catalogue with facets, sorting and typo-tolerant search, artwork detail with JSON-LD and a simulated room viewer, artist and collection pages, journal, saved works and taste-based recommendations, server-side cart, signed shipping/insurance/GST quotes, checkout through the payment adapters with inventory holds and webhook-only confirmation, order status lookup, collector account (orders, inquiries with message thread, viewings, private offers, notifications, settings), advisor inquiry pipeline, admin CRUD, uploads, analytics and audit log, and full auth (verification, reset, lockout, rotating refresh tokens, CSRF).
 
+Documents: every published work has a downloadable provenance dossier (`GET /api/v1/artworks/:slug/provenance.pdf`, A4, two pages). Once an order is confirmed, the collector can download a numbered certificate of authenticity for each work from the order page (`GET /api/v1/me/orders/:number/certificates/:artworkId`, owner or staff only). Each certificate carries a code signed with `CERTIFICATE_SECRET` that anyone can check at `/verify`. PDFs are rendered with pdfkit in Libre Caslon (OFL, bundled in `backend/assets/fonts`).
+
 Provider-dependent systems are honest adapters, not fake integrations. Locally, payments use a mock gateway with signed webhooks, email is written to the console, and images are stored on disk. Real Stripe or Razorpay keys, an SMTP provider, Cloudinary and MongoDB Atlas are free signups for the owner; real AR, address validation and carrier-rated shipping are not built. See `docs/PRODUCTION_INTEGRATIONS.md`.
 
 ## Documentation

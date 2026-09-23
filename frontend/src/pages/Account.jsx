@@ -9,7 +9,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, money, date, label } from "../lib/api";
+import { api, download, money, date, label } from "../lib/api";
 import { useSession, useAuthActions } from "../hooks/useSession";
 import { useDocumentMeta } from "../hooks/useDocumentMeta";
 import { Loading, ErrorState, Empty } from "../components/States";
@@ -194,6 +194,39 @@ export function AccountOrders() {
   );
 }
 
+const CERTIFIED = ["confirmed", "preparing", "shipped", "delivered"];
+
+function CertificateButton({ number, item }) {
+  const [state, setState] = useState("idle");
+  const get = async () => {
+    setState("busy");
+    try {
+      await download(
+        `/me/orders/${number}/certificates/${item.artwork}`,
+        `certificate-${number}.pdf`,
+      );
+      setState("idle");
+    } catch {
+      setState("error");
+    }
+  };
+  return (
+    <button
+      type="button"
+      className="link-button certificate-button"
+      onClick={get}
+      disabled={state === "busy"}
+      aria-label={`Download certificate of authenticity for ${item.title}`}
+    >
+      {state === "busy"
+        ? "Preparing…"
+        : state === "error"
+          ? "Try again"
+          : "Certificate"}
+    </button>
+  );
+}
+
 export function AccountOrder() {
   const { number } = useParams();
   useDocumentMeta(`Order ${number}`, undefined, { noindex: true });
@@ -224,6 +257,9 @@ export function AccountOrder() {
               </span>
               <span>× {i.quantity}</span>
               <span>{money(i.unitPrice * i.quantity, o.currency)}</span>
+              {CERTIFIED.includes(o.status) && (
+                <CertificateButton number={o.number} item={i} />
+              )}
             </li>
           ))}
         </ul>

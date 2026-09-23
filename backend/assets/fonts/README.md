@@ -1,0 +1,1 @@
+Libre Caslon Display and Libre Caslon Text by Impallari Type, licensed under the SIL Open Font License 1.1 (https://openfontlicense.org). Copied from @fontsource packages for server-side PDF rendering.

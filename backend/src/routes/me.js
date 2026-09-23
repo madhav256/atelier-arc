@@ -11,6 +11,7 @@ import * as inquiries from '../services/inquiryService.js';
 import * as bids from '../services/bidService.js';
 import { forUser } from '../services/recommendationService.js';
 import { checkoutOffer } from '../services/orderService.js';
+import { certificateForOwner } from '../services/documentService.js';
 
 const r = Router();
 r.use(authenticate);
@@ -111,6 +112,12 @@ r.get('/recommendations', asyncHandler(async (req, res) => {
 
 // Orders
 r.get('/orders', asyncHandler(async (req, res) => ok(res, await Order.find({ user: req.user.sub }).sort({ createdAt: -1 }).select('-idempotencyKey').lean())));
+r.get('/orders/:number/certificates/:artworkId', validate({ params: z.object({ number: z.string().max(40), artworkId: objectId }) }), asyncHandler(async (req, res) => {
+  const { filename, buffer } = await certificateForOwner(req.user.sub, req.params.number, req.params.artworkId, ['admin', 'advisor'].includes(req.user.role));
+  res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${filename}"`, 'Cache-Control': 'private, no-store' });
+  res.send(buffer);
+}));
+
 r.get('/orders/:number', asyncHandler(async (req, res) => {
   const order = await Order.findOne({ user: req.user.sub, number: req.params.number }).select('-idempotencyKey').lean();
   if (!order) throw new AppError(404, 'Order not found', 'NOT_FOUND');

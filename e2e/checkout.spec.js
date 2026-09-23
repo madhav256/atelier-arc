@@ -63,5 +63,6 @@ test('a declined test card leaves the order unpaid and the work available', asyn
   await page.getByRole('button', { name: 'Simulate a declined card' }).click();
   await expect(page.getByText(/declined|not completed|failed/i).first()).toBeVisible();
   await page.goto('/artworks/blue-interval');
-  await expect(page.getByText(/available/i).first()).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/^available$/i).first()).toBeVisible({ timeout: 15_000 });
 });

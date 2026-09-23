@@ -21,6 +21,7 @@ export const env = {
   accessSecret: process.env.JWT_ACCESS_SECRET || 'development-access-secret-change-me',
   refreshSecret: process.env.JWT_REFRESH_SECRET || 'development-refresh-secret-change-me',
   quoteSecret: process.env.QUOTE_SECRET || 'development-quote-secret-change-me',
+  certificateSecret: process.env.CERTIFICATE_SECRET || process.env.QUOTE_SECRET || 'development-certificate-secret-change-me',
   clientOrigins: list(process.env.CLIENT_ORIGINS, 'http://localhost:5173'),
   publicSiteUrl: process.env.PUBLIC_SITE_URL || 'http://localhost:5173',
   publicApiUrl: process.env.PUBLIC_API_URL || 'http://localhost:4000',

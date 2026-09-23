@@ -9,7 +9,7 @@ import {
   Bell,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import { api, money, label } from "../lib/api";
+import { api, apiUrl, money, label } from "../lib/api";
 import { ArtworkCard } from "../components/ArtworkCard";
 import { InquiryForm } from "../components/InquiryForm";
 import { AdvisorChat } from "../components/AdvisorChat";
@@ -163,16 +163,20 @@ function Detail({ artwork: a }) {
                 : "Notify me if this becomes available"}
             </button>
           )}
-          {purchasable && a.stock > 0 && <MakeOffer artwork={a} user={user} />}
-          {purchasable && (
-            <button
-              className="text-link"
-              onClick={() => dialog.current?.showModal()}
-            >
-              Speak with an advisor
-            </button>
-          )}
-          <AdvisorChat artwork={a} />
+          <div className="enquiry-links">
+            {purchasable && a.stock > 0 && (
+              <MakeOffer artwork={a} user={user} />
+            )}
+            {purchasable && (
+              <button
+                className="text-link"
+                onClick={() => dialog.current?.showModal()}
+              >
+                Speak with an advisor
+              </button>
+            )}
+            <AdvisorChat artwork={a} />
+          </div>
           <button
             className="text-link room-link"
             onClick={() => setRoom(!room)}
@@ -214,7 +218,8 @@ function Detail({ artwork: a }) {
             <summary>Condition and certificate</summary>
             <p>
               {a.condition || "Excellent"}.{" "}
-              {a.certificate || "Certificate included"}.
+              {a.certificate || "Certificate included"}. A numbered certificate
+              of authenticity is issued to the collector on acquisition.
             </p>
           </details>
           <details>
@@ -224,6 +229,19 @@ function Detail({ artwork: a }) {
                 "Specialist insured delivery is arranged after acquisition."}
             </p>
           </details>
+          <a
+            className="document-link"
+            href={apiUrl(`/artworks/${a.slug}/provenance.pdf`)}
+            download
+          >
+            <span className="document-link-mark" aria-hidden="true">
+              PDF
+            </span>
+            <span>
+              <b>Provenance dossier</b>
+              <small>Details, provenance and condition, A4</small>
+            </span>
+          </a>
         </div>
       </section>
       {a.similar?.length > 0 && (
