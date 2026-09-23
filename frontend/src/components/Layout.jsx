@@ -2,7 +2,8 @@ import { Loading } from './States';
 import { Suspense } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, Search, Heart, ShoppingBag, X, Bell, User } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { pageEnter, scrollToTop, startSmoothScroll, watchReveals } from '../lib/motion';
 import { useQuery } from '@tanstack/react-query';
 import { useCart } from '../hooks/useCart';
 import { useCollection } from '../hooks/useCollection';
@@ -16,9 +17,14 @@ export function Layout() {
   const { count } = useCollection();
   const { user, isStaff } = useSession();
   const unread = useQuery({ queryKey: ['notifications', 'unread'], queryFn: () => api('/me/notifications/unread-count'), enabled: Boolean(user), refetchInterval: 60_000 });
+  const mainRef = useRef(null);
+  const curtainRef = useRef(null);
+  useEffect(() => startSmoothScroll(), []);
+  useEffect(() => watchReveals(mainRef.current), []);
   useEffect(() => {
     setOpen(false);
-    window.scrollTo(0, 0);
+    scrollToTop();
+    return pageEnter(curtainRef.current, mainRef.current);
   }, [location.pathname]);
   const unreadCount = unread.data?.unread || 0;
   return (
@@ -65,7 +71,8 @@ export function Layout() {
           </button>
         </div>
       </header>
-      <main id="main" tabIndex={-1}>
+      <div className="page-curtain" ref={curtainRef} aria-hidden="true" />
+      <main id="main" tabIndex={-1} ref={mainRef}>
         <Suspense fallback={<Loading />}>
           <Outlet />
         </Suspense>

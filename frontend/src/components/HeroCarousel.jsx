@@ -1,0 +1,130 @@
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, Pause, Play } from 'lucide-react';
+import { money } from '../lib/api';
+import { gsap, EASE, EASE_IN_OUT, reducedMotion, ScrollTrigger } from '../lib/motion';
+
+const HOLD = 8; // seconds each work stays on screen
+
+// Cinematic featured-work hero: slow wipe between works, masked title reveal, gentle scroll parallax.
+export function HeroCarousel({ works }) {
+  const slides = works.slice(0, 4);
+  const [index, setIndex] = useState(0);
+  const [playing, setPlaying] = useState(() => !reducedMotion());
+  const [hovered, setHovered] = useState(false);
+  const root = useRef(null);
+  const prev = useRef(0);
+  const progress = useRef(null);
+  const n = slides.length;
+  const go = (i) => setIndex(((i % n) + n) % n);
+
+  // Transition between works
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const frames = el.querySelectorAll('.hero-frame');
+    const from = prev.current;
+    prev.current = index;
+    frames.forEach((f, i) => f.classList.toggle('is-active', i === index));
+    const copy = el.querySelectorAll('.hero-copy > *');
+    if (reducedMotion() || from === index) {
+      gsap.set(frames[index], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: 2 });
+      if (from === index) gsap.fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: reducedMotion() ? 0 : 1.4, ease: EASE, stagger: 0.08, delay: 0.5, clearProps: 'clipPath,transform' });
+      return;
+    }
+    const next = frames[index];
+    const img = next.querySelector('img');
+    const tl = gsap.timeline();
+    gsap.set(frames, { zIndex: 0 });
+    gsap.set(frames[from], { zIndex: 1 });
+    tl.fromTo(next, { zIndex: 2, clipPath: 'inset(0% 0% 0% 100%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.8, ease: EASE_IN_OUT }, 0)
+      .fromTo(img, { scale: 1.18, xPercent: 4 }, { scale: 1.04, xPercent: 0, duration: 2.6, ease: EASE }, 0)
+      .to(frames[from].querySelector('img'), { scale: 1.1, xPercent: -6, duration: 1.8, ease: EASE_IN_OUT }, 0)
+      .fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: 1.3, ease: EASE, stagger: 0.08, clearProps: 'clipPath,transform' }, 0.7);
+    return () => tl.progress(1).kill();
+  }, [index]);
+
+  // Autoplay with a hairline progress bar; pauses on hover, focus, or the pause button.
+  const tween = useRef(null);
+  useEffect(() => {
+    const bar = progress.current;
+    if (!bar || n < 2) return;
+    tween.current = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: HOLD, ease: 'none', paused: true, onComplete: () => setIndex((i) => (i + 1) % n) });
+    return () => tween.current?.kill();
+  }, [index, n]);
+  useEffect(() => {
+    const t = tween.current;
+    if (!t) return;
+    if (playing && !hovered) t.play();
+    else t.pause();
+  }, [index, playing, hovered]);
+
+  // Parallax: the image drifts slower than the page as you scroll past.
+  useEffect(() => {
+    if (reducedMotion() || !root.current) return;
+    const ctx = gsap.context(() => {
+      gsap.to('.hero-stage', { yPercent: 14, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.to('.hero-copy', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true } });
+    }, root);
+    ScrollTrigger.refresh();
+    return () => ctx.revert();
+  }, []);
+
+  const w = slides[index];
+  const pad = (x) => String(x).padStart(2, '0');
+  return (
+    <section
+      className="hero"
+      ref={root}
+      aria-roledescription="carousel"
+      aria-label="Featured acquisitions"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setHovered(false)}
+    >
+      <div className="hero-stage">
+        {slides.map((s, i) => (
+          <div className={`hero-frame${i === 0 ? ' is-active' : ''}`} key={s.slug} aria-hidden={i !== index}>
+            <img src={s.images[0].url} alt={i === index ? s.images[0].alt : ''} fetchpriority={i === 0 ? 'high' : 'auto'} />
+          </div>
+        ))}
+      </div>
+      <div className="hero-shade" />
+      <div className="hero-copy" aria-live={playing ? 'off' : 'polite'}>
+        <span className="eyebrow">
+          FEATURED ACQUISITION · {pad(index + 1)} / {pad(n)}
+        </span>
+        <h1>{w.title}</h1>
+        <p className="artist">{w.artist?.name}</p>
+        <p>
+          {w.year} · {w.medium}
+          <br />
+          {w.priceOnRequest ? 'Price on request' : money(w.price)}
+        </p>
+        <Link className="text-link light" to={`/artworks/${w.slug}`}>
+          View artwork <ArrowRight aria-hidden="true" />
+        </Link>
+      </div>
+      {n > 1 && (
+        <div className="hero-controls">
+          <button onClick={() => go(index - 1)} aria-label="Previous featured work">
+            <ArrowLeft aria-hidden="true" />
+          </button>
+          <div className="hero-progress" aria-hidden="true">
+            <i ref={progress} />
+          </div>
+          <button onClick={() => go(index + 1)} aria-label="Next featured work">
+            <ArrowRight aria-hidden="true" />
+          </button>
+          <button onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pause slideshow' : 'Play slideshow'} aria-pressed={!playing}>
+            {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+          </button>
+        </div>
+      )}
+      <div className="hero-mark" aria-hidden="true">
+        A<span>A</span>
+      </div>
+    </section>
+  );
+}

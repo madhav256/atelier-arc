@@ -59,6 +59,7 @@ Provider-dependent systems are honest adapters, not fake integrations. Locally, 
 - [Deployment](docs/DEPLOYMENT.md)
 - [Production integrations](docs/PRODUCTION_INTEGRATIONS.md)
 - [Runbooks](docs/runbooks/README.md): deploy, rollback, incident response, payments, backup and restore, secret rotation, staff access
+- [Motion](docs/MOTION.md)
 - [Load test](docs/LOAD_TEST.md)
 - [Dependency audit and SBOM](docs/SECURITY_AUDIT.md)
 - [Final audit](docs/FINAL_AUDIT.md)

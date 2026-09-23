@@ -148,3 +148,42 @@
 /* Closed mobile drawer: keep it out of the tab order and accessibility tree */
 @media(max-width:768px){.site-header nav:not(.open){visibility:hidden}}
 body{overflow-x:clip}
+
+/* ---- Gallery motion (GSAP + Lenis). Everything below degrades to static under reduced motion. ---- */
+.page-curtain{position:fixed;inset:0;z-index:40;background:var(--ivory);pointer-events:none;transform:scaleY(0);transform-origin:50% 0}
+.hero-stage{position:absolute;inset:0;will-change:transform}
+.hero-frame{position:absolute;inset:0;overflow:hidden;clip-path:inset(0 0 0 100%)}
+.hero-frame.is-active{clip-path:inset(0 0 0 0)}
+.hero-frame img{width:100%;height:100%;object-fit:cover;transform:scale(1.04);will-change:transform}
+.hero-frame:first-child img{animation:heroIn 2.4s cubic-bezier(.16,1,.3,1) both}
+.hero-shade,.hero-copy,.hero-mark{z-index:3}
+.hero-controls{position:absolute;z-index:4;right:5vw;bottom:10%;display:flex;align-items:center;gap:1rem;color:#fff}
+.hero-controls button{background:0;border:1px solid rgba(255,255,255,.45);color:inherit;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;transition:border-color .6s,background .6s}
+.hero-controls button:hover,.hero-controls button:focus-visible{border-color:#fff;background:rgba(255,255,255,.08)}
+.hero-controls svg{width:16px;height:16px}
+.hero-progress{width:120px;height:1px;background:rgba(255,255,255,.3);overflow:hidden}
+.hero-progress i{display:block;height:100%;background:#fff;transform:scaleX(0);transform-origin:0 50%}
+@media(max-width:768px){.hero-controls{right:1.5rem;bottom:1.5rem;gap:.6rem}.hero-progress{width:56px}.hero-copy{bottom:calc(8% + 56px)}}
+
+/* Artwork cards: slow zoom, soft veil, drawn title underline */
+.art-image picture{display:block;height:100%}
+.art-image a{display:block;height:100%;position:relative}
+.art-image a:after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(20,20,18,.18),transparent 45%);opacity:0;transition:opacity 1.2s cubic-bezier(.16,1,.3,1)}
+.art-image img{transition:transform 1.6s cubic-bezier(.16,1,.3,1)}
+.art-card:hover .art-image img,.art-card:focus-within .art-image img{transform:scale(1.045)}
+.art-card:hover .art-image a:after,.art-card:focus-within .art-image a:after{opacity:1}
+.art-meta h3{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;display:inline;transition:background-size .9s cubic-bezier(.16,1,.3,1)}
+.art-card:hover .art-meta h3,.art-card:focus-within .art-meta h3{background-size:100% 1px}
+
+/* Browse by price: hairlines that draw in, gold rule on hover, content glides instead of reflowing */
+.price-list a{position:relative;border-top:0;border-bottom:0!important;transition:color .7s cubic-bezier(.16,1,.3,1)}
+.price-list a:hover{padding-left:0}
+.price-list .rule{position:absolute;left:0;right:0;top:0;height:1px;background:#454640;transform-origin:0 50%}
+.price-list .rule:after{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.1s cubic-bezier(.16,1,.3,1)}
+.price-list a:last-child:after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:#454640}
+.price-list a:hover .rule:after,.price-list a:focus-visible .rule:after{transform:scaleX(1)}
+.price-list b,.price-list span,.price-list svg{transition:transform .9s cubic-bezier(.16,1,.3,1),color .7s}
+.price-list a:hover span,.price-list a:focus-visible span{transform:translateX(1rem)}
+.price-list a:hover b,.price-list a:focus-visible b{color:#ceb370}
+.price-list a:hover svg,.price-list a:focus-visible svg{transform:translateX(.5rem)}
+@media(prefers-reduced-motion:reduce){.hero-frame img{transform:none}.page-curtain{display:none}}
