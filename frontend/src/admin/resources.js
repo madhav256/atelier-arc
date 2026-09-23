@@ -38,6 +38,7 @@ export const RESOURCE_META = {
       ['tags', 'Tags (comma separated)', 'csv'],
       ['style', 'Style (comma separated)', 'csv'],
       ['images', 'Images', 'images'],
+      ['video', 'Film', 'video'],
       ['featured', 'Featured', 'bool'],
       ['published', 'Published', 'bool'],
     ],
@@ -148,6 +149,7 @@ export function toForm(item, fields) {
     else if (kind === 'artist') out[path] = v?._id || v || '';
     else if (kind === 'bool') out[path] = Boolean(v);
     else if (kind === 'images') out[path] = v || [];
+    else if (kind === 'video') out[path] = v || null;
     else out[path] = v ?? '';
   }
   return out;
@@ -179,6 +181,7 @@ export function fromForm(form, fields) {
           .map(([year, title, description]) => ({ year: Number(year), title, ...(description && { description }) })),
       );
     else if (kind === 'bool' || kind === 'images') set(path, v);
+    else if (kind === 'video') set(path, v || null);
     else if (kind === 'select' && v === '') continue;
     else if (v !== '' && v != null) set(path, v);
   }

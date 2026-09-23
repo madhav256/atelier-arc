@@ -155,6 +155,56 @@ function ImageUpload({ onUploaded, alt }) {
   );
 }
 
+function VideoField({ text, value, onChange }) {
+  const [error, setError] = useState(null);
+  const [poster, setPoster] = useState(null);
+  const up = useMutation({
+    mutationFn: (file) => {
+      const fd = new FormData();
+      fd.append('video', file);
+      if (poster) fd.append('poster', poster);
+      fd.append('caption', value?.caption || '');
+      return api('/admin/uploads/video', { body: fd });
+    },
+    onSuccess: (v) => {
+      setError(null);
+      onChange(v);
+    },
+    onError: setError,
+  });
+  return (
+    <fieldset className="field video-field">
+      <legend>{text}</legend>
+      {value?.url ? (
+        <div className="video-current">
+          <video src={value.url} poster={value.poster} controls muted playsInline preload="metadata" className="thumb-video" aria-label="Current film" />
+          <div>
+            {value.placeholder && <p className="muted">Placeholder film. Replace it with studio footage.</p>}
+            <p className="muted">{[value.duration && `${value.duration}s`, value.width && `${value.width}×${value.height}`, value.mime].filter(Boolean).join(' · ')}</p>
+            <Field label="Caption" value={value.caption || ''} onChange={(e) => onChange({ ...value, caption: e.target.value })} />
+            <button type="button" className="text-button" onClick={() => onChange(null)}>
+              Remove film
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="muted">MP4 (H.264) or WebM, up to 80 MB and ten minutes. Films never autoplay.</p>
+      )}
+      <div className="upload">
+        <label className="button ghost small">
+          Poster image (optional){poster ? `: ${poster.name}` : ''}
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={(e) => setPoster(e.target.files[0] || null)} />
+        </label>{' '}
+        <label className="button ghost small">
+          {up.isPending ? 'Uploading film…' : value?.url ? 'Replace film' : 'Upload film'}
+          <input type="file" accept="video/mp4,video/webm" className="sr-only" onChange={(e) => e.target.files[0] && up.mutate(e.target.files[0])} />
+        </label>
+        <FormError error={error} />
+      </div>
+    </fieldset>
+  );
+}
+
 function Input({ def, value, onChange, error, artists }) {
   const [, text, kind, opts = {}] = def;
   const common = { label: text, error, required: opts.required };
@@ -193,6 +243,7 @@ function Input({ def, value, onChange, error, artists }) {
         <ImageUpload onUploaded={(img) => onChange(img.url)} />
       </div>
     );
+  if (kind === 'video') return <VideoField text={text} value={value} onChange={onChange} />;
   if (kind === 'images')
     return (
       <fieldset className="field images-field">

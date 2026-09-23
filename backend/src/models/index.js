@@ -69,6 +69,15 @@ const artworkSchema = new Schema(
     certificate: String,
     shipping: String,
     images: [imageSchema],
+    // One short film per work (studio walk-round, detail pass). placeholder marks generated
+    // stand-in films so they can be replaced before launch.
+    video: {
+      type: new Schema(
+        { url: String, poster: String, mime: String, duration: Number, width: Number, height: Number, caption: String, placeholder: Boolean },
+        { _id: false },
+      ),
+      default: undefined,
+    },
     collection: { type: ObjectId, ref: 'Collection' },
     tags: [String],
     style: [String],

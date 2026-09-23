@@ -4,6 +4,8 @@ import net from 'net';
 import crypto from 'crypto';
 import sharp from 'sharp';
 import { fileTypeFromBuffer } from 'file-type';
+import { execFile } from 'child_process';
+import os from 'os';
 import { env } from '../../config/env.js';
 import { AppError } from '../../lib/errors.js';
 
@@ -66,7 +68,7 @@ const localStorage = {
 
 const cloudinaryStorage = {
   name: 'cloudinary',
-  async put(key, buffer) {
+  async put(key, buffer, { resourceType = 'image' } = {}) {
     const { cloudinaryCloud: cloud, cloudinaryKey: apiKey, cloudinarySecret: secret } = env.storage;
     if (!cloud || !apiKey || !secret) throw new AppError(503, 'Cloudinary is not configured', 'STORAGE_UNAVAILABLE');
     const timestamp = Math.floor(Date.now() / 1000);
@@ -78,7 +80,7 @@ const cloudinaryStorage = {
     form.append('timestamp', String(timestamp));
     form.append('api_key', apiKey);
     form.append('signature', signature);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/image/upload`, { method: 'POST', body: form });
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/${resourceType}/upload`, { method: 'POST', body: form });
     const body = await res.json();
     if (!res.ok) throw new AppError(502, body.error?.message || 'Upload failed', 'STORAGE_ERROR');
     return body.secure_url;
@@ -95,4 +97,55 @@ export async function storeImage(buffer, { alt = '' } = {}) {
   const variants = [];
   for (const v of processed.variants) variants.push({ width: v.width, format: v.format, url: await storage.put(`artworks/${id}-${v.width}.${v.format}`, v.buffer) });
   return { url, alt, width: processed.width, height: processed.height, variants };
+}
+
+// Video: sniff the real container, cap size, scan, and read duration and size with ffprobe
+// when it is installed (free; optional). Files are stored as uploaded, with faststart
+// expected from the editor's export. A poster image goes through the image pipeline; without
+// one, ffmpeg (if present) takes a frame at one second.
+const VIDEO_TYPES = new Set(['video/mp4', 'video/webm']);
+export const MAX_VIDEO_BYTES = 80 * 1024 * 1024;
+
+const run = (cmd, args, input) =>
+  new Promise((resolve) => {
+    const child = execFile(cmd, args, { timeout: 30_000, maxBuffer: 20 * 1024 * 1024, encoding: 'buffer' }, (err, stdout) => resolve(err ? null : stdout));
+    if (input) child.stdin?.end(input);
+  });
+
+async function probeVideo(file) {
+  const out = await run('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height:format=duration', '-of', 'json', file]);
+  if (!out) return {};
+  try {
+    const j = JSON.parse(out.toString());
+    return { width: j.streams?.[0]?.width, height: j.streams?.[0]?.height, duration: Math.round(Number(j.format?.duration) * 10) / 10 || undefined };
+  } catch {
+    return {};
+  }
+}
+
+export async function storeVideo(buffer, { poster, caption = '' } = {}) {
+  if (buffer.length > MAX_VIDEO_BYTES) throw new AppError(413, 'Films must be under 80 MB', 'FILE_TOO_LARGE');
+  const type = await fileTypeFromBuffer(buffer);
+  const mime = type?.mime === 'video/quicktime' && type.ext === 'mp4' ? 'video/mp4' : type?.mime;
+  if (!mime || !VIDEO_TYPES.has(mime)) throw new AppError(415, 'Upload an MP4 (H.264) or WebM film', 'UNSUPPORTED_MEDIA');
+  await clamScan(buffer);
+  const tmp = path.join(os.tmpdir(), `aa-${crypto.randomUUID()}.${type.ext}`);
+  await fs.writeFile(tmp, buffer);
+  try {
+    const meta = await probeVideo(tmp);
+    if (meta.duration && meta.duration > 600) throw new AppError(422, 'Films must be ten minutes or shorter', 'VIDEO_TOO_LONG');
+    let posterBuffer = poster;
+    if (!posterBuffer) posterBuffer = await run('ffmpeg', ['-v', 'error', '-ss', '1', '-i', tmp, '-frames:v', '1', '-f', 'image2', '-c:v', 'mjpeg', 'pipe:1']);
+    const storage = storages[env.storage.provider] || localStorage;
+    const id = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}`;
+    const url = await storage.put(`films/${id}.${type.ext}`, buffer, { resourceType: 'video' });
+    let posterUrl;
+    if (posterBuffer?.length) {
+      const img = await sharp(posterBuffer, { limitInputPixels: MAX_PIXELS }).rotate().resize({ width: 1600, withoutEnlargement: true }).jpeg({ quality: 84, mozjpeg: true }).toBuffer();
+      posterUrl = await storage.put(`films/${id}-poster.jpg`, img);
+    }
+    return { url, poster: posterUrl, mime, caption, ...meta };
+  } finally {
+    await fs.rm(tmp, { force: true });
+  }
 }

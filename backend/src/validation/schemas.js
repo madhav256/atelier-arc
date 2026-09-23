@@ -119,6 +119,17 @@ export const collection = {
 
 const image = z.object({ url: assetUrl, alt: text(300).default(''), width: z.number().int().positive().optional(), height: z.number().int().positive().optional(), variants: z.array(z.object({ url: assetUrl, width: z.number(), format: z.string() })).optional() });
 
+const video = z.object({
+  url: assetUrl,
+  poster: assetUrl.optional(),
+  mime: z.enum(['video/mp4', 'video/webm']).default('video/mp4'),
+  duration: z.number().positive().max(600).optional(),
+  width: z.number().int().positive().optional(),
+  height: z.number().int().positive().optional(),
+  caption: text(200).optional(),
+  placeholder: z.boolean().optional(),
+});
+
 const artwork = z.object({
   title: text(200).min(1),
   slug: text(100).regex(/^[a-z0-9-]+$/).optional(),
@@ -140,6 +151,7 @@ const artwork = z.object({
   certificate: text(300).optional(),
   shipping: text(500).optional(),
   images: z.array(image).max(20).default([]),
+  video: video.nullable().optional(),
   collection: objectId.optional().nullable(),
   tags: z.array(text(40)).max(30).optional(),
   style: z.array(text(40)).max(20).optional(),

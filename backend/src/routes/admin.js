@@ -13,7 +13,7 @@ import * as bids from '../services/bidService.js';
 import { dashboard } from '../services/analyticsService.js';
 import { updateOrderStatus, refundOrder, expireHolds } from '../services/orderService.js';
 import { audit } from '../services/auditService.js';
-import { storeImage } from '../providers/storage/index.js';
+import { storeImage, storeVideo, processImage } from '../providers/storage/index.js';
 import { Order, User } from '../models/index.js';
 
 const r = Router();
@@ -32,6 +32,17 @@ r.post('/uploads', authorize('admin'), uploadLimiter, upload.single('image'), as
   const image = await storeImage(req.file.buffer, { alt: String(req.body.alt || '').slice(0, 300) });
   await audit(req, { action: 'upload', resource: 'images', resourceId: image.url, changes: { width: image.width, height: image.height } });
   ok(res, image, undefined, 201);
+}));
+
+const filmUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 80 * 1024 * 1024, files: 2 } });
+r.post('/uploads/video', authorize('admin'), uploadLimiter, filmUpload.fields([{ name: 'video', maxCount: 1 }, { name: 'poster', maxCount: 1 }]), asyncHandler(async (req, res) => {
+  const file = req.files?.video?.[0];
+  if (!file) throw new AppError(422, 'Choose a film to upload', 'NO_FILE');
+  const poster = req.files?.poster?.[0];
+  if (poster) await processImage(poster.buffer); // same type and size checks as artwork images
+  const video = await storeVideo(file.buffer, { poster: poster?.buffer, caption: String(req.body.caption || '').slice(0, 200) });
+  await audit(req, { action: 'upload', resource: 'videos', resourceId: video.url, changes: { duration: video.duration, width: video.width, height: video.height } });
+  ok(res, video, undefined, 201);
 }));
 
 r.post('/maintenance/expire-holds', authorize('admin'), asyncHandler(async (req, res) => ok(res, { released: await expireHolds() })));

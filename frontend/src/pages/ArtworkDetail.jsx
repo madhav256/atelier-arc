@@ -8,6 +8,7 @@ import {
   Truck,
   Bell,
   RotateCcw,
+  Play,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { RETURN_DAYS } from "../content/guarantee";
@@ -38,7 +39,7 @@ export default function ArtworkDetail() {
   if (query.isLoading) return <Loading />;
   if (query.error)
     return <ErrorState error={query.error} retry={query.refetch} />;
-  return <Detail artwork={a} />;
+  return <Detail key={a._id} artwork={a} />;
 }
 
 function Detail({ artwork: a }) {
@@ -47,6 +48,8 @@ function Detail({ artwork: a }) {
   const { user } = useSession();
   const [room, setRoom] = useState(false);
   const [added, setAdded] = useState(false);
+  const [view, setView] = useState("image");
+  const film = useRef(null);
   const dialog = useRef(null);
   const fullscreen = useRef(null);
   const alert = useMutation({
@@ -69,11 +72,49 @@ function Detail({ artwork: a }) {
           >
             <Maximize2 aria-hidden="true" /> View fullscreen
           </button>
-          <img
-            src={a.images?.[0]?.url}
-            alt={a.images?.[0]?.alt || a.title}
-            fetchpriority="high"
-          />
+          {view === "film" && a.video ? (
+            <figure className="detail-film">
+              <video
+                ref={film}
+                src={a.video.url}
+                poster={a.video.poster || a.images?.[0]?.url}
+                controls
+                playsInline
+                preload="metadata"
+                aria-label={`Film of ${a.title}`}
+              />
+              {a.video.caption && <figcaption>{a.video.caption}</figcaption>}
+            </figure>
+          ) : (
+            <img
+              src={a.images?.[0]?.url}
+              alt={a.images?.[0]?.alt || a.title}
+              fetchpriority="high"
+            />
+          )}
+          {a.video?.url && (
+            <div className="media-switch" role="group" aria-label="Show">
+              <button
+                type="button"
+                aria-pressed={view === "image"}
+                onClick={() => setView("image")}
+              >
+                The work
+              </button>
+              <button
+                type="button"
+                aria-pressed={view === "film"}
+                onClick={() => setView("film")}
+              >
+                <Play aria-hidden="true" /> Film
+                {a.video.duration ? (
+                  <span className="media-time">
+                    {`${Math.floor(a.video.duration / 60)}:${String(Math.round(a.video.duration % 60)).padStart(2, "0")}`}
+                  </span>
+                ) : null}
+              </button>
+            </div>
+          )}
         </div>
         <div className="detail-info">
           <span className="eyebrow">{a.category || "ORIGINAL WORK"}</span>

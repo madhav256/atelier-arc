@@ -7,6 +7,7 @@ Every external service sits behind an adapter with a working local mode, so the 
 | Payments | `mock`: real intent + signed webhook pipeline, completed via `POST /api/v1/payments/mock/complete` (disabled in production) | Stripe (REST, test mode), Razorpay (REST, test mode) | `PAYMENT_PROVIDER` |
 | Email | `console`: logs to stdout, keeps an in-memory outbox | Any SMTP server (nodemailer) | `EMAIL_PROVIDER` |
 | Images | `local`: EXIF-stripped JPEG master + WebP/AVIF derivatives on disk, served at `/uploads` | Cloudinary signed upload | `STORAGE_PROVIDER` |
+| Films | `local`: MP4 (H.264) or WebM stored as uploaded, type-sniffed, size-capped at 80 MB, ClamAV-scanned when configured; ffprobe reads duration and size and ffmpeg takes a poster frame when installed (both free, optional) | Cloudinary signed upload to the `video` resource type (same account and keys as images) | `STORAGE_PROVIDER` |
 | Malware scan | off | ClamAV `INSTREAM` (self-hosted Docker, free) | `CLAMAV_HOST` |
 | Search | Mongo weighted `$text` + typo-tolerant fallback | Atlas Search `$search` with fuzzy matching | `SEARCH_PROVIDER` |
 | Shipping, insurance, tax | Rule-based quotes, HMAC-signed, 30 min expiry, revalidated at order time | Same `computeQuote()` signature for a carrier/tax API | `ORIGIN_COUNTRY`, `DOMESTIC_TAX_RATE`, `INSURANCE_RATE` |
@@ -37,6 +38,10 @@ Sign up at https://cloudinary.com/users/register_free, copy cloud name, API key 
 
 ### MongoDB Atlas (free M0 cluster)
 Create an M0 cluster, add a database user and network rule, set `MONGODB_URI`. Atlas is a replica set, so checkout runs inside real transactions. For fuzzy search, create an Atlas Search index named `artworks` on the `artworks` collection with dynamic mappings and set `SEARCH_PROVIDER=atlas`.
+
+### Artwork films
+
+Three seeded works (After the Monsoon, Quiet Geometry, Night Orchard) carry placeholder films: an eight-second slow pass over the artwork image made with ffmpeg, in `frontend/public/film`, flagged `placeholder: true` so the admin editor labels them. Replace them from Admin > Artworks > Film with studio footage. Export at 1080p or below with faststart (`ffmpeg -i in.mov -c:v libx264 -crf 23 -movflags +faststart -an out.mp4`). Films never autoplay and show native controls, so reduced-motion users are never shown moving images without asking.
 
 ## Rules that hold regardless of provider
 
