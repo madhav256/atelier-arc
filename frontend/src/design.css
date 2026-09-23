@@ -210,3 +210,26 @@ img{color:transparent}
 @keyframes taste-in{from{opacity:0;transform:translateY(12px)}}
 @media(prefers-reduced-motion:reduce){.taste-invite{animation:none}.taste-progress span,.taste-option img{transition:none}}
 @media(max-width:760px){.taste{padding-top:3rem}.taste-options.is-imagery{grid-template-columns:1fr 1fr;gap:1rem}.taste-actions{justify-content:space-between}}
+/* Make an offer */
+.offer-dialog{max-width:520px}
+.offer-dialog h2{font-size:clamp(2rem,3vw,2.6rem);margin-bottom:.6rem}
+.offer-meta{color:var(--muted);font-size:.9rem;margin-bottom:2rem}
+.offer-dialog form{display:grid;gap:1.1rem}
+.offer-dialog label{display:grid;gap:.5rem;font:560 .64rem var(--sans);letter-spacing:.2em;text-transform:uppercase}
+.offer-dialog textarea{font:400 .95rem var(--sans);letter-spacing:0;text-transform:none;border:1px solid var(--line);background:var(--paper);padding:.8rem}
+.offer-amount input{font:400 2.2rem/1.1 var(--serif);letter-spacing:-.02em;border:0;border-bottom:1px solid var(--ink);background:0;padding:.3rem 0;text-transform:none;border-radius:0}
+.offer-help{font-size:.82rem;color:var(--muted);margin:-.4rem 0 0}
+.offer-fine{font-size:.78rem;color:var(--muted);margin:0}
+.bid-card .eyebrow{margin-bottom:.4rem}
+.bid-card h2{margin-bottom:.4rem}
+.bid-status{color:var(--muted)}
+.bid-actions{display:flex;flex-wrap:wrap;align-items:center;gap:1rem}
+.bid-revise,.bid-staff-actions form{display:flex;flex-wrap:wrap;align-items:end;gap:1rem;margin:1rem 0}
+.bid-revise label,.bid-staff-actions label{display:grid;gap:.4rem;font-size:.8rem}
+.bid-staff-actions{display:grid;gap:.8rem;margin:1rem 0}
+.bid-timeline{list-style:none;padding:0;margin:1.5rem 0 0;border-top:1px solid var(--line)}
+.bid-timeline li{display:grid;grid-template-columns:7.5rem 1fr;gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.bid-when{color:var(--muted);font-size:.78rem}
+.bid-timeline em{color:var(--gold-text);font:italic .85rem var(--serif);margin-left:.4rem}
+.bid-note{display:block;color:var(--muted);margin-top:.2rem}
+.offer-trigger{display:flex;width:fit-content;margin-bottom:.9rem}

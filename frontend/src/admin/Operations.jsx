@@ -5,6 +5,7 @@ import { api, date, label, money } from "../lib/api";
 import { Field, FormError } from "../components/Form";
 import { Loading, ErrorState, Empty } from "../components/States";
 import { useAdminList, Pager } from "./ResourceEditor";
+import { StaffBid } from "../components/Offers";
 
 const when = (v) => date(v, { dateStyle: "medium", timeStyle: "short" });
 const Pill = ({ status }) => (
@@ -655,6 +656,7 @@ export function InquiryAdmin({ isAdmin }) {
               Propose viewing
             </button>
           </form>
+          {i.bid?.status && <StaffBid inquiry={i} onChange={done} />}
           <form
             className="admin-card"
             onSubmit={(e) => {

@@ -16,6 +16,7 @@ import { Loading, ErrorState, Empty } from "../components/States";
 import { Field, FormError, COUNTRIES } from "../components/Form";
 import { ArtworkCard } from "../components/ArtworkCard";
 import { PaymentStep } from "./Checkout";
+import { ClientBid } from "../components/Offers";
 
 const when = (v) => date(v, { dateStyle: "medium", timeStyle: "short" });
 
@@ -533,6 +534,7 @@ export function AccountInquiry() {
         )}
         {i.advisor?.name && ` · Advisor: ${i.advisor.name}`}
       </p>
+      {i.bid?.status && <ClientBid inquiry={i} onChange={refresh} />}
       {i.offer?.status && (
         <section className="offer-card" aria-labelledby="offer-h">
           <h2 id="offer-h">Private offer</h2>

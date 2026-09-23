@@ -13,6 +13,7 @@ import { api, money, label } from "../lib/api";
 import { ArtworkCard } from "../components/ArtworkCard";
 import { InquiryForm } from "../components/InquiryForm";
 import { AdvisorChat } from "../components/AdvisorChat";
+import { MakeOffer } from "../components/Offers";
 import { Loading, ErrorState } from "../components/States";
 import { useDocumentMeta } from "../hooks/useDocumentMeta";
 import { useCart } from "../hooks/useCart";
@@ -162,6 +163,7 @@ function Detail({ artwork: a }) {
                 : "Notify me if this becomes available"}
             </button>
           )}
+          {purchasable && a.stock > 0 && <MakeOffer artwork={a} user={user} />}
           {purchasable && (
             <button
               className="text-link"
