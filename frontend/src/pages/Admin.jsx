@@ -1,1 +1,80 @@
-import {useDocumentMeta} from '../hooks/useDocumentMeta';export default function Admin(){useDocumentMeta('Gallery Administration');return <section className="admin-page"><aside><b>ATELIER ARC</b>{['Overview','Artworks','Artists','Collections','Orders','Inquiries','Customers','Editorial','Analytics'].map(x=><button key={x}>{x}</button>)}</aside><main><span className="eyebrow">GALLERY ADMINISTRATION</span><h1>Overview</h1><div className="metrics">{[['Revenue','₹48.6L'],['Orders','32'],['Inquiries','87'],['Conversion','3.8%']].map(x=><article key={x[0]}><span>{x[0]}</span><b>{x[1]}</b><small>Last 30 days</small></article>)}</div><section className="admin-table"><div><h2>Recent inquiries</h2><button className="text-link">View all</button></div>{['Mira Khanna · Quiet Geometry','Aarav Sen · After the Monsoon','Leela Iyer · Memory of Stone'].map((x,i)=><p key={x}><span>{x}</span><b>{['New','Viewing scheduled','Negotiation'][i]}</b><small>Collector #{1250+i}</small></p>)}</section><section className="admin-note"><h2>Production integrations</h2><p>Payments, transactional email, SMS, cloud image storage, address validation, and analytics are provider adapters. Their contracts and production replacements are documented under <code>docs/</code>.</p></section></main></section>}
+import { NavLink, Navigate, Route, Routes, Link, useLocation } from 'react-router-dom';
+import { useSession, useAuthActions } from '../hooks/useSession';
+import { useDocumentMeta } from '../hooks/useDocumentMeta';
+import { Loading } from '../components/States';
+import { ResourceList, ResourceForm } from '../admin/ResourceEditor';
+import { Dashboard, OrdersList, OrderAdmin, InquiriesList, InquiryAdmin, AuditLog } from '../admin/Operations';
+
+export default function Admin() {
+  const { user, loading, isStaff, isAdmin } = useSession();
+  const { logout } = useAuthActions();
+  const loc = useLocation();
+  useDocumentMeta('Gallery administration', undefined, { noindex: true });
+  if (loading) return <Loading />;
+  if (!user) return <Navigate to={`/login?next=${encodeURIComponent(loc.pathname)}`} replace />;
+  if (!isStaff)
+    return (
+      <section className="plain-page">
+        <h1>Staff only</h1>
+        <p className="lede">This area is for Atelier Arc staff.</p>
+        <Link className="button" to="/">
+          Return to the gallery
+        </Link>
+      </section>
+    );
+  const nav = [
+    ...(isAdmin ? [['/admin', 'Overview', true]] : []),
+    ['/admin/inquiries', isAdmin ? 'Inquiries' : 'My inquiries'],
+    ['/admin/orders', 'Orders'],
+    ['/admin/artworks', 'Artworks'],
+    ['/admin/artists', 'Artists'],
+    ['/admin/collections', 'Collections'],
+    ['/admin/articles', 'Journal'],
+    ...(isAdmin
+      ? [
+          ['/admin/customers', 'Customers'],
+          ['/admin/audit', 'Audit log'],
+        ]
+      : []),
+  ];
+  return (
+    <div className="admin-page">
+      <a className="skip-link" href="#admin-main">
+        Skip to content
+      </a>
+      <aside>
+        <Link to="/" className="brand">
+          ATELIER <i>ARC</i>
+        </Link>
+        <nav aria-label="Administration">
+          {nav.map(([to, text, end]) => (
+            <NavLink key={to} to={to} end={end}>
+              {text}
+            </NavLink>
+          ))}
+        </nav>
+        <p className="admin-user">
+          {user.name}
+          <br />
+          <small>{user.role}</small>
+          <br />
+          <button className="text-button" onClick={() => logout.mutate()}>
+            Sign out
+          </button>
+        </p>
+      </aside>
+      <main id="admin-main" tabIndex={-1}>
+        <Routes>
+          <Route index element={isAdmin ? <Dashboard /> : <Navigate to="/admin/inquiries" replace />} />
+          <Route path="inquiries" element={<InquiriesList isAdmin={isAdmin} />} />
+          <Route path="inquiries/:id" element={<InquiryAdmin isAdmin={isAdmin} />} />
+          <Route path="orders" element={<OrdersList />} />
+          <Route path="orders/:id" element={<OrderAdmin isAdmin={isAdmin} />} />
+          <Route path="audit" element={isAdmin ? <AuditLog /> : <Navigate to="/admin" replace />} />
+          <Route path=":resource" element={<ResourceList canWrite={isAdmin} />} />
+          <Route path=":resource/:id" element={<ResourceForm canWrite={isAdmin} />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}

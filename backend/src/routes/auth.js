@@ -23,17 +23,17 @@ function clearSession(res) {
   res.clearCookie('refreshToken', { ...base, sameSite: 'strict', path: '/api/v1/auth' });
 }
 
-r.use(authLimiter);
+// Credential endpoints only; session reads (/me, /refresh, /csrf) run on every page load.
 r.get('/csrf', (req, res) => ok(res, { csrfToken: req.cookies.csrfToken || null }));
 
-r.post('/register', validate(s.register), asyncHandler(async (req, res) => {
+r.post('/register', authLimiter, validate(s.register), asyncHandler(async (req, res) => {
   const { user, tokens } = await authService.register(req.body, req.get('user-agent'));
   setSession(res, tokens);
   await mergeGuestCart(req.cookies.cartSession, user._id);
   ok(res, { user, accessToken: tokens.accessToken }, undefined, 201);
 }));
 
-r.post('/login', validate(s.login), asyncHandler(async (req, res) => {
+r.post('/login', authLimiter, validate(s.login), asyncHandler(async (req, res) => {
   const { user, tokens } = await authService.login(req.body, req.get('user-agent'));
   setSession(res, tokens);
   await mergeGuestCart(req.cookies.cartSession, user._id);
@@ -72,21 +72,21 @@ r.get('/me', authenticate, asyncHandler(async (req, res) => {
 }));
 
 const generic = { message: 'If an account exists for that email, we have sent instructions.' };
-r.post('/forgot-password', validate(s.email), asyncHandler(async (req, res) => {
+r.post('/forgot-password', authLimiter, validate(s.email), asyncHandler(async (req, res) => {
   await authService.requestPasswordReset(req.body.email);
   ok(res, generic);
 }));
-r.post('/reset-password', validate(s.reset), asyncHandler(async (req, res) => {
+r.post('/reset-password', authLimiter, validate(s.reset), asyncHandler(async (req, res) => {
   await authService.resetPassword(req.body.token, req.body.password);
   clearSession(res);
   ok(res, { message: 'Password updated. Please sign in again.' });
 }));
-r.post('/verify-email', validate(s.verify), asyncHandler(async (req, res) => ok(res, { user: await authService.verifyEmail(req.body.token) })));
-r.post('/resend-verification', authenticate, asyncHandler(async (req, res) => {
+r.post('/verify-email', authLimiter, validate(s.verify), asyncHandler(async (req, res) => ok(res, { user: await authService.verifyEmail(req.body.token) })));
+r.post('/resend-verification', authLimiter, authenticate, asyncHandler(async (req, res) => {
   await authService.resendVerification(req.user.sub);
   ok(res, { message: 'Verification email sent.' });
 }));
-r.post('/change-password', authenticate, validate(s.change), asyncHandler(async (req, res) => {
+r.post('/change-password', authLimiter, authenticate, validate(s.change), asyncHandler(async (req, res) => {
   await authService.changePassword(req.user.sub, req.body.currentPassword, req.body.newPassword);
   clearSession(res);
   ok(res, { message: 'Password changed. Please sign in again.' });

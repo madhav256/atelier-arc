@@ -90,3 +90,49 @@
 .settings-block legend{padding:0}
 .settings-block legend h2{margin:0 0 1rem}
 @media(max-width:768px){.order-detail{grid-template-columns:1fr}.messages li{max-width:100%}.account-nav{gap:1rem}}
+
+/* ---- Admin ---- */
+.admin-page>aside nav{display:grid;gap:.15rem;margin-top:2.5rem}
+.admin-page>aside nav a{color:#bbb;padding:.7rem .8rem;font-size:.85rem}
+.admin-page>aside nav a:hover{color:#fff}
+.admin-page>aside nav a.active{color:#fff;background:#ffffff14}
+.admin-page>aside .brand{color:#fff}
+.admin-page>aside .text-button{color:#ddd}
+.admin-user{margin-top:auto;font-size:.85rem;color:#ccc}
+.admin-page h1{font-size:clamp(2.2rem,4vw,3.4rem);display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.admin-page h2{font-size:1.5rem}
+.admin-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.admin-filters{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end}
+.admin-filters .field{min-width:180px}
+.bulk-bar{display:flex;gap:.8rem;align-items:center;background:#fff;border:1px solid var(--line);padding:.7rem 1rem;margin-bottom:1rem}
+.table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--line)}
+.data-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.data-table th,.data-table td{text-align:left;padding:.8rem 1rem;border-bottom:1px solid #ece8e0;vertical-align:top}
+.data-table th{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.data-table td a{text-decoration:underline;text-underline-offset:3px}
+.data-table pre{white-space:pre-wrap;max-width:420px;font-size:.75rem}
+.pipeline{display:flex;flex-wrap:wrap;gap:.4rem;margin:1rem 0}
+.pipeline button{border:1px solid var(--line);background:#fff;padding:.5rem .9rem;font-size:.8rem}
+.pipeline button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.admin-columns{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:2rem;align-items:start}
+.admin-columns.three{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.admin-card{background:#fff;border:1px solid var(--line);padding:1.5rem;margin-bottom:1.5rem}
+.admin-form{max-width:760px}
+.admin-form fieldset{border:0;padding:0;margin:0}
+.form-actions{display:flex;gap:1rem;margin-top:1rem}
+.form-actions .button{width:auto}
+.thumb{width:96px;height:96px;margin:.4rem 0}
+.images-field ul{list-style:none;padding:0;display:grid;gap:1rem}
+.images-field li{display:grid;grid-template-columns:96px 1fr;gap:.2rem 1rem;align-items:center}
+.images-field legend{font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.upload label{cursor:pointer}
+.upload label:focus-within{outline:2px solid var(--gold);outline-offset:3px}
+.bar-chart{width:100%;border-collapse:collapse}
+.bar-chart th{font-weight:500;text-align:left;width:6rem;padding:.3rem 0}
+.bar-chart td{font-size:.8rem}
+.bar{display:block;height:.6rem;background:var(--gold);margin-bottom:.2rem;min-width:2px}
+.metrics{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:1.5rem}
+@media(max-width:1024px){.admin-page>aside{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;padding:1rem}.admin-page>aside nav{display:flex;flex-wrap:wrap;margin:0}.admin-user{margin:0 0 0 auto}.admin-columns{grid-template-columns:1fr}}
+.admin-page>aside .admin-user button:first-of-type{background:none;color:#ddd;padding:0}
+.pipeline button,.admin-filters option{text-transform:capitalize}
+.data-table td{text-transform:none}
