@@ -77,31 +77,49 @@ export function Layout() {
           <Outlet />
         </Suspense>
       </main>
-      <footer>
-        <div>
-          <span className="eyebrow">ATELIER ARC</span>
-          <h2>
-            Art that changes
-            <br />
-            the room.
-          </h2>
-        </div>
-        <div>
-          <h3>Visit</h3>
-          <p>
-            By appointment
-            <br />
-            Mumbai · New Delhi
+      <footer className="site-footer">
+        <div className="footer-top">
+          <p className="footer-statement">
+            Art that changes <em>the room.</em>
           </p>
+          <div className="footer-cols">
+            <div>
+              <h3>
+                <i>01</i> Visit
+              </h3>
+              <p>
+                By appointment
+                <br />
+                Mumbai · New Delhi
+              </p>
+            </div>
+            <div>
+              <h3>
+                <i>02</i> Explore
+              </h3>
+              <Link to="/artworks">Artworks</Link>
+              <Link to="/artists">Artists</Link>
+              <Link to="/collections">Collections</Link>
+              <Link to="/journal">Journal</Link>
+            </div>
+            <div>
+              <h3>
+                <i>03</i> Collectors
+              </h3>
+              <Link to="/advisory">Private advisory</Link>
+              <Link to="/my-collection">My Collection</Link>
+              <Link to="/order-status">Order status</Link>
+            </div>
+          </div>
         </div>
-        <div>
-          <h3>Explore</h3>
-          <Link to="/artworks">Artworks</Link>
-          <Link to="/journal">Journal</Link>
-          <Link to="/advisory">Private advisory</Link>
-          <Link to="/order-status">Order status</Link>
+        <p className="footer-wordmark" aria-hidden="true">
+          Atelier <em>Arc</em>
+        </p>
+        <div className="footer-meta">
+          <small>© {new Date().getFullYear()} Atelier Arc</small>
+          <small>Original contemporary art · Est. Mumbai</small>
+          <small>Privacy · Terms</small>
         </div>
-        <small>© {new Date().getFullYear()} Atelier Arc · Privacy · Terms</small>
       </footer>
     </>
   );

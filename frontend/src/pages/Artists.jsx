@@ -9,7 +9,7 @@ export default function Artists() {
   const q = useQuery({ queryKey: ['artists'], queryFn: () => api('/artists') });
   return (
     <section className="plain-page">
-      <span className="eyebrow">THE ARTISTS</span>
+      <span className="eyebrow">THE ARTISTS · {q.data ? String(q.data.length).padStart(2, '0') : ''}</span>
       <h1>
         Distinct voices.
         <br />
@@ -20,21 +20,21 @@ export default function Artists() {
       ) : q.error ? (
         <ErrorState error={q.error} retry={q.refetch} />
       ) : (
-        <div className="artist-grid">
-          {q.data.map((a) => (
-            <Link to={`/artists/${a.slug}`} key={a._id}>
-              <img src={a.portrait} alt="" loading="lazy" width="800" height="1000" />
-              <h2>{a.name}</h2>
-              <p>
-                {[a.location, a.movement].filter(Boolean).join(' · ')}
-                <br />
-                <small>
-                  {a.available} of {a.works} works available
-                </small>
-              </p>
-            </Link>
+        <ol className="artist-index">
+          {q.data.map((a, i) => (
+            <li key={a._id}>
+              <Link to={`/artists/${a.slug}`}>
+                <span className="artist-index-no">{String(i + 1).padStart(2, '0')}</span>
+                <img src={a.portrait} alt="" loading="lazy" width="160" height="200" />
+                <h2>{a.name}</h2>
+                <span className="artist-index-meta">{[a.location, a.movement].filter(Boolean).join(' · ')}</span>
+                <span className="artist-index-count">
+                  {a.available} of {a.works} available
+                </span>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ol>
       )}
     </section>
   );
