@@ -7,8 +7,10 @@ import {
   ShieldCheck,
   Truck,
   Bell,
+  RotateCcw,
 } from "lucide-react";
 import { useRef, useState } from "react";
+import { RETURN_DAYS } from "../content/guarantee";
 import { api, apiUrl, money, label } from "../lib/api";
 import { ArtworkCard } from "../components/ArtworkCard";
 import { InquiryForm } from "../components/InquiryForm";
@@ -191,6 +193,11 @@ function Detail({ artwork: a }) {
             </p>
             <p>
               <Truck aria-hidden="true" /> Insured specialist delivery
+            </p>
+            <p>
+              <RotateCcw aria-hidden="true" /> {RETURN_DAYS}-day returns,
+              lifetime authenticity guarantee.{" "}
+              <Link to="/guarantee">Read the guarantee</Link>
             </p>
           </div>
         </div>

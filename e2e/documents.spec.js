@@ -14,3 +14,10 @@ test('an unknown certificate code is reported as not recognised', async ({ page 
   await page.getByRole('button', { name: 'Verify' }).click();
   await expect(page.getByText('NOT RECOGNISED')).toBeVisible();
 });
+
+test('the guarantee is linked from the artwork page and the footer', async ({ page }) => {
+  await page.goto('/artworks/night-orchard');
+  await page.getByRole('link', { name: 'Read the guarantee' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(/certainty/i);
+  await expect(page.locator('.site-footer').getByRole('link', { name: 'Returns and guarantee' })).toHaveAttribute('href', '/guarantee');
+});

@@ -32,6 +32,7 @@ const CollectionDetail = named(
 );
 const Advisory = lazy(() => import("./pages/Advisory"));
 const Verify = lazy(() => import("./pages/Verify"));
+const Guarantee = lazy(() => import("./pages/Guarantee"));
 const TasteQuiz = lazy(() => import("./pages/TasteQuiz"));
 const Auth = lazy(authPages);
 const ForgotPassword = named(authPages, "ForgotPassword");
@@ -82,6 +83,7 @@ const router = createBrowserRouter([
       { path: "/journal/:slug", element: <JournalStory /> },
       { path: "/advisory", element: <Advisory /> },
       { path: "/taste", element: <TasteQuiz /> },
+      { path: "/guarantee", element: <Guarantee /> },
       { path: "/verify", element: <Verify /> },
       { path: "/verify/:code", element: <Verify /> },
       { path: "/my-collection", element: <MyCollection /> },

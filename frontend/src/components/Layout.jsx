@@ -144,6 +144,8 @@ export function Layout() {
               <Link to="/advisory">Private advisory</Link>
               <Link to="/my-collection">My Collection</Link>
               <Link to="/order-status">Order status</Link>
+              <Link to="/guarantee">Returns and guarantee</Link>
+              <Link to="/verify">Verify a certificate</Link>
             </div>
           </div>
         </div>

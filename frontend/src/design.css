@@ -249,3 +249,25 @@ img{color:transparent}
 .verify-result{max-width:44rem;padding:2rem 0;border-top:1px solid var(--line)}
 .verify-result h2{font-size:clamp(2rem,4vw,3.4rem);margin:.6rem 0}
 .verify-result.is-valid .eyebrow{color:var(--gold-text)}
+.assurances p{flex-wrap:wrap;align-items:baseline}
+.assurances a{color:inherit;text-decoration:underline;text-underline-offset:.25em}
+/* Returns and authenticity guarantee */
+.guarantee-page{padding:9rem var(--gutter) 8rem}
+.guarantee-hero{max-width:62rem;padding-bottom:5rem}
+.guarantee-terms{border-top:var(--hair)}
+.guarantee-hero h1{font-size:clamp(3.6rem,9vw,9.5rem);line-height:.92;letter-spacing:-.055em;margin:1.4rem 0 2rem}
+.guarantee-hero .dek{font-size:clamp(1.25rem,1.7vw,1.6rem);line-height:1.45;max-width:34ch}
+.guarantee-terms{list-style:none;margin:0;padding:0}
+.guarantee-terms li{display:grid;grid-template-columns:repeat(12,1fr);column-gap:1.5rem;padding:3.2rem 0;border-bottom:var(--hair);scroll-margin-top:6rem}
+.guarantee-terms b{grid-column:1/3;font:italic 400 1.05rem var(--serif-text);color:var(--gold-text)}
+.guarantee-terms li>div{grid-column:3/11}
+.guarantee-terms h2{font-size:clamp(1.8rem,3vw,2.9rem);letter-spacing:-.035em;margin:0 0 1rem}
+.guarantee-terms p{max-width:62ch;line-height:1.7;margin:0}
+.guarantee-aside{display:grid;grid-template-columns:repeat(12,1fr);column-gap:1.5rem;padding-top:4rem}
+.guarantee-aside>div:first-child{grid-column:3/7}
+.guarantee-aside>div:last-child{grid-column:8/12}
+.guarantee-aside ul{list-style:none;padding:0;margin:1.2rem 0}
+.guarantee-aside li{padding:.8rem 0;border-bottom:var(--hair);line-height:1.5}
+.guarantee-aside p{line-height:1.7;margin:1.2rem 0 0}
+.guarantee-aside a{color:inherit;text-decoration:underline;text-underline-offset:.25em}
+@media (max-width:800px){.guarantee-terms li>div,.guarantee-terms b{grid-column:1/-1}.guarantee-terms b{margin-bottom:1rem}.guarantee-aside>div:first-child,.guarantee-aside>div:last-child{grid-column:1/-1}.guarantee-aside>div+div{margin-top:3rem}}
