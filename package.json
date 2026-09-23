@@ -1,1 +1,23 @@
-{"name":"atelier-arc","private":true,"workspaces":["frontend","backend"],"scripts":{"dev":"concurrently -n API,WEB -c gold,cyan \"npm run dev -w backend\" \"npm run dev -w frontend\"","build":"npm run build -w frontend","test":"npm test -w backend && npm test -w frontend","lint":"npm run lint -w backend && npm run lint -w frontend","format":"prettier --write ."},"devDependencies":{"@axe-core/playwright":"^4.13.0","@playwright/test":"^1.63.0","concurrently":"^9.0.1","prettier":"^3.3.3"}}
+{
+  "name": "atelier-arc",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n API,WEB -c gold,cyan \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w frontend",
+    "test": "npm test -w backend && npm test -w frontend",
+    "lint": "npm run lint -w backend && npm run lint -w frontend",
+    "format": "prettier --write .",
+    "test:e2e": "playwright test",
+    "test:load": "node backend/load/run.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "concurrently": "^9.0.1",
+    "prettier": "^3.3.3"
+  }
+}

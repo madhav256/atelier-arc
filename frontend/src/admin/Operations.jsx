@@ -1,21 +1,57 @@
-import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, date, label, money } from '../lib/api';
-import { Field, FormError } from '../components/Form';
-import { Loading, ErrorState, Empty } from '../components/States';
-import { useAdminList, Pager } from './ResourceEditor';
+import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api, date, label, money } from "../lib/api";
+import { Field, FormError } from "../components/Form";
+import { Loading, ErrorState, Empty } from "../components/States";
+import { useAdminList, Pager } from "./ResourceEditor";
 
-const when = (v) => date(v, { dateStyle: 'medium', timeStyle: 'short' });
-const Pill = ({ status }) => <span className={`pill pill-${status}`}>{label(status)}</span>;
-const ORDER_STATUSES = ['pending_payment', 'confirmed', 'preparing', 'shipped', 'delivered', 'cancelled', 'refunded', 'payment_failed'];
-const PIPELINE = ['new', 'contacted', 'viewing_scheduled', 'negotiation', 'acquired', 'closed'];
+const when = (v) => date(v, { dateStyle: "medium", timeStyle: "short" });
+const Pill = ({ status }) => (
+  <span className={`pill pill-${status}`}>{label(status)}</span>
+);
+const ORDER_STATUSES = [
+  "pending_payment",
+  "confirmed",
+  "preparing",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "refunded",
+  "payment_failed",
+];
+// Mirrors ORDER_TRANSITIONS in backend/src/services/orderService.js.
+const NEXT_STATUS = {
+  confirmed: ["preparing", "cancelled"],
+  preparing: ["shipped", "cancelled"],
+  shipped: ["delivered"],
+  pending_payment: ["cancelled"],
+  payment_failed: ["cancelled"],
+};
+const PIPELINE = [
+  "new",
+  "contacted",
+  "viewing_scheduled",
+  "negotiation",
+  "acquired",
+  "closed",
+];
 
 function Filters({ params, setParam, statuses }) {
   return (
     <div className="admin-filters">
-      <Field label="Search" type="search" defaultValue={params.get('q') || ''} onChange={(e) => setParam('q', e.target.value)} />
-      <Field label="Status" as="select" value={params.get('status') || ''} onChange={(e) => setParam('status', e.target.value)}>
+      <Field
+        label="Search"
+        type="search"
+        defaultValue={params.get("q") || ""}
+        onChange={(e) => setParam("q", e.target.value)}
+      />
+      <Field
+        label="Status"
+        as="select"
+        value={params.get("status") || ""}
+        onChange={(e) => setParam("status", e.target.value)}
+      >
         <option value="">All</option>
         {statuses.map((s) => (
           <option key={s} value={s}>
@@ -28,7 +64,7 @@ function Filters({ params, setParam, statuses }) {
 }
 
 export function OrdersList() {
-  const { q, params, setParam, setPage } = useAdminList('orders');
+  const { q, params, setParam, setPage } = useAdminList("orders");
   const rows = q.data?.data || [];
   return (
     <>
@@ -69,7 +105,10 @@ export function OrdersList() {
           </table>
         </div>
       ) : (
-        <Empty title="No orders match" text="Try a different search or status." />
+        <Empty
+          title="No orders match"
+          text="Try a different search or status."
+        />
       )}
       <Pager meta={q.data?.meta} setPage={setPage} />
     </>
@@ -79,23 +118,56 @@ export function OrdersList() {
 export function OrderAdmin({ isAdmin }) {
   const { id } = useParams();
   const qc = useQueryClient();
-  const key = ['admin', 'orders', 'item', id];
-  const q = useQuery({ queryKey: key, queryFn: () => api(`/admin/orders/${id}`) });
-  const [form, setForm] = useState({ status: 'preparing', note: '', carrier: '', number: '', url: '' });
-  const done = (o) => (qc.setQueryData(key, o), qc.invalidateQueries({ queryKey: ['admin', 'orders'] }));
+  const key = ["admin", "orders", "item", id];
+  const q = useQuery({
+    queryKey: key,
+    queryFn: () => api(`/admin/orders/${id}`),
+  });
+  const [form, setForm] = useState({
+    status: "",
+    note: "",
+    carrier: "",
+    number: "",
+    url: "",
+  });
+  const done = (o) => (
+    qc.setQueryData(key, o),
+    qc.invalidateQueries({ queryKey: ["admin", "orders"] })
+  );
   const status = useMutation({
     mutationFn: () =>
       api(`/admin/orders/${id}/status`, {
-        body: { status: form.status, ...(form.note && { note: form.note }), ...(form.carrier && form.number && { tracking: { carrier: form.carrier, number: form.number, ...(form.url && { url: form.url }) } }) },
+        body: {
+          status: next.includes(form.status) ? form.status : next[0],
+          ...(form.note && { note: form.note }),
+          ...(form.carrier &&
+            form.number && {
+              tracking: {
+                carrier: form.carrier,
+                number: form.number,
+                ...(form.url && { url: form.url }),
+              },
+            }),
+        },
       }),
     onSuccess: done,
   });
-  const refund = useMutation({ mutationFn: () => api(`/admin/orders/${id}/refund`, { body: { note: 'Refund issued by gallery' } }), onSuccess: done });
+  const refund = useMutation({
+    mutationFn: () =>
+      api(`/admin/orders/${id}/refund`, {
+        body: { note: "Refund issued by gallery" },
+      }),
+    onSuccess: done,
+  });
   if (q.isLoading) return <Loading />;
   if (q.error) return <ErrorState error={q.error} retry={q.refetch} />;
   const o = q.data;
   const a = o.shippingAddress || {};
-  const paid = ['confirmed', 'preparing', 'shipped', 'delivered'].includes(o.status);
+  const paid = ["confirmed", "preparing", "shipped", "delivered"].includes(
+    o.status,
+  );
+  const next = NEXT_STATUS[o.status] || [];
+  const chosen = next.includes(form.status) ? form.status : next[0];
   return (
     <>
       <Link to="/admin/orders">← Orders</Link>
@@ -120,58 +192,128 @@ export function OrderAdmin({ isAdmin }) {
             ))}
           </ul>
           <p>
-            Subtotal {money(o.subtotal, o.currency)} · Shipping {money(o.shipping, o.currency)} · Insurance {money(o.insurance, o.currency)} · Tax {money(o.tax, o.currency)} · <b>Total {money(o.total, o.currency)}</b>
+            Subtotal {money(o.subtotal, o.currency)} · Shipping{" "}
+            {money(o.shipping, o.currency)} · Insurance{" "}
+            {money(o.insurance, o.currency)} · Tax {money(o.tax, o.currency)} ·{" "}
+            <b>Total {money(o.total, o.currency)}</b>
           </p>
           <h2>Collector and delivery</h2>
           <p>
             {o.email}
             <br />
-            {label(o.deliveryMethod)}: {[a.name, a.line1, a.line2, a.city, a.state, a.postalCode, a.country, a.phone].filter(Boolean).join(', ')}
+            {label(o.deliveryMethod)}:{" "}
+            {[
+              a.name,
+              a.line1,
+              a.line2,
+              a.city,
+              a.state,
+              a.postalCode,
+              a.country,
+              a.phone,
+            ]
+              .filter(Boolean)
+              .join(", ")}
           </p>
           <h2>Payment</h2>
           <p>
-            {o.payment?.provider} · {label(o.payment?.status)} {o.payment?.paidAt && `· paid ${when(o.payment.paidAt)}`} {o.payment?.intentId && <code>{o.payment.intentId}</code>}
+            {o.payment?.provider} · {label(o.payment?.status)}{" "}
+            {o.payment?.paidAt && `· paid ${when(o.payment.paidAt)}`}{" "}
+            {o.payment?.intentId && <code>{o.payment.intentId}</code>}
           </p>
           <h2>History</h2>
           <ol className="timeline-list">
             {(o.history || []).map((h, i) => (
               <li key={i}>
-                <b>{label(h.status)}</b> · {when(h.at)} {h.note && `— ${h.note}`}
+                <b>{label(h.status)}</b> · {when(h.at)}{" "}
+                {h.note && `— ${h.note}`}
               </li>
             ))}
           </ol>
         </section>
         <aside>
-          <form
-            className="admin-card"
-            onSubmit={(e) => {
-              e.preventDefault();
-              status.mutate();
-            }}
-          >
-            <h2>Update fulfilment</h2>
-            <Field label="New status" as="select" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-              {['preparing', 'shipped', 'delivered', 'cancelled'].map((s) => (
-                <option key={s} value={s}>
-                  {label(s)}
-                </option>
-              ))}
-            </Field>
-            <Field label="Note to collector (optional)" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
-            <Field label="Carrier" value={form.carrier} onChange={(e) => setForm({ ...form, carrier: e.target.value })} />
-            <Field label="Tracking number" value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} />
-            <Field label="Tracking URL" type="url" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} />
-            <FormError error={status.error} />
-            <button className="button" disabled={status.isPending}>
-              Update order
-            </button>
-          </form>
+          {next.length === 0 ? (
+            <div className="admin-card">
+              <h2>Fulfilment</h2>
+              <p className="muted">
+                This order is {label(o.status)}; no further status changes are
+                possible.
+              </p>
+            </div>
+          ) : (
+            <form
+              className="admin-card"
+              onSubmit={(e) => {
+                e.preventDefault();
+                status.mutate(undefined, {
+                  onSuccess: () =>
+                    setForm({
+                      status: "",
+                      note: "",
+                      carrier: "",
+                      number: "",
+                      url: "",
+                    }),
+                });
+              }}
+            >
+              <h2>Update fulfilment</h2>
+              <Field
+                label="New status"
+                as="select"
+                value={chosen}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+              >
+                {next.map((s) => (
+                  <option key={s} value={s}>
+                    {label(s)}
+                  </option>
+                ))}
+              </Field>
+              <Field
+                label="Note to collector (optional)"
+                value={form.note}
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
+              />
+              <Field
+                label="Carrier"
+                value={form.carrier}
+                onChange={(e) => setForm({ ...form, carrier: e.target.value })}
+              />
+              <Field
+                label="Tracking number"
+                value={form.number}
+                onChange={(e) => setForm({ ...form, number: e.target.value })}
+              />
+              <Field
+                label="Tracking URL"
+                type="url"
+                value={form.url}
+                onChange={(e) => setForm({ ...form, url: e.target.value })}
+              />
+              <FormError error={status.error} />
+              <button className="button" disabled={status.isPending}>
+                Update order
+              </button>
+            </form>
+          )}
           {isAdmin && paid && (
             <div className="admin-card">
               <h2>Refund</h2>
-              <p className="muted">Refunds the full amount through {o.payment?.provider} and returns the works to inventory.</p>
+              <p className="muted">
+                Refunds the full amount through {o.payment?.provider} and
+                returns the works to inventory.
+              </p>
               <FormError error={refund.error} />
-              <button className="button ghost" disabled={refund.isPending} onClick={() => confirm(`Refund ${money(o.total, o.currency)} to ${o.email}?`) && refund.mutate()}>
+              <button
+                className="button ghost"
+                disabled={refund.isPending}
+                onClick={() =>
+                  confirm(
+                    `Refund ${money(o.total, o.currency)} to ${o.email}?`,
+                  ) && refund.mutate()
+                }
+              >
                 Issue full refund
               </button>
             </div>
@@ -183,20 +325,29 @@ export function OrderAdmin({ isAdmin }) {
 }
 
 export function InquiriesList({ isAdmin }) {
-  const { q, params, setParam, setPage } = useAdminList('inquiries');
+  const { q, params, setParam, setPage } = useAdminList("inquiries");
   const rows = q.data?.data || [];
   return (
     <>
-      <h1>{isAdmin ? 'Inquiries' : 'My inquiries'}</h1>
+      <h1>{isAdmin ? "Inquiries" : "My inquiries"}</h1>
       {!isAdmin && <p className="muted">Showing inquiries assigned to you.</p>}
       <nav className="pipeline" aria-label="Pipeline stage">
-        {['', ...PIPELINE].map((s) => (
-          <button key={s || 'all'} aria-pressed={(params.get('status') || '') === s} onClick={() => setParam('status', s)}>
-            {s ? label(s) : 'All'}
+        {["", ...PIPELINE].map((s) => (
+          <button
+            key={s || "all"}
+            aria-pressed={(params.get("status") || "") === s}
+            onClick={() => setParam("status", s)}
+          >
+            {s ? label(s) : "All"}
           </button>
         ))}
       </nav>
-      <Field label="Search" type="search" defaultValue={params.get('q') || ''} onChange={(e) => setParam('q', e.target.value)} />
+      <Field
+        label="Search"
+        type="search"
+        defaultValue={params.get("q") || ""}
+        onChange={(e) => setParam("q", e.target.value)}
+      />
       {q.isLoading ? (
         <Loading />
       ) : q.error ? (
@@ -219,7 +370,10 @@ export function InquiriesList({ isAdmin }) {
               {rows.map((i) => (
                 <tr key={i._id}>
                   <td>
-                    <Link to={`/admin/inquiries/${i._id}`}>{i.reference}</Link> {i.priority === 'high' && <span className="pill pill-open">Priority</span>}
+                    <Link to={`/admin/inquiries/${i._id}`}>{i.reference}</Link>{" "}
+                    {i.priority === "high" && (
+                      <span className="pill pill-open">Priority</span>
+                    )}
                   </td>
                   <td>
                     {i.name}
@@ -238,7 +392,10 @@ export function InquiriesList({ isAdmin }) {
           </table>
         </div>
       ) : (
-        <Empty title="No inquiries here" text="New inquiries from the site appear here." />
+        <Empty
+          title="No inquiries here"
+          text="New inquiries from the site appear here."
+        />
       )}
       <Pager meta={q.data?.meta} setPage={setPage} />
     </>
@@ -246,15 +403,23 @@ export function InquiriesList({ isAdmin }) {
 }
 
 function PostForm({ labelText, onSubmit, pending, error, button }) {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(text, () => setText(''));
+        onSubmit(text, () => setText(""));
       }}
     >
-      <Field label={labelText} as="textarea" rows={3} value={text} onChange={(e) => setText(e.target.value)} required maxLength={4000} />
+      <Field
+        label={labelText}
+        as="textarea"
+        rows={3}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        required
+        maxLength={4000}
+      />
       <FormError error={error} />
       <button className="button small" disabled={pending || !text.trim()}>
         {button}
@@ -263,26 +428,44 @@ function PostForm({ labelText, onSubmit, pending, error, button }) {
   );
 }
 
-function useInquiryAction(id, path, onSuccess, method = 'POST') {
-  return useMutation({ mutationFn: (body) => api(`/admin/inquiries/${id}/${path}`, { method, body }), onSuccess });
+function useInquiryAction(id, path, onSuccess, method = "POST") {
+  return useMutation({
+    mutationFn: (body) =>
+      api(`/admin/inquiries/${id}/${path}`, { method, body }),
+    onSuccess,
+  });
 }
 
 export function InquiryAdmin({ isAdmin }) {
   const { id } = useParams();
   const qc = useQueryClient();
-  const key = ['admin', 'inquiries', 'item', id];
-  const q = useQuery({ queryKey: key, queryFn: () => api(`/admin/inquiries/${id}`) });
-  const advisors = useQuery({ queryKey: ['admin', 'advisors'], queryFn: () => api('/admin/advisors'), enabled: isAdmin });
-  const done = (i) => (qc.setQueryData(key, i), qc.invalidateQueries({ queryKey: ['admin', 'inquiries'] }));
-  const status = useInquiryAction(id, 'status', done);
-  const assign = useInquiryAction(id, 'assign', done);
-  const note = useInquiryAction(id, 'notes', done);
-  const reply = useInquiryAction(id, 'messages', done);
-  const appt = useInquiryAction(id, 'appointments', done);
-  const offer = useInquiryAction(id, 'offer', done);
-  const withdraw = useInquiryAction(id, 'offer', done, 'DELETE');
-  const [apptForm, setAppt] = useState({ startsAt: '', mode: 'gallery', location: '' });
-  const [offerForm, setOffer] = useState({ amount: '', expiresInDays: 7 });
+  const key = ["admin", "inquiries", "item", id];
+  const q = useQuery({
+    queryKey: key,
+    queryFn: () => api(`/admin/inquiries/${id}`),
+  });
+  const advisors = useQuery({
+    queryKey: ["admin", "advisors"],
+    queryFn: () => api("/admin/advisors"),
+    enabled: isAdmin,
+  });
+  const done = (i) => (
+    qc.setQueryData(key, i),
+    qc.invalidateQueries({ queryKey: ["admin", "inquiries"] })
+  );
+  const status = useInquiryAction(id, "status", done);
+  const assign = useInquiryAction(id, "assign", done);
+  const note = useInquiryAction(id, "notes", done);
+  const reply = useInquiryAction(id, "messages", done);
+  const appt = useInquiryAction(id, "appointments", done);
+  const offer = useInquiryAction(id, "offer", done);
+  const withdraw = useInquiryAction(id, "offer", done, "DELETE");
+  const [apptForm, setAppt] = useState({
+    startsAt: "",
+    mode: "gallery",
+    location: "",
+  });
+  const [offerForm, setOffer] = useState({ amount: "", expiresInDays: 7 });
   if (q.isLoading) return <Loading />;
   if (q.error) return <ErrorState error={q.error} retry={q.refetch} />;
   const i = q.data;
@@ -297,11 +480,35 @@ export function InquiryAdmin({ isAdmin }) {
       <div className="admin-columns">
         <section>
           <p>
-            <b>{i.name}</b> · <a href={`mailto:${i.email}`}>{i.email}</a> {i.phone && <>· <a href={`tel:${i.phone}`}>{i.phone}</a></>} · prefers {i.preferredContact}
+            <b>{i.name}</b> · <a href={`mailto:${i.email}`}>{i.email}</a>{" "}
+            {i.phone && (
+              <>
+                · <a href={`tel:${i.phone}`}>{i.phone}</a>
+              </>
+            )}{" "}
+            · prefers {i.preferredContact}
             <br />
-            {label(i.type)} inquiry {i.artwork && <>about <a href={`/artworks/${i.artwork.slug}`} target="_blank" rel="noopener noreferrer">{i.artwork.title}</a> ({i.artwork.priceOnRequest ? 'price on request' : money(i.artwork.price, i.artwork.currency)}, {i.artwork.availability})</>}
+            {label(i.type)} inquiry{" "}
+            {i.artwork && (
+              <>
+                about{" "}
+                <a
+                  href={`/artworks/${i.artwork.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {i.artwork.title}
+                </a>{" "}
+                (
+                {i.artwork.priceOnRequest
+                  ? "price on request"
+                  : money(i.artwork.price, i.artwork.currency)}
+                , {i.artwork.availability})
+              </>
+            )}
             {i.budgetRange && ` · budget ${i.budgetRange}`}
-            {i.preferredViewingDate && ` · hopes to view ${date(i.preferredViewingDate)}`}
+            {i.preferredViewingDate &&
+              ` · hopes to view ${date(i.preferredViewingDate)}`}
           </p>
           <h2>Conversation</h2>
           <ol className="messages">
@@ -315,29 +522,51 @@ export function InquiryAdmin({ isAdmin }) {
               <li key={m._id} className={`from-${m.from}`}>
                 <p>{m.text}</p>
                 <small>
-                  {m.from === 'client' ? i.name : m.author?.name || 'Advisor'} · {when(m.createdAt)}
+                  {m.from === "client" ? i.name : m.author?.name || "Advisor"} ·{" "}
+                  {when(m.createdAt)}
                 </small>
               </li>
             ))}
           </ol>
-          <PostForm labelText="Reply to collector (they are notified)" button="Send reply" pending={reply.isPending} error={reply.error} onSubmit={(text, reset) => reply.mutate({ text }, { onSuccess: reset })} />
+          <PostForm
+            labelText="Reply to collector (they are notified)"
+            button="Send reply"
+            pending={reply.isPending}
+            error={reply.error}
+            onSubmit={(text, reset) =>
+              reply.mutate({ text }, { onSuccess: reset })
+            }
+          />
           <h2>Internal notes</h2>
           <ol className="messages">
             {i.notes.map((n) => (
               <li key={n._id} className="from-note">
                 <p>{n.text}</p>
                 <small>
-                  {n.author?.name || 'Staff'} · {when(n.createdAt)}
+                  {n.author?.name || "Staff"} · {when(n.createdAt)}
                 </small>
               </li>
             ))}
           </ol>
-          <PostForm labelText="Add a private note (never shown to the collector)" button="Add note" pending={note.isPending} error={note.error} onSubmit={(text, reset) => note.mutate({ text }, { onSuccess: reset })} />
+          <PostForm
+            labelText="Add a private note (never shown to the collector)"
+            button="Add note"
+            pending={note.isPending}
+            error={note.error}
+            onSubmit={(text, reset) =>
+              note.mutate({ text }, { onSuccess: reset })
+            }
+          />
         </section>
         <aside>
           <div className="admin-card">
             <h2>Stage</h2>
-            <Field label="Pipeline stage" as="select" value={i.status} onChange={(e) => status.mutate({ status: e.target.value })}>
+            <Field
+              label="Pipeline stage"
+              as="select"
+              value={i.status}
+              onChange={(e) => status.mutate({ status: e.target.value })}
+            >
               {PIPELINE.map((s) => (
                 <option key={s} value={s}>
                   {label(s)}
@@ -347,7 +576,15 @@ export function InquiryAdmin({ isAdmin }) {
             <FormError error={status.error} />
             {isAdmin ? (
               <>
-                <Field label="Advisor" as="select" value={i.advisor?._id || ''} onChange={(e) => e.target.value && assign.mutate({ advisorId: e.target.value })}>
+                <Field
+                  label="Advisor"
+                  as="select"
+                  value={i.advisor?._id || ""}
+                  onChange={(e) =>
+                    e.target.value &&
+                    assign.mutate({ advisorId: e.target.value })
+                  }
+                >
                   <option value="">Unassigned</option>
                   {(advisors.data || []).map((a) => (
                     <option key={a._id} value={a._id}>
@@ -358,31 +595,61 @@ export function InquiryAdmin({ isAdmin }) {
                 <FormError error={assign.error} />
               </>
             ) : (
-              <p>Advisor: {i.advisor?.name || 'Unassigned'}</p>
+              <p>Advisor: {i.advisor?.name || "Unassigned"}</p>
             )}
           </div>
           <form
             className="admin-card"
             onSubmit={(e) => {
               e.preventDefault();
-              appt.mutate({ mode: apptForm.mode, startsAt: new Date(apptForm.startsAt).toISOString(), ...(apptForm.location && { location: apptForm.location }) }, { onSuccess: () => setAppt({ startsAt: '', mode: 'gallery', location: '' }) });
+              appt.mutate(
+                {
+                  mode: apptForm.mode,
+                  startsAt: new Date(apptForm.startsAt).toISOString(),
+                  ...(apptForm.location && { location: apptForm.location }),
+                },
+                {
+                  onSuccess: () =>
+                    setAppt({ startsAt: "", mode: "gallery", location: "" }),
+                },
+              );
             }}
           >
             <h2>Viewings</h2>
             <ul className="row-list">
               {i.appointments.map((a) => (
                 <li key={a._id}>
-                  {when(a.startsAt)} · {label(a.mode)} <Pill status={a.status} />
+                  {when(a.startsAt)} · {label(a.mode)}{" "}
+                  <Pill status={a.status} />
                 </li>
               ))}
             </ul>
-            <Field label="Proposed time" type="datetime-local" required value={apptForm.startsAt} onChange={(e) => setAppt({ ...apptForm, startsAt: e.target.value })} />
-            <Field label="Format" as="select" value={apptForm.mode} onChange={(e) => setAppt({ ...apptForm, mode: e.target.value })}>
+            <Field
+              label="Proposed time"
+              type="datetime-local"
+              required
+              value={apptForm.startsAt}
+              onChange={(e) =>
+                setAppt({ ...apptForm, startsAt: e.target.value })
+              }
+            />
+            <Field
+              label="Format"
+              as="select"
+              value={apptForm.mode}
+              onChange={(e) => setAppt({ ...apptForm, mode: e.target.value })}
+            >
               <option value="gallery">At the gallery</option>
               <option value="virtual">Virtual viewing</option>
               <option value="private">Private (collector's home)</option>
             </Field>
-            <Field label="Location or link" value={apptForm.location} onChange={(e) => setAppt({ ...apptForm, location: e.target.value })} />
+            <Field
+              label="Location or link"
+              value={apptForm.location}
+              onChange={(e) =>
+                setAppt({ ...apptForm, location: e.target.value })
+              }
+            />
             <FormError error={appt.error} />
             <button className="button small" disabled={appt.isPending}>
               Propose viewing
@@ -392,33 +659,63 @@ export function InquiryAdmin({ isAdmin }) {
             className="admin-card"
             onSubmit={(e) => {
               e.preventDefault();
-              offer.mutate({ amount: Number(offerForm.amount), expiresInDays: Number(offerForm.expiresInDays) });
+              offer.mutate({
+                amount: Number(offerForm.amount),
+                expiresInDays: Number(offerForm.expiresInDays),
+              });
             }}
           >
             <h2>Private offer</h2>
             {i.offer?.status && (
               <p>
-                {money(i.offer.amount, i.offer.currency)} · <Pill status={i.offer.status} /> {i.offer.expiresAt && `· expires ${when(i.offer.expiresAt)}`}
+                {money(i.offer.amount, i.offer.currency)} ·{" "}
+                <Pill status={i.offer.status} />{" "}
+                {i.offer.expiresAt && `· expires ${when(i.offer.expiresAt)}`}
               </p>
             )}
-            {i.offer?.status === 'open' ? (
+            {i.offer?.status === "open" ? (
               <>
                 <FormError error={withdraw.error} />
-                <button type="button" className="button ghost small" onClick={() => withdraw.mutate()} disabled={withdraw.isPending}>
+                <button
+                  type="button"
+                  className="button ghost small"
+                  onClick={() => withdraw.mutate()}
+                  disabled={withdraw.isPending}
+                >
                   Withdraw offer
                 </button>
               </>
             ) : i.artwork ? (
               <>
-                <Field label="Amount (INR)" type="number" min="1" required value={offerForm.amount} onChange={(e) => setOffer({ ...offerForm, amount: e.target.value })} />
-                <Field label="Valid for (days)" type="number" min="1" max="30" value={offerForm.expiresInDays} onChange={(e) => setOffer({ ...offerForm, expiresInDays: e.target.value })} />
+                <Field
+                  label="Amount (INR)"
+                  type="number"
+                  min="1"
+                  required
+                  value={offerForm.amount}
+                  onChange={(e) =>
+                    setOffer({ ...offerForm, amount: e.target.value })
+                  }
+                />
+                <Field
+                  label="Valid for (days)"
+                  type="number"
+                  min="1"
+                  max="30"
+                  value={offerForm.expiresInDays}
+                  onChange={(e) =>
+                    setOffer({ ...offerForm, expiresInDays: e.target.value })
+                  }
+                />
                 <FormError error={offer.error} />
                 <button className="button small" disabled={offer.isPending}>
                   Send offer
                 </button>
               </>
             ) : (
-              <p className="muted">Offers need an inquiry linked to a specific work.</p>
+              <p className="muted">
+                Offers need an inquiry linked to a specific work.
+              </p>
             )}
           </form>
         </aside>
@@ -428,7 +725,10 @@ export function InquiryAdmin({ isAdmin }) {
 }
 
 export function Dashboard() {
-  const q = useQuery({ queryKey: ['admin', 'analytics'], queryFn: () => api('/admin/analytics') });
+  const q = useQuery({
+    queryKey: ["admin", "analytics"],
+    queryFn: () => api("/admin/analytics"),
+  });
   if (q.isLoading) return <Loading />;
   if (q.error) return <ErrorState error={q.error} retry={q.refetch} />;
   const d = q.data;
@@ -439,12 +739,15 @@ export function Dashboard() {
       <h1>Overview</h1>
       <div className="metrics">
         {[
-          ['Revenue', money(d.revenue)],
-          ['Paid orders', d.orders],
-          ['Average order', money(d.averageOrderValue)],
-          ['Open inquiries', d.inquiries.open],
-          ['Inquiry conversion', `${(d.inquiries.conversionRate * 100).toFixed(1)}%`],
-          ['New collectors', d.newCustomers],
+          ["Revenue", money(d.revenue)],
+          ["Paid orders", d.orders],
+          ["Average order", money(d.averageOrderValue)],
+          ["Open inquiries", d.inquiries.open],
+          [
+            "Inquiry conversion",
+            `${(d.inquiries.conversionRate * 100).toFixed(1)}%`,
+          ],
+          ["New collectors", d.newCustomers],
         ].map(([k, v]) => (
           <article key={k}>
             <span>{k}</span>
@@ -462,7 +765,10 @@ export function Dashboard() {
                 <tr key={m._id}>
                   <th scope="row">{m._id}</th>
                   <td>
-                    <span className="bar" style={{ width: `${(m.revenue / max) * 100}%` }} />
+                    <span
+                      className="bar"
+                      style={{ width: `${(m.revenue / max) * 100}%` }}
+                    />
                     {money(m.revenue)} · {m.orders} orders
                   </td>
                 </tr>
@@ -478,7 +784,11 @@ export function Dashboard() {
           <h2>Inquiry pipeline</h2>
           <dl className="totals">
             {PIPELINE.map((s) => (
-              <FragmentRow key={s} k={label(s)} v={d.inquiries.byStatus[s] || 0} />
+              <FragmentRow
+                key={s}
+                k={label(s)}
+                v={d.inquiries.byStatus[s] || 0}
+              />
             ))}
           </dl>
         </section>
@@ -486,7 +796,11 @@ export function Dashboard() {
           <h2>Inventory</h2>
           <dl className="totals">
             {Object.entries(d.inventory).map(([k, v]) => (
-              <FragmentRow key={k} k={label(k)} v={`${v.count} · ${money(v.value)}`} />
+              <FragmentRow
+                key={k}
+                k={label(k)}
+                v={`${v.count} · ${money(v.value)}`}
+              />
             ))}
           </dl>
         </section>
@@ -495,7 +809,8 @@ export function Dashboard() {
           <ol>
             {d.topViewed.map((a) => (
               <li key={a._id}>
-                <Link to={`/admin/artworks/${a._id}`}>{a.title}</Link> · {a.viewCount} views · {a.saveCount} saves
+                <Link to={`/admin/artworks/${a._id}`}>{a.title}</Link> ·{" "}
+                {a.viewCount} views · {a.saveCount} saves
               </li>
             ))}
           </ol>
@@ -528,13 +843,18 @@ const FragmentRow = ({ k, v }) => (
 );
 
 export function AuditLog() {
-  const { q, setPage } = useAdminList('audit');
+  const { q, setPage } = useAdminList("audit");
   const rows = q.data?.data || [];
-  const meta = q.data?.meta && { ...q.data.meta, pages: Math.ceil(q.data.meta.total / q.data.meta.limit) };
+  const meta = q.data?.meta && {
+    ...q.data.meta,
+    pages: Math.ceil(q.data.meta.total / q.data.meta.limit),
+  };
   return (
     <>
       <h1>Audit log</h1>
-      <p className="muted">Every staff change is recorded here and cannot be edited or deleted.</p>
+      <p className="muted">
+        Every staff change is recorded here and cannot be edited or deleted.
+      </p>
       {q.isLoading ? (
         <Loading />
       ) : q.error ? (
@@ -559,7 +879,8 @@ export function AuditLog() {
                   <td>{r.actorEmail}</td>
                   <td>{r.action}</td>
                   <td>
-                    {r.resource} <code>{String(r.resourceId || '').slice(-8)}</code>
+                    {r.resource}{" "}
+                    <code>{String(r.resourceId || "").slice(-8)}</code>
                   </td>
                   <td>
                     <details>
