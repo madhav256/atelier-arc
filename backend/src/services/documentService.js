@@ -39,7 +39,7 @@ function wordmark(doc, x, y, align = 'left', width = 200) {
 }
 
 // Local /art paths are read from disk; remote https images are fetched with a timeout and size cap.
-async function loadImage(url) {
+export async function loadImage(url) {
   if (!url) return null;
   try {
     let buf;

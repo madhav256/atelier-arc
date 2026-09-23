@@ -9,6 +9,7 @@ import { similarTo, trending, recordView } from '../services/recommendationServi
 import { artworkJsonLd, sitemap } from '../services/seoService.js';
 import { env } from '../config/env.js';
 import { provenanceDossier, verifyCertificate } from '../services/documentService.js';
+import { artworkModel } from '../services/modelService.js';
 
 const r = Router();
 const CARD = 'title slug artist images price priceOnRequest currency availability medium category year dimensions edition tags style featured orientation';
@@ -83,6 +84,12 @@ const sendPdf = (res, { filename, buffer }, disposition = 'attachment') => {
 };
 
 r.get('/artworks/:slug/provenance.pdf', asyncHandler(async (req, res) => sendPdf(res, await provenanceDossier(String(req.params.slug)))));
+
+r.get('/artworks/:slug/model.glb', asyncHandler(async (req, res) => {
+  const glb = await artworkModel(String(req.params.slug));
+  res.set({ 'Content-Type': 'model/gltf-binary', 'Cache-Control': 'public, max-age=3600' });
+  res.send(glb);
+}));
 
 r.get('/certificates/:code', asyncHandler(async (req, res) => ok(res, await verifyCertificate(String(req.params.code).slice(0, 64)))));
 

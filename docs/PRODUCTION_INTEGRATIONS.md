@@ -49,4 +49,4 @@ Three seeded works (After the Monsoon, Quiet Geometry, Night Orchard) carry plac
 - Totals are always computed on the server from database prices. The client sees a signed quote; any change to cart, destination or delivery method invalidates it.
 - If payment lands after a reservation expired and the work was sold to someone else, the order is refunded automatically.
 - Card data never touches this API. Stripe Elements / Razorpay Checkout collect it in the browser.
-- Real AR (calibrated wall detection) is not included. The room view is an explicit 2D simulation using the work's real dimensions.
+- AR is free and account-free: `<model-viewer>` with WebXR, Scene Viewer (Android) and Quick Look (iOS), fed by a GLB the API builds at true scale. Wall detection and scale come from the device (ARCore/ARKit). Flat works only; sculpture would need a scanned model (photogrammetry, e.g. free Apple Object Capture or Polycam's free tier), which is not built. The 2D room view remains for desktop and unsupported devices.

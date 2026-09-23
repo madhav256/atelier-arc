@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { RETURN_DAYS } from "../content/guarantee";
+import { ArView } from "../components/ArView";
 import { api, apiUrl, money, label } from "../lib/api";
 import { ArtworkCard } from "../components/ArtworkCard";
 import { InquiryForm } from "../components/InquiryForm";
@@ -220,6 +221,7 @@ function Detail({ artwork: a }) {
             )}
             <AdvisorChat artwork={a} />
           </div>
+          <ArView artwork={a} onFallback={() => setRoom(true)} />
           <button
             className="text-link room-link"
             onClick={() => setRoom(!room)}

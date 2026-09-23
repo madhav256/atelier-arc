@@ -283,3 +283,14 @@ img{color:transparent}
 .media-time{opacity:.65;letter-spacing:.08em}
 .video-current{display:grid;grid-template-columns:10rem 1fr;gap:1.2rem;align-items:start;margin-bottom:1rem}
 .thumb-video{width:10rem;aspect-ratio:4/5;object-fit:cover;background:#141513}
+/* AR */
+.ar-link{display:inline-flex;align-items:center;gap:.6rem}
+.ar-badge{border:1px solid currentColor;padding:.1rem .35rem;font-size:.56rem;letter-spacing:.14em}
+.ar-dialog{width:min(64rem,94vw);max-width:none;max-height:92vh;padding:0;border:0;background:var(--paper,#faf8f3);color:var(--ink)}
+.ar-dialog::backdrop{background:rgba(20,21,19,.72)}
+.ar-head{display:flex;justify-content:space-between;align-items:start;padding:1.6rem 2rem 1.2rem}
+.ar-head h2{font-size:clamp(1.8rem,3vw,2.6rem);margin:.4rem 0 0;letter-spacing:-.03em}
+.ar-stage{height:min(62vh,38rem);background:#e3ddd2;display:grid;place-items:center}
+.ar-stage model-viewer{width:100%;height:100%;--poster-color:transparent}
+.ar-go{position:absolute;left:50%;bottom:1.4rem;transform:translateX(-50%)}
+.ar-note{padding:1rem 2rem 1.6rem;margin:0;color:#4f4b44;font-size:.88rem;line-height:1.6}
