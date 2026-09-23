@@ -40,6 +40,7 @@ export default function CheckoutComplete() {
           </p>
         ))}
         <h3>{money(order.total, order.currency)}</h3>
+        {confirmed && order.payment?.method === 'emi' && <p className="emi-receipt">Paid through your bank in {order.payment.emiTenure ? `${order.payment.emiTenure} monthly instalments` : 'monthly instalments'}</p>}
       </div>
       <div className="form-nav">
         {user ? (

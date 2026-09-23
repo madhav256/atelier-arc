@@ -24,7 +24,7 @@ export async function mountStripe(el, { publishableKey, clientSecret }) {
   };
 }
 
-export async function openRazorpay({ keyId, orderId, amount, currency, email, name, onSuccess, onDismiss }) {
+export async function openRazorpay({ keyId, orderId, amount, currency, email, name, instalments, onSuccess, onDismiss }) {
   await loadScript('https://checkout.razorpay.com/v1/checkout.js');
   const rzp = new window.Razorpay({
     key: keyId,
@@ -34,6 +34,16 @@ export async function openRazorpay({ keyId, orderId, amount, currency, email, na
     name: 'Atelier Arc',
     prefill: { email, name },
     theme: { color: '#171715' },
+    // Lead with EMI when the collector chose instalments; other methods stay available below.
+    ...(instalments && {
+      config: {
+        display: {
+          blocks: { emi: { name: 'Pay in monthly instalments', instruments: [{ method: 'emi' }, { method: 'cardless_emi' }] } },
+          sequence: ['block.emi'],
+          preferences: { show_default_blocks: true },
+        },
+      },
+    }),
     handler: onSuccess,
     modal: { ondismiss: onDismiss },
   });

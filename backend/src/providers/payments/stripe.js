@@ -35,6 +35,7 @@ export function verifyStripeSignature(rawBody, header, secret, toleranceSeconds 
 
 export const stripeProvider = {
   name: 'stripe',
+  supportsEmi: false,
   async createIntent({ order }) {
     const intent = await call(
       '/payment_intents',

@@ -50,3 +50,22 @@ Three seeded works (After the Monsoon, Quiet Geometry, Night Orchard) carry plac
 - If payment lands after a reservation expired and the work was sold to someone else, the order is refunded automatically.
 - Card data never touches this API. Stripe Elements / Razorpay Checkout collect it in the browser.
 - AR is free and account-free: `<model-viewer>` with WebXR, Scene Viewer (Android) and Quick Look (iOS), fed by a GLB the API builds at true scale. Wall detection and scale come from the device (ARCore/ARKit). Flat works only; sculpture would need a scanned model (photogrammetry, e.g. free Apple Object Capture or Polycam's free tier), which is not built. The 2D room view remains for desktop and unsupported devices.
+
+## EMI (monthly instalments) at checkout
+
+What collectors see: on the payment step, INR orders at or above `EMI_MIN_AMOUNT` offer "In full" or "In monthly instalments". The instalment option lists each tenure with the price divided evenly and says plainly that the bank's interest comes on top. Atelier Arc never shows an interest rate of its own, because the bank sets it and Razorpay shows the exact plan before the collector confirms. The gallery is paid in full; the collector's bank collects the instalments. Confirmed orders record `payment.method` (`emi` when paid that way) and, in test mode, the chosen tenure. The confirmation page shows "Paid through your bank in N monthly instalments".
+
+How it is built:
+- `backend/src/providers/payments/emi.js` decides availability: EMI enabled, provider has `supportsEmi`, currency INR, total at least `EMI_MIN_AMOUNT`. The mock and Razorpay adapters support it; Stripe does not (card EMI in India is a Razorpay feature here).
+- With Razorpay, choosing instalments opens Standard Checkout with a `config.display` block that puts EMI (`method: emi`) and cardless EMI (`method: cardless_emi`) first, with all other methods still below. Razorpay's webhook reports `payment.method`, which we store.
+- With the mock gateway (local and CI), the collector picks a tenure and the signed test webhook carries it, so the whole flow runs without an account.
+
+Settings: `EMI_ENABLED` (default `true`), `EMI_MIN_AMOUNT` in rupees (default `5000`, which matches the lowest common bank minimums Razorpay lists), `EMI_TENURES` (default `3,6,9,12`, shown to collectors as a guide only).
+
+Free signup for test mode (no spend, not done on your behalf):
+1. Create a Razorpay account at https://dashboard.razorpay.com/signup and stay in Test Mode.
+2. Account & Settings > API Keys > generate test keys (`rzp_test_...`). Set `PAYMENT_PROVIDER=razorpay`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`.
+3. Account & Settings > Webhooks > add `https://<your-api>/api/v1/webhooks/razorpay` with `payment.captured`, `payment.failed` and `refund.processed`, and set `RAZORPAY_WEBHOOK_SECRET`.
+4. Check Account & Settings > Payment Methods to see which EMI types are on. Card EMI is on by default for Standard Checkout; cardless EMI needs Razorpay's approval. Going live needs KYC.
+
+Sources: https://razorpay.com/docs/payments/payment-methods/emi/credit-card-emi/ (EMI is on by default in Standard Checkout), https://razorpay.com/docs/payments/payment-methods/emi/faqs (bank minimums from ₹5,000), https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/configure-payment-methods/display-configuration/ (display blocks).

@@ -16,7 +16,7 @@ export async function handleWebhook(providerName, rawBody, headers) {
   if (event.type !== 'ignored' && event.intentId) {
     const order = await Order.findOne({ 'payment.intentId': event.intentId });
     if (order) {
-      if (event.type === 'payment.succeeded') result = await confirmOrder(order, { paymentId: event.paymentId });
+      if (event.type === 'payment.succeeded') result = await confirmOrder(order, { paymentId: event.paymentId, method: event.method, emiTenure: event.emiTenure });
       else if (event.type === 'payment.failed') {
         await Order.updateOne({ _id: order._id }, { 'payment.status': 'failed' });
         await releaseOrder(order, 'payment_failed', 'Payment was declined');

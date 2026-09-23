@@ -66,3 +66,27 @@ test('a declined test card leaves the order unpaid and the work available', asyn
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText(/^available$/i).first()).toBeVisible({ timeout: 15_000 });
 });
+
+test('a collector pays in monthly instalments through the test gateway', async ({ page }) => {
+  await page.goto('/artworks/the-long-light');
+  await page.getByRole('button', { name: 'Add to acquisition bag' }).click();
+  await page.goto('/checkout');
+  await page.getByLabel('Email').fill('instalments@example.com');
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await fillAddress(page);
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('radio').first().check();
+  await page.getByRole('button', { name: 'Review total' }).click();
+  await page.getByLabel(/I have reviewed/).check();
+  await page.getByRole('button', { name: 'Place order and pay' }).click();
+
+  await expect(page.getByRole('group', { name: 'How would you like to pay?' })).toBeVisible();
+  await page.getByRole('radio', { name: /In monthly instalments/ }).check();
+  await page.getByRole('button', { name: /^12 months/ }).click();
+  await expect(page.getByRole('button', { name: /^12 months/ })).toHaveAttribute('aria-pressed', 'true');
+  await expectAccessible(page, 'payment with instalments');
+  await page.getByRole('button', { name: 'Complete test payment over 12 months' }).click();
+  await page.waitForURL(/\/checkout\/complete\//);
+  await expect(page.getByRole('heading', { name: 'Thank you.' })).toBeVisible();
+  await expect(page.getByText('Paid through your bank in 12 monthly instalments')).toBeVisible();
+});

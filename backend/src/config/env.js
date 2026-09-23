@@ -34,6 +34,13 @@ export const env = {
     razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET,
     razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET,
     mockWebhookSecret: process.env.MOCK_WEBHOOK_SECRET || 'mock-webhook-secret',
+    // Monthly instalments through the gateway. Razorpay sets its own per-bank minimums;
+    // EMI_MIN_AMOUNT is the lowest total at which the option is offered at all.
+    emi: {
+      enabled: process.env.EMI_ENABLED !== 'false',
+      minAmount: Number(process.env.EMI_MIN_AMOUNT || 5000),
+      tenures: list(process.env.EMI_TENURES, '3,6,9,12').map(Number).filter((n) => Number.isInteger(n) && n > 0),
+    },
   },
   email: {
     provider: process.env.EMAIL_PROVIDER || 'console',

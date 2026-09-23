@@ -20,6 +20,7 @@ async function call(path, body) {
 
 export const razorpayProvider = {
   name: 'razorpay',
+  supportsEmi: true,
   async createIntent({ order }) {
     const rzp = await call('/orders', {
       amount: Math.round(order.total * 100),
@@ -39,7 +40,7 @@ export const razorpayProvider = {
     const refund = event.payload?.refund?.entity;
     const map = { 'payment.captured': 'payment.succeeded', 'order.paid': 'payment.succeeded', 'payment.failed': 'payment.failed', 'refund.processed': 'refund.succeeded' };
     const id = headers['x-razorpay-event-id'] || `${event.event}:${payment.id || refund?.id}`;
-    return { id, type: map[event.event] || 'ignored', intentId: payment.order_id || event.payload?.order?.entity?.id, paymentId: payment.id || refund?.payment_id, raw: event };
+    return { id, type: map[event.event] || 'ignored', intentId: payment.order_id || event.payload?.order?.entity?.id, paymentId: payment.id || refund?.payment_id, method: payment.method, raw: event };
   },
   async refund({ paymentId, amount }) {
     const refund = await call(`/payments/${paymentId}/refund`, amount ? { amount: Math.round(amount * 100) } : {});

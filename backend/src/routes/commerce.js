@@ -45,7 +45,7 @@ r.post('/checkout/orders', validate(co.order), asyncHandler(async (req, res) => 
 r.get('/orders/lookup', asyncHandler(async (req, res) => {
   const { number, email } = req.query;
   if (!number || !email) throw new AppError(422, 'Order number and email are required', 'VALIDATION_ERROR');
-  const order = await Order.findOne({ number: String(number), email: String(email).toLowerCase() }).select('number status items total currency createdAt tracking history deliveryMethod').lean();
+  const order = await Order.findOne({ number: String(number), email: String(email).toLowerCase() }).select('number status items total currency createdAt tracking history deliveryMethod payment.method payment.emiTenure').lean();
   if (!order) throw new AppError(404, 'We could not find that order', 'NOT_FOUND');
   ok(res, order);
 }));

@@ -276,6 +276,8 @@ const orderSchema = new Schema(
       intentId: { type: String, index: true },
       status: String,
       chargeId: String,
+      method: String,
+      emiTenure: Number,
       paidAt: Date,
       refundId: String,
       refundedAt: Date,

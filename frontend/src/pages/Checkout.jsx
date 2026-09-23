@@ -236,6 +236,10 @@ export function PaymentStep({ placed, email, name, onDone, heading }) {
   const [stripe, setStripe] = useState(null);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const emi = payment.emi?.available ? payment.emi : null;
+  const [plan, setPlan] = useState('full');
+  const [tenure, setTenure] = useState(emi?.tenures?.[1]?.months ?? emi?.tenures?.[0]?.months);
+  const instalments = plan === 'emi' && emi;
   const returnUrl = `${location.origin}/checkout/complete/${order.number}?email=${encodeURIComponent(email)}`;
 
   useEffect(() => {
@@ -257,13 +261,13 @@ export function PaymentStep({ placed, email, name, onDone, heading }) {
     setError(null);
     try {
       if (payment.mode === 'mock') {
-        await api('/payments/mock/complete', { body: { intentId: order.payment.intentId, outcome } });
+        await api('/payments/mock/complete', { body: { intentId: order.payment.intentId, outcome, ...(instalments && { method: 'emi', tenure }) } });
         onDone(order.number);
       } else if (payment.mode === 'stripe') {
         const result = await stripe.confirm(returnUrl);
         if (result.error) throw result.error;
       } else if (payment.mode === 'razorpay') {
-        await openRazorpay({ ...payment, currency: order.currency, email, name, onSuccess: () => onDone(order.number), onDismiss: () => setBusy(false) });
+        await openRazorpay({ ...payment, instalments: Boolean(instalments), currency: order.currency, email, name, onSuccess: () => onDone(order.number), onDismiss: () => setBusy(false) });
         return;
       }
     } catch (err) {
@@ -282,13 +286,60 @@ export function PaymentStep({ placed, email, name, onDone, heading }) {
         Order <b>{order.number}</b> is reserved for you until {new Date(order.holdExpiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.
       </p>
       {payment.replayed && <p className="notice">This order was already placed. Complete payment below.</p>}
+      {emi && (
+        <fieldset className="emi-plan">
+          <legend>How would you like to pay?</legend>
+          <div className="emi-choice">
+            <label className={plan === 'full' ? 'selected' : ''}>
+              <input type="radio" name="plan" value="full" checked={plan === 'full'} onChange={() => setPlan('full')} />
+              <span>
+                <b>In full</b>
+                <small>{money(order.total, order.currency)} today</small>
+              </span>
+            </label>
+            <label className={plan === 'emi' ? 'selected' : ''}>
+              <input type="radio" name="plan" value="emi" checked={plan === 'emi'} onChange={() => setPlan('emi')} />
+              <span>
+                <b>In monthly instalments</b>
+                <small>From {money(emi.tenures[emi.tenures.length - 1].principalPerMonth, order.currency)} a month</small>
+              </span>
+            </label>
+          </div>
+          {instalments && (
+            <div className="emi-detail">
+              {payment.mode === 'mock' ? (
+                <div className="emi-tenures" role="group" aria-label="Instalment plan">
+                  {emi.tenures.map((t) => (
+                    <button key={t.months} type="button" aria-pressed={tenure === t.months} onClick={() => setTenure(t.months)}>
+                      <b>{t.months} months</b>
+                      <span>{money(t.principalPerMonth, order.currency)} / month</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <ul className="emi-tenure-list">
+                  {emi.tenures.map((t) => (
+                    <li key={t.months}>
+                      <b>{t.months} months</b> {money(t.principalPerMonth, order.currency)} / month
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p>
+                Monthly figures are the price divided evenly, before your bank&apos;s interest. You choose your bank and see its exact rate and plan before you confirm in the secure payment window. Available on most Indian credit cards and selected debit cards.
+              </p>
+              <p>The gallery is paid in full today and your work is prepared as usual. Your bank collects the instalments.</p>
+            </div>
+          )}
+        </fieldset>
+      )}
       {payment.mode === 'mock' && (
         <div className="provider-note">
           <h3>Test payment</h3>
           <p>This environment uses the built-in test gateway. No card is charged. The order is confirmed through the same signed webhook a real provider sends.</p>
           <div className="form-nav">
             <button className="button" onClick={() => pay('succeeded')} disabled={busy}>
-              {busy ? 'Processing…' : 'Complete test payment'}
+              {busy ? 'Processing…' : instalments ? `Complete test payment over ${tenure} months` : 'Complete test payment'}
             </button>
             <button className="button ghost" onClick={() => pay('failed')} disabled={busy}>
               Simulate a declined card
@@ -306,7 +357,7 @@ export function PaymentStep({ placed, email, name, onDone, heading }) {
       )}
       {payment.mode === 'razorpay' && (
         <button className="button" onClick={() => pay()} disabled={busy}>
-          {busy ? 'Opening Razorpay…' : 'Pay with Razorpay'}
+          {busy ? 'Opening Razorpay…' : instalments ? 'Choose an instalment plan' : 'Pay with Razorpay'}
         </button>
       )}
       {error && (

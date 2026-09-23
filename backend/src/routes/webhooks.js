@@ -22,10 +22,11 @@ r.post('/webhooks/:provider(mock|stripe|razorpay)', express.raw({ type: '*/*', l
 // mock webhook through the same pipeline a real provider would.
 r.post('/payments/mock/complete', express.json(), optionalAuth, asyncHandler(async (req, res) => {
   if (env.isProd || env.payments.provider !== 'mock') throw new AppError(404, 'Resource not found', 'NOT_FOUND');
-  const { intentId, outcome = 'succeeded' } = req.body || {};
+  const { intentId, outcome = 'succeeded', method = 'card', tenure } = req.body || {};
+  if (method === 'emi' && !env.payments.emi.tenures.includes(Number(tenure))) throw new AppError(422, 'Choose an instalment plan', 'INVALID_TENURE');
   const order = await Order.findOne({ 'payment.intentId': intentId }).lean();
   if (!order) throw new AppError(404, 'Payment not found', 'NOT_FOUND');
-  const body = JSON.stringify({ id: `evt_${crypto.randomUUID()}`, type: outcome === 'failed' ? 'payment.failed' : 'payment.succeeded', intentId });
+  const body = JSON.stringify({ id: `evt_${crypto.randomUUID()}`, type: outcome === 'failed' ? 'payment.failed' : 'payment.succeeded', intentId, method: method === 'emi' ? 'emi' : 'card', ...(method === 'emi' && { tenure: Number(tenure) }) });
   const result = await handleWebhook('mock', body, { 'x-mock-signature': mockProvider.sign(body) });
   ok(res, { orderNumber: order.number, ...result, order: undefined });
 }));

@@ -332,3 +332,30 @@ img{color:transparent}
 @media (prefers-reduced-motion:reduce){.viewing-places label{transition:none}}
 .viewing-row-actions{white-space:nowrap}
 .viewing-row-actions button+button{margin-left:1rem}
+/* EMI plan at payment */
+.emi-plan{border:0;padding:0;margin:0 0 2rem}
+.emi-plan legend{font:500 .67rem var(--sans);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;padding:0}
+.emi-choice{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.emi-choice label{display:flex;gap:.9rem;align-items:flex-start;padding:1.1rem 1.2rem;border:1px solid var(--line);cursor:pointer;transition:border-color .2s}
+.emi-choice label.selected{border-color:var(--ink)}
+.emi-choice input{accent-color:var(--ink);margin-top:.3rem}
+.emi-choice b{display:block;font-weight:500}
+.emi-choice small{color:var(--muted)}
+.emi-detail{margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+.emi-detail p{color:var(--muted);font-size:.86rem;max-width:40rem;margin-bottom:.6rem}
+.emi-tenures{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:.6rem;margin-bottom:1.1rem}
+.emi-tenures button{display:grid;gap:.2rem;text-align:left;padding:.9rem 1rem;border:1px solid var(--line);background:none;color:var(--ink);cursor:pointer}
+.emi-tenures button b{font:400 1.15rem var(--serif)}
+.emi-tenures button span{font-size:.78rem;color:var(--muted)}
+.emi-tenures button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ivory)}
+.emi-tenures button[aria-pressed="true"] span{color:color-mix(in srgb,var(--ivory) 75%,transparent)}
+.emi-tenure-list{list-style:none;padding:0;margin:0 0 1rem;display:flex;flex-wrap:wrap;gap:.4rem 1.8rem;font-size:.86rem}
+.emi-tenure-list b{font-weight:500;margin-right:.35rem}
+.emi-receipt{font-size:.86rem;color:var(--muted);margin-top:.4rem}
+@media (max-width:640px){.emi-choice{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.emi-choice label{transition:none}}
+.emi-choice label{text-transform:none;letter-spacing:normal;font-size:.9rem;font-weight:400}
+.emi-choice b{font:400 1.25rem var(--serif);letter-spacing:-.01em;margin-bottom:.15rem}
+.emi-choice small{font-size:.82rem;letter-spacing:normal;text-transform:none}
+.checkout-page.confirmation h1{margin-bottom:.3em}
+@media (max-width:640px){.payment-step .form-nav{flex-direction:column;align-items:stretch}.payment-step .form-nav .button{width:100%}}

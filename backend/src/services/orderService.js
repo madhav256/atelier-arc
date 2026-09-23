@@ -5,6 +5,7 @@ import { withTransaction } from '../lib/transaction.js';
 import { pricedCart, clearCart } from './cartService.js';
 import { computeQuote, signQuote, verifyQuote, validateAddress } from '../providers/commerce/quotes.js';
 import { paymentProvider } from '../providers/payments/index.js';
+import { emiOptions } from '../providers/payments/emi.js';
 import { notify, notifyAvailability } from './notificationService.js';
 import { sendEmail } from '../providers/email/index.js';
 import { templates } from '../providers/email/templates.js';
@@ -89,7 +90,7 @@ async function createPendingOrder({ owner, email, lines, totals, address, billin
     const intent = await provider.createIntent({ order });
     order.payment = { provider: provider.name, intentId: intent.intentId, status: 'requires_payment' };
     await order.save();
-    return { order, payment: { provider: provider.name, clientSecret: intent.clientSecret, ...intent.publicData } };
+    return { order, payment: { provider: provider.name, clientSecret: intent.clientSecret, ...intent.publicData, emi: emiOptions(provider, order) } };
   } catch (err) {
     await releaseOrder(order, 'payment_failed', 'Payment could not be started');
     throw err;
@@ -145,11 +146,11 @@ export async function releaseOrder(order, status = 'cancelled', note) {
   if (order.offer) await Inquiry.updateOne({ _id: order.offer, 'offer.order': order._id }, { 'offer.status': 'open', $unset: { 'offer.order': 1 } });
 }
 
-export async function confirmOrder(order, { paymentId } = {}) {
+export async function confirmOrder(order, { paymentId, method, emiTenure } = {}) {
   const outcome = await withTransaction(async (session) => {
     const fresh = await Order.findOneAndUpdate(
       { _id: order._id, status: { $in: ['pending_payment', 'payment_failed', 'cancelled'] } },
-      { status: 'confirmed', 'payment.status': 'succeeded', 'payment.paidAt': new Date(), 'payment.chargeId': paymentId, $push: { history: { status: 'confirmed', note: 'Payment received' } } },
+      { status: 'confirmed', 'payment.status': 'succeeded', 'payment.paidAt': new Date(), 'payment.chargeId': paymentId, ...(method && { 'payment.method': method }), ...(emiTenure && { 'payment.emiTenure': emiTenure }), $push: { history: { status: 'confirmed', note: 'Payment received' } } },
       { new: true, session },
     );
     if (!fresh) return { already: true };
