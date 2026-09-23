@@ -1,8 +1,12 @@
-import { useDocumentMeta } from '../hooks/useDocumentMeta';
-import { InquiryForm } from '../components/InquiryForm';
+import { AdvisorChat } from "../components/AdvisorChat";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
+import { InquiryForm } from "../components/InquiryForm";
 
 export default function Advisory() {
-  useDocumentMeta('Private Advisory', 'A discreet advisory service for first acquisitions, established collections and commissions.');
+  useDocumentMeta(
+    "Private Advisory",
+    "A discreet advisory service for first acquisitions, established collections and commissions.",
+  );
   return (
     <section className="advisory-page">
       <div>
@@ -12,27 +16,36 @@ export default function Advisory() {
           <br />
           <em>clarity.</em>
         </h1>
-        <p className="dek">A discreet, informed service for first acquisitions, established collections, and spaces that deserve a defining work.</p>
+        <p className="dek">
+          A discreet, informed service for first acquisitions, established
+          collections, and spaces that deserve a defining work.
+        </p>
         <ol>
           <li>
             <b>01</b>
             <span>
               <h3>Private sourcing</h3>
-              <p>Works selected around your eye, context, and preferred range.</p>
+              <p>
+                Works selected around your eye, context, and preferred range.
+              </p>
             </span>
           </li>
           <li>
             <b>02</b>
             <span>
               <h3>Viewings and placement</h3>
-              <p>Private appointments, scale studies, and installation planning.</p>
+              <p>
+                Private appointments, scale studies, and installation planning.
+              </p>
             </span>
           </li>
           <li>
             <b>03</b>
             <span>
               <h3>Collection stewardship</h3>
-              <p>Documentation, conservation guidance, and long-term strategy.</p>
+              <p>
+                Documentation, conservation guidance, and long-term strategy.
+              </p>
             </span>
           </li>
         </ol>
@@ -41,6 +54,12 @@ export default function Advisory() {
         <span className="eyebrow">BEGIN A CONVERSATION</span>
         <h2>Tell us what you are looking for.</h2>
         <InquiryForm type="advisory" submitLabel="Request a consultation" />
+        <p className="advisor-chat-alt">
+          Prefer a conversation now?{" "}
+          <AdvisorChat message="Hello, I would like to speak with an Atelier Arc advisor about private collector services.">
+            Message an advisor on WhatsApp
+          </AdvisorChat>
+        </p>
       </div>
     </section>
   );
