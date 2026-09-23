@@ -15,7 +15,7 @@ npm run dev
 
 Storefront: `http://localhost:5173` · API: `http://localhost:4000/api/v1` · health check: `http://localhost:4000/health`.
 
-The seed creates 15 fictional artists, 50 original fictional artworks, 8 collections, 10 journal stories, and one development admin (`admin@atelierarc.example` / `ChangeMe123!`). Change or remove that account immediately outside local development.
+The seed creates 15 fictional artists, 50 original fictional artworks, 8 collections, 10 journal stories, and local-only accounts: `admin@atelierarc.example`, `advisor@atelierarc.example`, `advisor2@atelierarc.example`, `collector@atelierarc.example`, all with the password from `SEED_PASSWORD` (default `ChangeMe123!`). The seed refuses to run against production. Payments, email and image storage run in free local modes by default; see `docs/PRODUCTION_INTEGRATIONS.md` to switch providers.
 
 ## Commands
 

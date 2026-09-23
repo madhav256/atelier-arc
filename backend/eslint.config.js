@@ -1,1 +1,3 @@
-import js from '@eslint/js';export default [js.configs.recommended,{files:['**/*.js'],languageOptions:{ecmaVersion:2023,sourceType:'module',globals:{process:'readonly',console:'readonly',Buffer:'readonly',setTimeout:'readonly'}},rules:{'no-unused-vars':['warn',{argsIgnorePattern:'^_'}]}}];
+import js from '@eslint/js';
+import globals from 'globals';
+export default [js.configs.recommended, { files: ['**/*.js'], languageOptions: { ecmaVersion: 2024, sourceType: 'module', globals: { ...globals.node, fetch: 'readonly', FormData: 'readonly', Blob: 'readonly' } }, rules: { 'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }] } }];
