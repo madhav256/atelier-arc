@@ -51,6 +51,20 @@ export const profile = z.object({
   addresses: z.array(address.extend({ label: text(40).optional() })).max(10).optional(),
 });
 
+export const TASTE_STYLES = ['colour-field', 'horizon', 'geometric', 'arch', 'strata'];
+export const TASTE_PALETTES = ['warm', 'cool', 'verdant', 'monochrome'];
+export const taste = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('skip') }),
+  z.object({
+    action: z.literal('complete'),
+    styles: z.array(z.enum(TASTE_STYLES)).min(1).max(TASTE_STYLES.length),
+    palettes: z.array(z.enum(TASTE_PALETTES)).max(TASTE_PALETTES.length).default([]),
+    scale: z.enum(['intimate', 'considered', 'statement']).optional(),
+    priceMin: z.number().min(0).max(1e9).optional(),
+    priceMax: z.number().min(0).max(1e9).optional(),
+  }),
+]);
+
 export const cart = {
   add: z.object({ artworkId: objectId, quantity: z.number().int().min(1).max(20).default(1) }),
   update: z.object({ quantity: z.number().int().min(1).max(20) }),

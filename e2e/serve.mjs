@@ -17,7 +17,7 @@ if (seedCode !== 0) {
 const children = [
   spawn('node', ['src/server.js'], { cwd: 'backend', env, stdio: 'inherit' }),
   // Test the production bundle (vite preview proxies /api like the dev server does).
-  spawn('sh', ['-c', 'npx vite build --logLevel warn && npx vite preview --port 5173 --strictPort'], { cwd: 'frontend', env: { VITE_ADVISOR_WHATSAPP: '919800000000', ...process.env }, stdio: 'inherit' }),
+  spawn('sh', ['-c', 'npx vite build --logLevel warn && npx vite preview --port 5173 --strictPort'], { cwd: 'frontend', env: { ...process.env }, stdio: 'inherit' }),
 ];
 const stop = async () => {
   children.forEach((c) => c.kill('SIGTERM'));

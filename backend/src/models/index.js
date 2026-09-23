@@ -130,7 +130,11 @@ const userSchema = new Schema(
       artists: [{ type: ObjectId, ref: 'Artist' }],
       priceMin: Number,
       priceMax: Number,
+      styles: [String],
+      palettes: [String],
+      scale: { type: String, enum: ['intimate', 'considered', 'statement'] },
     },
+    tasteQuiz: { completedAt: Date, skippedAt: Date },
     notificationSettings: {
       email: { type: Boolean, default: true },
       orders: { type: Boolean, default: true },

@@ -10,7 +10,7 @@ import { artworkJsonLd, sitemap } from '../services/seoService.js';
 import { env } from '../config/env.js';
 
 const r = Router();
-const CARD = 'title slug artist images price priceOnRequest currency availability medium category year dimensions edition tags featured orientation';
+const CARD = 'title slug artist images price priceOnRequest currency availability medium category year dimensions edition tags style featured orientation';
 
 async function searchArtworks(query) {
   const { page, limit, skip } = paging(query);

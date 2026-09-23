@@ -3,7 +3,7 @@ import { asyncHandler, AppError } from '../lib/errors.js';
 import { ok, pick } from '../lib/util.js';
 import { authenticate } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
-import { profile, collection as cs, inquiry as is, checkout as co, idParam, objectId } from '../validation/schemas.js';
+import { profile, taste, collection as cs, inquiry as is, checkout as co, idParam, objectId } from '../validation/schemas.js';
 import { z } from 'zod';
 import { User, Notification, Order, AvailabilityAlert, Artist, Artwork } from '../models/index.js';
 import * as collections from '../services/collectionService.js';
@@ -22,6 +22,31 @@ r.patch('/profile', validate(profile), asyncHandler(async (req, res) => {
     for (const [k, v] of Object.entries(req.body.notificationSettings)) if (allowed.includes(k)) update[`notificationSettings.${k}`] = v;
   }
   ok(res, await User.findByIdAndUpdate(req.user.sub, { $set: update }, { new: true, runValidators: true }));
+}));
+
+// Taste quiz: writes stated preferences field by field so other preferences survive.
+r.put('/taste', validate({ body: taste }), asyncHandler(async (req, res) => {
+  const now = new Date();
+  const update =
+    req.body.action === 'skip'
+      ? { $set: { 'tasteQuiz.skippedAt': now } }
+      : {
+          $set: {
+            'preferences.styles': req.body.styles,
+            'preferences.palettes': req.body.palettes,
+            'tasteQuiz.completedAt': now,
+            ...(req.body.scale ? { 'preferences.scale': req.body.scale } : {}),
+            ...(req.body.priceMin != null ? { 'preferences.priceMin': req.body.priceMin } : {}),
+            ...(req.body.priceMax != null ? { 'preferences.priceMax': req.body.priceMax } : {}),
+          },
+          $unset: {
+            ...(req.body.scale ? {} : { 'preferences.scale': 1 }),
+            ...(req.body.priceMin != null ? {} : { 'preferences.priceMin': 1 }),
+            ...(req.body.priceMax != null ? {} : { 'preferences.priceMax': 1 }),
+          },
+        };
+  const user = await User.findByIdAndUpdate(req.user.sub, update, { new: true, runValidators: true }).lean();
+  ok(res, { preferences: user.preferences, tasteQuiz: user.tasteQuiz });
 }));
 
 // Collections

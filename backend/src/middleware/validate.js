@@ -2,7 +2,8 @@ import { AppError } from '../lib/errors.js';
 
 // Validates any of body/query/params with zod schemas and replaces them with the parsed output.
 export const validate = (schemas) => (req, res, next) => {
-  const parts = schemas.shape && !schemas.body && !schemas.query && !schemas.params ? { body: schemas } : schemas;
+  // Any bare zod schema (object, union, effects) validates the body.
+  const parts = typeof schemas.safeParse === 'function' ? { body: schemas } : schemas;
   const details = {};
   for (const key of ['body', 'query', 'params']) {
     if (!parts[key]) continue;

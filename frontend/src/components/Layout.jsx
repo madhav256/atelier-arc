@@ -1,14 +1,20 @@
-import { Loading } from './States';
-import { Suspense } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, Search, Heart, ShoppingBag, X, Bell, User } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { pageEnter, scrollToTop, startSmoothScroll, watchReveals } from '../lib/motion';
-import { useQuery } from '@tanstack/react-query';
-import { useCart } from '../hooks/useCart';
-import { useCollection } from '../hooks/useCollection';
-import { useSession } from '../hooks/useSession';
-import { api } from '../lib/api';
+import { TasteInvite } from "./TasteInvite";
+import { Loading } from "./States";
+import { Suspense } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Menu, Search, Heart, ShoppingBag, X, Bell, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  pageEnter,
+  scrollToTop,
+  startSmoothScroll,
+  watchReveals,
+} from "../lib/motion";
+import { useQuery } from "@tanstack/react-query";
+import { useCart } from "../hooks/useCart";
+import { useCollection } from "../hooks/useCollection";
+import { useSession } from "../hooks/useSession";
+import { api } from "../lib/api";
 
 export function Layout() {
   const [open, setOpen] = useState(false);
@@ -16,7 +22,12 @@ export function Layout() {
   const { cart } = useCart();
   const { count } = useCollection();
   const { user, isStaff } = useSession();
-  const unread = useQuery({ queryKey: ['notifications', 'unread'], queryFn: () => api('/me/notifications/unread-count'), enabled: Boolean(user), refetchInterval: 60_000 });
+  const unread = useQuery({
+    queryKey: ["notifications", "unread"],
+    queryFn: () => api("/me/notifications/unread-count"),
+    enabled: Boolean(user),
+    refetchInterval: 60_000,
+  });
   const mainRef = useRef(null);
   const curtainRef = useRef(null);
   useEffect(() => startSmoothScroll(), []);
@@ -34,14 +45,22 @@ export function Layout() {
           <span>ATELIER</span>
           <i>ARC</i>
         </Link>
-        <nav className={open ? 'open' : ''} aria-label="Primary" id="primary-nav">
+        <nav
+          className={open ? "open" : ""}
+          aria-label="Primary"
+          id="primary-nav"
+        >
           <NavLink to="/artworks">Artworks</NavLink>
           <NavLink to="/artists">Artists</NavLink>
           <NavLink to="/collections">Collections</NavLink>
           <NavLink to="/journal">Journal</NavLink>
           <NavLink to="/advisory">Private advisory</NavLink>
           {isStaff && <NavLink to="/admin">Gallery admin</NavLink>}
-          <button className="nav-close" onClick={() => setOpen(false)} aria-label="Close navigation">
+          <button
+            className="nav-close"
+            onClick={() => setOpen(false)}
+            aria-label="Close navigation"
+          >
             <X />
           </button>
         </nav>
@@ -50,23 +69,38 @@ export function Layout() {
             <Search />
           </Link>
           {user && (
-            <Link to="/account/notifications" aria-label={`Notifications, ${unreadCount} unread`}>
+            <Link
+              to="/account/notifications"
+              aria-label={`Notifications, ${unreadCount} unread`}
+            >
               <Bell />
-              <b>{unreadCount || ''}</b>
+              <b>{unreadCount || ""}</b>
             </Link>
           )}
-          <Link to="/my-collection" aria-label={`My Collection, ${count} works`}>
+          <Link
+            to="/my-collection"
+            aria-label={`My Collection, ${count} works`}
+          >
             <Heart />
-            <b>{count || ''}</b>
+            <b>{count || ""}</b>
           </Link>
           <Link to="/cart" aria-label={`Acquisition bag, ${cart.count} works`}>
             <ShoppingBag />
-            <b>{cart.count || ''}</b>
+            <b>{cart.count || ""}</b>
           </Link>
-          <Link to={user ? '/account' : '/login'} aria-label={user ? 'Your account' : 'Sign in'}>
+          <Link
+            to={user ? "/account" : "/login"}
+            aria-label={user ? "Your account" : "Sign in"}
+          >
             <User />
           </Link>
-          <button className="menu" onClick={() => setOpen(true)} aria-label="Open navigation" aria-expanded={open} aria-controls="primary-nav">
+          <button
+            className="menu"
+            onClick={() => setOpen(true)}
+            aria-label="Open navigation"
+            aria-expanded={open}
+            aria-controls="primary-nav"
+          >
             <Menu />
           </button>
         </div>
@@ -77,6 +111,7 @@ export function Layout() {
           <Outlet />
         </Suspense>
       </main>
+      <TasteInvite />
       <footer className="site-footer">
         <div className="footer-top">
           <p className="footer-statement">

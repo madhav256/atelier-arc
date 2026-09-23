@@ -9,7 +9,7 @@ test("artwork and advisory pages offer a prefilled WhatsApp advisor chat", async
   });
   await expect(link).toHaveAttribute(
     "href",
-    /^https:\/\/wa\.me\/919800000000\?text=.*Quiet%20Geometry/,
+    /^https:\/\/wa\.me\/16699377112\?text=.*Quiet%20Geometry/,
   );
   await expect(link).toHaveAttribute("target", "_blank");
   await expect(link).toHaveAttribute("rel", /noopener/);

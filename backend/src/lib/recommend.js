@@ -38,8 +38,22 @@ export function scoreAgainstProfile(artwork, profile, preferences = {}) {
     const ratio = artwork.price / median;
     if (ratio > 0.5 && ratio < 2) score += 2;
   }
+  // Stated taste (quiz): visual form, palette and scale.
+  const styles = new Set(artwork.style || []);
+  if (preferences.styles?.some((x) => styles.has(x))) score += 4;
+  const tags = new Set(artwork.tags || []);
+  if (preferences.palettes?.some((x) => tags.has(x))) score += 2.5;
+  if (preferences.scale && scaleOf(artwork) === preferences.scale) score += 1.5;
   if (preferences.priceMax && artwork.price > preferences.priceMax) score -= 5;
   if (preferences.priceMin && artwork.price && artwork.price < preferences.priceMin) score -= 2;
   score += Math.log10((artwork.saveCount || 0) + 1) * 0.5;
   return score;
+}
+
+// Width bands used by the taste quiz: intimate up to 60 cm, statement from 100 cm.
+export function scaleOf(artwork) {
+  const d = artwork.dimensions || {};
+  const w = d.unit === 'in' ? (d.width || 0) * 2.54 : d.width || 0;
+  if (!w) return null;
+  return w <= 60 ? 'intimate' : w >= 100 ? 'statement' : 'considered';
 }

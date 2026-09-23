@@ -1,7 +1,7 @@
 import { Artwork, User, UserCollection, Cart, Order } from '../models/index.js';
 import { buildProfile, scoreAgainstProfile, scoreArtwork } from '../lib/recommend.js';
 
-const CARD_FIELDS = 'title slug artist images price priceOnRequest currency availability medium category year dimensions tags saveCount';
+const CARD_FIELDS = 'title slug artist images price priceOnRequest currency availability medium category year dimensions tags style saveCount';
 
 export async function similarTo(artwork, limit = 6) {
   const pool = await Artwork.find({
@@ -42,7 +42,7 @@ export async function forUser(userId, limit = 12) {
   ].filter((s) => s.artwork);
   const exclude = new Set(signals.map((s) => String(s.artwork._id)));
   const preferences = { ...(user?.preferences || {}), artists: [...(user?.preferences?.artists || []), ...(user?.followedArtists || [])] };
-  if (!signals.length && !preferences.categories?.length && !preferences.artists.length) {
+  if (!signals.length && !preferences.categories?.length && !preferences.artists.length && !preferences.styles?.length && !preferences.palettes?.length) {
     return { reason: 'popular', items: await trending(limit) };
   }
   const profile = buildProfile(signals);

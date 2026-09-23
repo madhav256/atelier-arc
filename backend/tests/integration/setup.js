@@ -31,7 +31,7 @@ export async function agentFor(creds) {
   let csrf = /csrfToken=([^;]+)/.exec(first.headers['set-cookie']?.join(';') || '')?.[1];
   if (creds) await agent.post('/api/v1/auth/login').set('x-csrf-token', csrf).send({ email: creds.email, password: creds.password }).expect(200);
   const wrap = (method) => (url) => agent[method](url).set('x-csrf-token', csrf);
-  return { agent, csrf, get: (u) => agent.get(u), post: wrap('post'), patch: wrap('patch'), delete: wrap('delete') };
+  return { agent, csrf, get: (u) => agent.get(u), post: wrap('post'), patch: wrap('patch'), put: wrap('put'), delete: wrap('delete') };
 }
 
 export async function makeArtwork(overrides = {}) {
