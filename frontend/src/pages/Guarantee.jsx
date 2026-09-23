@@ -6,8 +6,7 @@ import {
   REFUND_WORKING_DAYS,
 } from "../content/guarantee";
 
-// Returns and authenticity guarantee. The terms are DRAFT placeholders (see content/guarantee.js)
-// and must be confirmed by the gallery owner before launch.
+// Returns and authenticity guarantee. Numbers live in content/guarantee.js.
 const TERMS = [
   {
     n: "01",
