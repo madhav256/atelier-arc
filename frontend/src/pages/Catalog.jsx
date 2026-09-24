@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { api, label, money } from '../lib/api';
+import { applyPriceParam } from '../lib/priceBands';
 import { ArtworkCard } from '../components/ArtworkCard';
 import { Loading, ErrorState, Empty } from '../components/States';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
@@ -19,7 +20,7 @@ export default function Catalog() {
   const [params, setParams] = useSearchParams();
   const [drawer, setDrawer] = useState(false);
   const search = useRef(null);
-  const apiParams = new URLSearchParams(params);
+  const apiParams = applyPriceParam(params);
   apiParams.delete('focus');
   if (!apiParams.get('limit')) apiParams.set('limit', '24');
   const query = useQuery({ queryKey: ['artworks', apiParams.toString()], queryFn: () => api(`/artworks?${apiParams}`, { raw: true }), placeholderData: keepPreviousData });
@@ -32,6 +33,7 @@ export default function Catalog() {
   const set = (updates) => {
     const n = new URLSearchParams(params);
     n.delete('focus');
+    n.delete('price');
     for (const [k, v] of Object.entries(updates)) (v ? n.set(k, v) : n.delete(k));
     if (!('page' in updates)) n.delete('page');
     setParams(n);
@@ -41,7 +43,7 @@ export default function Catalog() {
     const next = current.includes(value) ? current.filter((x) => x !== value) : [...current, value];
     set({ [key]: next.join(',') });
   };
-  const active = ['category', 'medium', 'availability', 'artist', 'minPrice', 'maxPrice', 'search', 'orientation'].filter((k) => params.get(k));
+  const active = ['category', 'medium', 'availability', 'artist', 'minPrice', 'maxPrice', 'search', 'orientation', 'price'].filter((k) => params.get(k));
   const f = facets.data;
   return (
     <section className="catalog">
