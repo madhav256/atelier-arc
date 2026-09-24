@@ -117,7 +117,8 @@ const userSchema = new Schema(
     name: { type: String, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     phone: String,
-    passwordHash: { type: String, required: true, select: false },
+    passwordHash: { type: String, select: false, required: function requiredPassword() { return !this.googleId; } },
+    googleId: { type: String, select: false, index: true, sparse: true },
     role: { type: String, enum: ['customer', 'advisor', 'admin'], default: 'customer', index: true },
     verified: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false },
@@ -173,6 +174,7 @@ const userSchema = new Schema(
 userSchema.methods.toJSON = function toJSON() {
   const out = this.toObject();
   delete out.passwordHash;
+  delete out.googleId;
   delete out.sessions;
   delete out.verificationTokenHash;
   delete out.verificationExpiresAt;
