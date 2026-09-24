@@ -359,3 +359,6 @@ img{color:transparent}
 .emi-choice small{font-size:.82rem;letter-spacing:normal;text-transform:none}
 .checkout-page.confirmation h1{margin-bottom:.3em}
 @media (max-width:640px){.payment-step .form-nav{flex-direction:column;align-items:stretch}.payment-step .form-nav .button{width:100%}}
+
+/* Giant wordmark must never stick past the viewport (feeds the mobile overflow bug). */
+.site-footer{overflow-x:clip}
