@@ -363,5 +363,5 @@ img{color:transparent}
 /* Giant wordmark must never stick past the viewport (feeds the mobile overflow bug). */
 .site-footer{overflow-x:clip}
 
-/* Fixed mobile nav overlay: backdrop-filter on the sticky header traps fixed descendants in the header box. Drop it while the menu is open so the nav covers the viewport. */
-.site-header:has(nav.open){backdrop-filter:none}
+/* Fixed mobile nav drawer + scrim: backdrop-filter on the sticky header traps fixed descendants in the header box. Drop it while the menu is open so the nav drawer and its scrim position against the viewport. */
+.site-header:has(nav.open, .nav-scrim.show){backdrop-filter:none}
