@@ -3,6 +3,7 @@ import { User } from '../models/index.js';
 import { AppError } from '../lib/errors.js';
 import { hashToken, randomToken } from '../lib/util.js';
 import { startSession, endAllSessions } from './tokenService.js';
+import { verifyGoogleCredential } from './googleAuth.js';
 import { sendEmail } from '../providers/email/index.js';
 import { templates } from '../providers/email/templates.js';
 
@@ -84,4 +85,21 @@ export async function verifyEmail(token) {
   );
   if (!user) throw new AppError(400, 'This verification link is invalid or has expired', 'INVALID_VERIFICATION_TOKEN');
   return user;
+}
+
+export async function googleLogin(credential, userAgent) {
+  const { googleId, email, name } = await verifyGoogleCredential(credential);
+  let user = await User.findOne({ $or: [{ googleId }, { email }] });
+  if (user) {
+    if (user.disabled) throw new AppError(403, 'This account is disabled. Contact the gallery.', 'ACCOUNT_DISABLED');
+    // Link Google to an existing password account and treat the Google-verified email as confirmed.
+    if (!user.googleId || !user.verified) {
+      await User.updateOne({ _id: user._id }, { googleId, verified: true });
+      user = await User.findById(user._id);
+    }
+  } else {
+    user = await User.create({ name: name || email.split('@')[0], email, googleId, verified: true });
+  }
+  const tokens = await startSession(user, userAgent);
+  return { user, tokens };
 }
