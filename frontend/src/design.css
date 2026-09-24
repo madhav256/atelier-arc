@@ -401,3 +401,5 @@ img{color:transparent}
 
 /* Footer legal links sit on one line */
 .site-footer .footer-meta a{display:inline}
+/* Homepage hero: quiet brand-orienting line above the featured-work eyebrow */
+.hero-brand{font:italic 1.05rem var(--serif);color:rgba(255,255,255,.85);margin:0 0 1.1rem;max-width:34ch}
