@@ -365,3 +365,8 @@ img{color:transparent}
 
 /* Fixed mobile nav drawer + scrim: backdrop-filter on the sticky header traps fixed descendants in the header box. Drop it while the menu is open so the nav drawer and its scrim position against the viewport. */
 .site-header:has(nav.open, .nav-scrim.show){backdrop-filter:none}
+
+/* Google sign-in on the auth page: quiet divider plus a centered host for the GSI button. */
+.auth-or{display:flex;align-items:center;gap:1rem;color:var(--muted);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;margin:1.8rem 0 .4rem}
+.auth-or:before,.auth-or:after{content:'';height:1px;background:var(--line);flex:1}
+.google-signin{display:flex;justify-content:center;min-height:44px;margin-top:1.8rem}
