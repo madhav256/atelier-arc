@@ -45,6 +45,18 @@ function ArtistSelect({ artists, value, onChange }) {
     if (open) document.getElementById(`artist-opt-${active}`)?.scrollIntoView({ block: 'nearest' });
   }, [active, open]);
 
+  // The mobile filters drawer is its own scroll container, so a list that
+  // opens near the drawer bottom renders mostly off-screen. Glide the drawer
+  // until the open list sits near the top; no-op on desktop (no overflow).
+  useEffect(() => {
+    if (!open) return;
+    const aside = box.current?.closest('aside');
+    const list = box.current?.querySelector('ul');
+    if (!aside || !list) return;
+    const top = aside.scrollTop + list.getBoundingClientRect().top - aside.getBoundingClientRect().top - 12;
+    aside.scrollTo({ top, behavior: 'smooth' });
+  }, [open]);
+
   const choose = (i) => {
     onChange(options[i]._id);
     setOpen(false);
@@ -178,7 +190,7 @@ export default function Catalog() {
         </select>
       </div>
       <div className="catalog-body">
-        <aside className={drawer ? 'drawer' : ''} id="filters" aria-label="Filters">
+        <aside className={drawer ? 'drawer' : ''} id="filters" aria-label="Filters" data-lenis-prevent>
           <button className="drawer-x" onClick={() => setDrawer(false)}>
             <X aria-hidden="true" /> Close
           </button>
