@@ -106,10 +106,7 @@ function ArtistSelect({ artists, value, onChange }) {
               role="option"
               aria-selected={i === selected}
               className={i === active ? 'active' : ''}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                choose(i);
-              }}
+              onClick={() => choose(i)}
               onMouseEnter={() => setActive(i)}
             >
               {o.name}
