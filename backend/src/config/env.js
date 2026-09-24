@@ -61,6 +61,7 @@ export const env = {
     clamavPort: Number(process.env.CLAMAV_PORT || 3310),
   },
   search: { provider: process.env.SEARCH_PROVIDER || 'mongo', atlasIndex: process.env.ATLAS_SEARCH_INDEX || 'artworks' },
+  google: { clientId: process.env.GOOGLE_CLIENT_ID || '' },
   commerce: {
     originCountry: process.env.ORIGIN_COUNTRY || 'IN',
     domesticTaxRate: Number(process.env.DOMESTIC_TAX_RATE ?? 0.12),
