@@ -161,7 +161,10 @@ export function Layout() {
         <div className="footer-meta">
           <small>© {new Date().getFullYear()} Atelier Arc</small>
           <small>Original contemporary art · Est. Mumbai</small>
-          <small>Privacy · Terms</small>
+          <small>
+              <Link to="/privacy">Privacy</Link> ·{" "}
+              <Link to="/terms">Terms</Link>
+            </small>
         </div>
       </footer>
     </>
