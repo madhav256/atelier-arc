@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
@@ -8,6 +8,36 @@ import { Field, FormError } from '../components/Form';
 
 const safeNext = (next) => (next && next.startsWith('/') && !next.startsWith('//') ? next : null);
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
+function GoogleButton({ onCredential }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return undefined;
+    let cancelled = false;
+    const init = () => {
+      if (cancelled || !window.google?.accounts?.id || !ref.current) return;
+      window.google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: (resp) => resp?.credential && onCredential(resp.credential) });
+      window.google.accounts.id.renderButton(ref.current, { theme: 'outline', size: 'large', text: 'continue_with', shape: 'rectangular', width: 300 });
+    };
+    if (window.google?.accounts?.id) {
+      init();
+      return undefined;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = init;
+    document.head.appendChild(script);
+    return () => {
+      cancelled = true;
+    };
+  }, [onCredential]);
+  if (!GOOGLE_CLIENT_ID) return null;
+  return <div className="google-signin" ref={ref} />;
+}
+
 export default function Auth() {
   const location = useLocation();
   const [params] = useSearchParams();
@@ -15,8 +45,9 @@ export default function Auth() {
   useDocumentMeta(mode === 'login' ? 'Sign in' : 'Create an account', 'Collector access to saved works, orders and private advisory.', { noindex: true });
   const navigate = useNavigate();
   const { user } = useSession();
-  const { login, register } = useAuthActions();
+  const { login, register, googleLogin } = useAuthActions();
   const action = mode === 'login' ? login : register;
+  const onGoogleCredential = useCallback((credential) => googleLogin.mutate({ credential }), [googleLogin]);
   const errors = action.error?.fieldErrors || {};
   useEffect(() => {
     if (user) navigate(safeNext(params.get('next')) || (['admin', 'advisor'].includes(user.role) ? '/admin' : '/account'), { replace: true });
@@ -45,6 +76,13 @@ export default function Auth() {
             Register
           </Link>
         </nav>
+        <GoogleButton onCredential={onGoogleCredential} />
+        <FormError error={googleLogin.error} />
+        {GOOGLE_CLIENT_ID && (
+          <div className="auth-or" aria-hidden="true">
+            <span>or</span>
+          </div>
+        )}
         {params.get('changed') && <p className="notice" role="status">Your password was changed. Please sign in again.</p>}
         {mode === 'register' && <Field label="Full name" name="name" required minLength={2} autoComplete="name" error={errors.name} />}
         <Field label="Email" name="email" type="email" required autoComplete="email" error={errors.email} />
