@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { api, label } from '../lib/api';
 import { applyPriceParam, bandForPriceParam } from '../lib/priceBands';
@@ -17,6 +17,106 @@ const PRICE_BANDS = [
   ['500000', '1000000', '₹5L – ₹10L'],
   ['1000000', '', '₹10L+'],
 ];
+
+// Themed replacement for the native artist <select>: same look closed,
+// and an on-theme open state instead of the OS picker. Follows the APG
+// collapsible-listbox pattern (focus stays on the button, aria-activedescendant
+// tracks the highlighted option).
+function ArtistSelect({ artists, value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const box = useRef(null);
+  const options = [{ _id: '', name: 'All artists' }, ...artists];
+  const selected = Math.max(0, options.findIndex((o) => o._id === value));
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const away = (e) => {
+      if (!box.current?.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', away);
+    return () => document.removeEventListener('pointerdown', away);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) document.getElementById(`artist-opt-${active}`)?.scrollIntoView({ block: 'nearest' });
+  }, [active, open]);
+
+  const choose = (i) => {
+    onChange(options[i]._id);
+    setOpen(false);
+  };
+  const openList = () => {
+    setActive(selected);
+    setOpen(true);
+  };
+  const onKeyDown = (e) => {
+    if (!open) {
+      if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        openList();
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setOpen(false);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActive((active + 1) % options.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActive((active - 1 + options.length) % options.length);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActive(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActive(options.length - 1);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      choose(active);
+    } else if (e.key === 'Tab') {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <div className="artist-select" ref={box}>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-activedescendant={open ? `artist-opt-${active}` : undefined}
+        onClick={() => (open ? setOpen(false) : openList())}
+        onKeyDown={onKeyDown}
+      >
+        {options[selected].name}
+        <ChevronDown aria-hidden="true" />
+      </button>
+      {open && (
+        <ul role="listbox" aria-label="Artist">
+          {options.map((o, i) => (
+            <li
+              key={o._id || 'all'}
+              id={`artist-opt-${i}`}
+              role="option"
+              aria-selected={i === selected}
+              className={i === active ? 'active' : ''}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                choose(i);
+              }}
+              onMouseEnter={() => setActive(i)}
+            >
+              {o.name}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function Catalog() {
   useDocumentMeta('Artworks', 'Browse original paintings, sculpture, works on paper, photography and editions.');
@@ -119,14 +219,7 @@ export default function Catalog() {
           {f?.artists?.length > 0 && (
             <fieldset>
               <legend>Artist</legend>
-              <select aria-label="Artist" value={params.get('artist') || ''} onChange={(e) => set({ artist: e.target.value })}>
-                <option value="">All artists</option>
-                {f.artists.map((a) => (
-                  <option key={a._id} value={a._id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
+              <ArtistSelect artists={f.artists} value={params.get('artist') || ''} onChange={(v) => set({ artist: v })} />
             </fieldset>
           )}
           <button className="text-link" onClick={() => setParams({})}>
