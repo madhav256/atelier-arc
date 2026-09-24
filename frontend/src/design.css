@@ -382,4 +382,4 @@ img{color:transparent}
 .catalog-body fieldset select{clear:left;width:100%;margin:.2rem 0 .4rem;padding:.7rem 2.2rem .7rem .9rem;background-color:transparent;border:1px solid var(--line);color:inherit;font:inherit;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2368645c' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center}
 
 /* Footer legal links sit on one line */
-footer small a{display:inline}
+.site-footer .footer-meta a{display:inline}
