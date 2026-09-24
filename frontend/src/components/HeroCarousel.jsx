@@ -8,7 +8,7 @@ const HOLD = 8; // seconds each work stays on screen
 
 // Cinematic featured-work hero: slow wipe between works, masked title reveal, gentle scroll parallax.
 export function HeroCarousel({ works }) {
-  const slides = works.slice(0, 4);
+  const slides = works.slice(0, 6);
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(() => !reducedMotion());
   const [hovered, setHovered] = useState(false);
