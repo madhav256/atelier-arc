@@ -28,7 +28,7 @@ img{color:transparent}
 
 /* Header */
 .site-header{height:76px;border-bottom:var(--hair);background:rgba(244,240,232,.86)}
-.site-header nav{font-size:.68rem;letter-spacing:.16em;font-weight:500}
+.site-header nav{font-weight:400}
 .detail-info{top:76px}
 
 /* Home: intro as an editorial spread */
