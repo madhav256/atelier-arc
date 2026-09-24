@@ -1,6 +1,24 @@
 # Atelier Arc
 
-A production-oriented MERN foundation for a luxury contemporary art dealership. The repository contains an independently deployable React/Vite storefront and Express/Mongoose API.
+[![CI](https://github.com/madhav256/atelier-arc/actions/workflows/ci.yml/badge.svg)](https://github.com/madhav256/atelier-arc/actions/workflows/ci.yml)
+
+A production-oriented MERN platform for a luxury contemporary art dealership: an editorial storefront, collector accounts, a staff admin, and a checkout built on real payment-provider adapters. Designed and built end to end - React/Vite storefront, Express/Mongoose API, Playwright + axe end-to-end suite, GitHub Actions CI.
+
+**Live:** [atelier-arc.onrender.com](https://atelier-arc.onrender.com) · API: [atelier-arc-api.onrender.com/api/v1](https://atelier-arc-api.onrender.com/api/v1)
+
+![Storefront hero - curated artwork carousel](docs/screenshots/hero-desktop.png)
+
+<p align="center"><img src="docs/screenshots/hero-mobile.png" alt="Storefront hero on mobile" width="320"></p>
+
+## Technical deep dives
+
+Three parts of this project show how I approach engineering problems:
+
+**Curated editorial carousel.** The homepage hero is a curated set of artworks chosen as a visual spread (palette, form, and artist variety), fetched per slug in parallel with order preserved (`HERO_SLUGS` in `frontend/src/pages/Home.jsx`). Keyboard navigation (arrow keys) is gated on the hero being in the viewport and no dialog or input holding focus; touch uses a horizontal-dominant swipe threshold. Motion honours `prefers-reduced-motion`.
+
+**Same-origin session architecture.** The storefront and API deploy as separate services. Cookies set by the API were `SameSite=Lax` third-party on the storefront origin, so sessions, cart, and CSRF silently failed cross-origin. The fix routes API traffic same-origin through a host-level rewrite (`/api/*` proxied to the API service), making all cookies first-party. On top of that: double-submit CSRF tokens, rotating refresh tokens, and lockout on credential endpoints (`backend/src/middleware/csrf.js`, `backend/src/services/authService.js`).
+
+**Checkout integrity.** Prices are never trusted from the client: the API issues signed shipping/insurance/GST quotes, holds inventory for a bounded window, and confirms orders only from signed provider webhooks - never from a browser redirect (`backend/src/services`, payment adapters). The declined-payment path leaves the order unpaid and the work available, and both paths are covered by the Playwright suite.
 
 ## Quick start
 
