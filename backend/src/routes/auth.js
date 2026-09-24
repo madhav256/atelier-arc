@@ -40,6 +40,13 @@ r.post('/login', authLimiter, validate(s.login), asyncHandler(async (req, res) =
   ok(res, { user, accessToken: tokens.accessToken });
 }));
 
+r.post('/google', authLimiter, validate(s.google), asyncHandler(async (req, res) => {
+  const { user, tokens } = await authService.googleLogin(req.body.credential, req.get('user-agent'));
+  setSession(res, tokens);
+  await mergeGuestCart(req.cookies.cartSession, user._id);
+  ok(res, { user, accessToken: tokens.accessToken });
+}));
+
 r.post('/refresh', asyncHandler(async (req, res) => {
   const raw = req.cookies.refreshToken || req.body?.refreshToken;
   if (!raw) throw new AppError(401, 'Refresh token required', 'AUTH_REQUIRED');
