@@ -386,6 +386,17 @@ img{color:transparent}
 .artist-select li{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.55rem .9rem;font-size:.78rem;cursor:pointer}
 .artist-select li.active{background:var(--ivory)}
 .artist-select li[aria-selected=true]::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.artist-select ul.overlay{position:absolute;top:calc(100% + .3rem);left:0;right:0;margin:0;z-index:90;box-shadow:0 .9rem 2.4rem rgba(23,23,21,.14)}
+.catalog-tools .artist-select{flex:0 1 auto;min-width:13rem;margin:0;clear:none}
+.drawer-scrim{display:none}
+@media (max-width:768px){.drawer-scrim{display:block;position:fixed;inset:0;z-index:79;background:rgba(23,23,21,.28);border:0;padding:0;cursor:pointer}.catalog-tools .artist-select{flex:1 1 auto;min-width:0}}
+
+/* Artworks toolbar: uniform Filter/Sort controls; icon-only search on mobile */
+.catalog-tools{align-items:center}
+.catalog-tools .filter-button,.catalog-tools .search-toggle,.catalog-tools .artist-select>button{display:flex;align-items:center;gap:.5rem;height:2.9rem;padding:0 1rem;border:1px solid var(--line);background:transparent;font:inherit;font-size:.92rem;white-space:nowrap}
+.catalog-tools .filter-button,.catalog-tools .search-toggle{justify-content:center}
+.catalog-tools .search-toggle{display:none;padding:0 .85rem}
+@media (max-width:768px){.catalog-tools{gap:.6rem}.catalog-tools .search{display:none}.catalog-tools .search-toggle{display:flex}.catalog-tools.search-open .search{display:flex;flex:1}.catalog-tools.search-open .search-toggle,.catalog-tools.search-open .filter-button,.catalog-tools.search-open .artist-select{display:none}}
 
 /* Footer legal links sit on one line */
 .site-footer .footer-meta a{display:inline}
