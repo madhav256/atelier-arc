@@ -2,17 +2,20 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { api, label, money } from '../lib/api';
-import { applyPriceParam } from '../lib/priceBands';
+import { api, label } from '../lib/api';
+import { applyPriceParam, bandForPriceParam } from '../lib/priceBands';
 import { ArtworkCard } from '../components/ArtworkCard';
 import { Loading, ErrorState, Empty } from '../components/States';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 
+// Same ranges as the "Browse by price" tiles on the home page.
 const PRICE_BANDS = [
   ['', '', 'Any price'],
-  ['', '250000', `Under ${money(250000)}`],
-  ['250000', '1000000', `${money(250000)} – ${money(1000000)}`],
-  ['1000000', '', `Above ${money(1000000)}`],
+  ['', '50000', 'Under ₹50,000'],
+  ['50000', '100000', '₹50,000 – ₹1L'],
+  ['100000', '500000', '₹1L – ₹5L'],
+  ['500000', '1000000', '₹5L – ₹10L'],
+  ['1000000', '', '₹10L+'],
 ];
 
 export default function Catalog() {
@@ -45,6 +48,10 @@ export default function Catalog() {
   };
   const active = ['category', 'medium', 'availability', 'artist', 'minPrice', 'maxPrice', 'search', 'orientation', 'price'].filter((k) => params.get(k));
   const f = facets.data;
+  // Reflect a band chosen via a home-page tile (?price=<index>) in the radios.
+  const tileBand = bandForPriceParam(params.get('price'));
+  const priceMin = params.get('minPrice') ?? tileBand?.min ?? '';
+  const priceMax = params.get('maxPrice') ?? tileBand?.max ?? '';
   return (
     <section className="catalog">
       <div className="catalog-title">
@@ -95,7 +102,7 @@ export default function Catalog() {
             <legend>Price</legend>
             {PRICE_BANDS.map(([min, max, text]) => (
               <label key={text}>
-                <input type="radio" name="price" checked={(params.get('minPrice') || '') === min && (params.get('maxPrice') || '') === max} onChange={() => set({ minPrice: min, maxPrice: max })} />
+                <input type="radio" name="price" checked={priceMin === min && priceMax === max} onChange={() => set({ minPrice: min, maxPrice: max })} />
                 {text}
               </label>
             ))}
