@@ -8,7 +8,7 @@ import { Field, FormError } from '../components/Form';
 
 const safeNext = (next) => (next && next.startsWith('/') && !next.startsWith('//') ? next : null);
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '566562303272-ksqt0kqqmgge27a9sevhafs7p2jltrbp.apps.googleusercontent.com';
 
 function GoogleButton({ onCredential }) {
   const ref = useRef(null);
