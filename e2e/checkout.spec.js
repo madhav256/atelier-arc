@@ -8,6 +8,8 @@ test('guest completes a full checkout with the test gateway, and staff see a con
   await page.goto(WORK);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Quiet Geometry/);
   await page.getByRole('button', { name: 'Add to acquisition bag' }).click();
+  // Wait for the add mutation to land before navigating, or the goto aborts the in-flight POST.
+  await expect(page.getByRole('link', { name: /In your bag/ })).toBeVisible();
   await page.goto('/cart');
   await expect(page.getByText('Quiet Geometry').first()).toBeVisible();
   await expectAccessible(page, 'cart');
@@ -51,6 +53,8 @@ test('guest completes a full checkout with the test gateway, and staff see a con
 test('a declined test card leaves the order unpaid and the work available', async ({ page }) => {
   await page.goto('/artworks/blue-interval');
   await page.getByRole('button', { name: 'Add to acquisition bag' }).click();
+  // Same race as above: let the add complete before leaving the page.
+  await expect(page.getByRole('link', { name: /In your bag/ })).toBeVisible();
   await page.goto('/checkout');
   await page.getByLabel('Email').fill('declined@example.com');
   await page.getByRole('button', { name: 'Continue' }).click();
@@ -70,6 +74,8 @@ test('a declined test card leaves the order unpaid and the work available', asyn
 test('a collector pays in monthly instalments through the test gateway', async ({ page }) => {
   await page.goto('/artworks/the-long-light');
   await page.getByRole('button', { name: 'Add to acquisition bag' }).click();
+  // Same race as above: let the add complete before leaving the page.
+  await expect(page.getByRole('link', { name: /In your bag/ })).toBeVisible();
   await page.goto('/checkout');
   await page.getByLabel('Email').fill('instalments@example.com');
   await page.getByRole('button', { name: 'Continue' }).click();
