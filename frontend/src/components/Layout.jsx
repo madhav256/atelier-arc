@@ -45,6 +45,12 @@ export function Layout() {
           <span>ATELIER</span>
           <i>ARC</i>
         </Link>
+        <button
+          className={open ? "nav-scrim show" : "nav-scrim"}
+          onClick={() => setOpen(false)}
+          aria-label="Close navigation"
+          tabIndex={-1}
+        />
         <nav
           className={open ? "open" : ""}
           aria-label="Primary"
