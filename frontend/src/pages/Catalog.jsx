@@ -8,6 +8,9 @@ import { ArtworkCard } from '../components/ArtworkCard';
 import { Loading, ErrorState, Empty } from '../components/States';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 
+// Filter option names arrive lowercase from the API; the panel shows them capitalized.
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 // Same ranges as the "Browse by price" tiles on the home page.
 const PRICE_BANDS = [
   ['', '', 'Any price'],
@@ -193,7 +196,7 @@ export default function Catalog() {
                 {items.map((x) => (
                   <label key={x._id}>
                     <input type="checkbox" checked={(params.get(key) || '').split(',').includes(x._id)} onChange={() => toggleList(key, x._id)} />
-                    {label(x._id)} <small>({x.count})</small>
+                    {cap(label(x._id))} <small>({x.count})</small>
                   </label>
                 ))}
               </fieldset>
@@ -212,7 +215,7 @@ export default function Catalog() {
             {['portrait', 'landscape', 'square'].map((o) => (
               <label key={o}>
                 <input type="checkbox" checked={(params.get('orientation') || '').split(',').includes(o)} onChange={() => toggleList('orientation', o)} />
-                {label(o)}
+                {cap(label(o))}
               </label>
             ))}
           </fieldset>
