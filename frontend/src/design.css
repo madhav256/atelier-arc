@@ -376,7 +376,10 @@ img{color:transparent}
 /* Artworks filters: hairline above each group heading, aligned rows, styled artist select */
 .catalog-body fieldset{overflow:hidden}
 .catalog-body legend{float:left;width:100%;padding-top:0;margin:0 0 .9rem}
-.catalog-body label{display:flex;align-items:center;margin:.6rem 0}
-.catalog-body input{margin:0 .6rem 0 0;flex-shrink:0}
+.catalog-body label{display:flex;align-items:center;gap:.5rem;margin:.6rem 0;clear:left}
+.catalog-body input{margin:0;flex-shrink:0}
 .catalog-body label small{color:var(--muted)}
-.catalog-body fieldset select{width:100%;margin:.2rem 0 .4rem;padding:.7rem 2.2rem .7rem .9rem;background-color:transparent;border:1px solid var(--line);color:inherit;font:inherit;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2368645c' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center}
+.catalog-body fieldset select{clear:left;width:100%;margin:.2rem 0 .4rem;padding:.7rem 2.2rem .7rem .9rem;background-color:transparent;border:1px solid var(--line);color:inherit;font:inherit;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2368645c' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center}
+
+/* Footer legal links sit on one line */
+footer small a{display:inline}
