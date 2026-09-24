@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
@@ -12,6 +12,15 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta';
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Same ranges as the "Browse by price" tiles on the home page.
+const SORT_OPTIONS = [
+  { _id: 'newest', name: 'Newest' },
+  { _id: 'featured', name: 'Featured' },
+  { _id: 'popular', name: 'Most viewed' },
+  { _id: 'price_asc', name: 'Price: low to high' },
+  { _id: 'price_desc', name: 'Price: high to low' },
+  { _id: 'year_desc', name: 'Year: newest first' },
+];
+
 const PRICE_BANDS = [
   ['', '', 'Any price'],
   ['', '50000', 'Under ₹50,000'],
@@ -21,15 +30,16 @@ const PRICE_BANDS = [
   ['1000000', '', '₹10L+'],
 ];
 
-// Themed replacement for the native artist <select>: same look closed,
-// and an on-theme open state instead of the OS picker. Follows the APG
-// collapsible-listbox pattern (focus stays on the button, aria-activedescendant
-// tracks the highlighted option).
-function ArtistSelect({ artists, value, onChange }) {
+// Themed replacement for a native <select> (artist filter, toolbar sort): same
+// look closed, and an on-theme open state instead of the OS picker. Follows the
+// APG collapsible-listbox pattern (focus stays on the button, aria-activedescendant
+// tracks the highlighted option). overlay floats the panel over the page (toolbar
+// sort); the default opens in-flow (the filters drawer clips overlays).
+function ThemedSelect({ options, value, onChange, ariaLabel, overlay = false }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const box = useRef(null);
-  const options = [{ _id: '', name: 'All artists' }, ...artists];
+  const uid = useId();
   const selected = Math.max(0, options.findIndex((o) => o._id === value));
 
   useEffect(() => {
@@ -42,7 +52,7 @@ function ArtistSelect({ artists, value, onChange }) {
   }, [open]);
 
   useEffect(() => {
-    if (open) document.getElementById(`artist-opt-${active}`)?.scrollIntoView({ block: 'nearest' });
+    if (open) document.getElementById(`${uid}-opt-${active}`)?.scrollIntoView({ block: 'nearest' });
   }, [active, open]);
 
   // The mobile filters drawer is its own scroll container, so a list that
@@ -102,7 +112,7 @@ function ArtistSelect({ artists, value, onChange }) {
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-activedescendant={open ? `artist-opt-${active}` : undefined}
+        aria-activedescendant={open ? `${uid}-opt-${active}` : undefined}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={onKeyDown}
       >
@@ -110,11 +120,11 @@ function ArtistSelect({ artists, value, onChange }) {
         <ChevronDown aria-hidden="true" />
       </button>
       {open && (
-        <ul role="listbox" aria-label="Artist">
+        <ul role="listbox" aria-label={ariaLabel} className={overlay ? 'overlay' : undefined}>
           {options.map((o, i) => (
             <li
               key={o._id || 'all'}
-              id={`artist-opt-${i}`}
+              id={`${uid}-opt-${i}`}
               role="option"
               aria-selected={i === selected}
               className={i === active ? 'active' : ''}
@@ -143,6 +153,15 @@ export default function Catalog() {
   useEffect(() => {
     if (params.get('focus') === 'search') search.current?.focus();
   }, [params]);
+  // Tap anywhere outside the open filters drawer (the scrim) or press Escape to close it.
+  useEffect(() => {
+    if (!drawer) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setDrawer(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [drawer]);
   const works = query.data?.data || [];
   const meta = query.data?.meta;
   const set = (updates) => {
@@ -179,17 +198,16 @@ export default function Catalog() {
         <button className="filter-button" onClick={() => setDrawer(true)} aria-expanded={drawer} aria-controls="filters">
           <SlidersHorizontal aria-hidden="true" /> Filter{active.length ? ` (${active.length})` : ''}
         </button>
-        <select aria-label="Sort artworks" value={params.get('sort') || (params.get('search') ? '' : 'newest')} onChange={(e) => set({ sort: e.target.value })}>
-          {params.get('search') && <option value="">Best match</option>}
-          <option value="newest">Newest</option>
-          <option value="featured">Featured</option>
-          <option value="popular">Most viewed</option>
-          <option value="price_asc">Price: low to high</option>
-          <option value="price_desc">Price: high to low</option>
-          <option value="year_desc">Year: newest first</option>
-        </select>
+        <ThemedSelect
+          options={params.get('search') ? [{ _id: '', name: 'Best match' }, ...SORT_OPTIONS] : SORT_OPTIONS}
+          value={params.get('sort') || (params.get('search') ? '' : 'newest')}
+          onChange={(v) => set({ sort: v })}
+          ariaLabel="Sort artworks"
+          overlay
+        />
       </div>
       <div className="catalog-body">
+        {drawer && <button type="button" className="drawer-scrim" aria-label="Close filters" onClick={() => setDrawer(false)} />}
         <aside className={drawer ? 'drawer' : ''} id="filters" aria-label="Filters" data-lenis-prevent>
           <button className="drawer-x" onClick={() => setDrawer(false)}>
             <X aria-hidden="true" /> Close
@@ -231,7 +249,7 @@ export default function Catalog() {
           {f?.artists?.length > 0 && (
             <fieldset>
               <legend>Artist</legend>
-              <ArtistSelect artists={f.artists} value={params.get('artist') || ''} onChange={(v) => set({ artist: v })} />
+              <ThemedSelect options={[{ _id: '', name: 'All artists' }, ...f.artists]} value={params.get('artist') || ''} onChange={(v) => set({ artist: v })} ariaLabel="Artist" />
             </fieldset>
           )}
           <button className="text-link" onClick={() => setParams({})}>
