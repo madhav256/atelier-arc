@@ -35,6 +35,7 @@ export function useAuthActions() {
   return {
     login: useMutation({ mutationFn: (body) => api('/auth/login', { body }), onSuccess: after }),
     register: useMutation({ mutationFn: (body) => api('/auth/register', { body }), onSuccess: after }),
+    googleLogin: useMutation({ mutationFn: (body) => api('/auth/google', { body }), onSuccess: after }),
     logout: useMutation({
       mutationFn: () => api('/auth/logout', { method: 'POST' }),
       onSettled: () => {
