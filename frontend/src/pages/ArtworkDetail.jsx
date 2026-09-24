@@ -452,7 +452,7 @@ function RoomViewer({ artwork }) {
         </p>
         {framingNote && (
           <AdvisorChat message={framingNote}>
-            Ask about this frame on WhatsApp
+            Ask about this frame by email
           </AdvisorChat>
         )}
       </div>

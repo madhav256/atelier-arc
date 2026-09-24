@@ -28,7 +28,7 @@ const PRIVACY = [
   {
     n: "05",
     title: "When others see a little of it",
-    body: "When you acquire a work, the specialists who pack, insure and deliver it receive only the details they need for that delivery. When you message an advisor on WhatsApp, that conversation is also covered by WhatsApp's own privacy policy.",
+    body: "When you acquire a work, the specialists who pack, insure and deliver it receive only the details they need for that delivery. When you email an advisor, that conversation is also covered by your email provider's own privacy policy.",
   },
   {
     n: "06",

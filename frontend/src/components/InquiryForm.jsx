@@ -33,7 +33,6 @@ export function InquiryForm({ artwork, type, onSent, submitLabel = 'Send inquiry
       <Field label="Preferred contact" name="preferredContact" as="select" defaultValue="email">
         <option value="email">Email</option>
         <option value="phone">Phone</option>
-        <option value="whatsapp">WhatsApp</option>
       </Field>
       {!artwork && (
         <Field label="Budget range (optional)" name="budgetRange" as="select" defaultValue="">

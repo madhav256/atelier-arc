@@ -57,7 +57,7 @@ export default function Advisory() {
         <p className="advisor-chat-alt">
           Prefer a conversation now?{" "}
           <AdvisorChat message="Hello, I would like to speak with an Atelier Arc advisor about private collector services.">
-            Message an advisor on WhatsApp
+            Email an advisor
           </AdvisorChat>
         </p>
       </div>

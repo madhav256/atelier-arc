@@ -1,28 +1,24 @@
-import { whatsappLink, artworkMessage } from "../lib/whatsapp";
+import { advisorMailto, artworkMessage } from "../lib/advisor";
 
-// A quiet text link, not a green widget: the chat opens in WhatsApp with a prefilled note.
+// A quiet text link, not a widget: the note opens in the visitor's mail client.
 export function AdvisorChat({
   artwork,
   message,
-  children = "Message an advisor on WhatsApp",
+  subject,
+  children = "Email an advisor",
   className = "text-link advisor-chat",
 }) {
-  const href = whatsappLink(
+  const href = advisorMailto(
     message ||
       (artwork
         ? artworkMessage(artwork)
         : "Hello, I would like to speak with an Atelier Arc advisor."),
+    { subject: subject || (artwork ? `About "${artwork.title}"` : undefined) },
   );
   if (!href) return null;
   return (
-    <a
-      className={className}
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
+    <a className={className} href={href}>
       {children}
-      <span className="sr-only"> (opens WhatsApp in a new tab)</span>
     </a>
   );
 }
