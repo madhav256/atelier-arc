@@ -228,15 +228,15 @@ function Detail({ artwork: a }) {
               </Link>
             )}
             <AdvisorChat artwork={a} />
+            <ArView artwork={a} onFallback={() => setRoom(true)} />
+            <button
+              className="text-link room-link"
+              onClick={() => setRoom(!room)}
+              aria-expanded={room}
+            >
+              View in your space
+            </button>
           </div>
-          <ArView artwork={a} onFallback={() => setRoom(true)} />
-          <button
-            className="text-link room-link"
-            onClick={() => setRoom(!room)}
-            aria-expanded={room}
-          >
-            View in your space <Maximize2 aria-hidden="true" />
-          </button>
           <div className="assurances">
             <p>
               <ShieldCheck aria-hidden="true" />{" "}
