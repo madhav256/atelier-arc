@@ -144,6 +144,7 @@ export default function Catalog() {
   useDocumentMeta('Artworks', 'Browse original paintings, sculpture, works on paper, photography and editions.');
   const [params, setParams] = useSearchParams();
   const [drawer, setDrawer] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const search = useRef(null);
   const apiParams = applyPriceParam(params);
   apiParams.delete('focus');
@@ -151,7 +152,10 @@ export default function Catalog() {
   const query = useQuery({ queryKey: ['artworks', apiParams.toString()], queryFn: () => api(`/artworks?${apiParams}`, { raw: true }), placeholderData: keepPreviousData });
   const facets = useQuery({ queryKey: ['facets'], queryFn: () => api('/artworks/facets'), staleTime: 5 * 60_000 });
   useEffect(() => {
-    if (params.get('focus') === 'search') search.current?.focus();
+    if (params.get('focus') === 'search') {
+      setSearchOpen(true);
+      search.current?.focus();
+    }
   }, [params]);
   // Tap anywhere outside the open filters drawer (the scrim) or press Escape to close it.
   useEffect(() => {
@@ -190,11 +194,14 @@ export default function Catalog() {
         <h1>Artworks</h1>
         <p>Singular works, selected for depth, material intelligence, and enduring presence.</p>
       </div>
-      <div className="catalog-tools">
-        <form className="search" role="search" onSubmit={(e) => (e.preventDefault(), set({ search: search.current.value.trim() }))}>
+      <div className={`catalog-tools${searchOpen ? ' search-open' : ''}`}>
+        <form className="search" role="search" onSubmit={(e) => (e.preventDefault(), set({ search: search.current.value.trim() }), setSearchOpen(false))}>
           <Search aria-hidden="true" />
           <input ref={search} type="search" aria-label="Search artworks" placeholder="Search artist, title, medium…" defaultValue={params.get('search') || ''} key={params.get('search') || ''} />
         </form>
+        <button type="button" className="search-toggle" aria-label="Search artworks" aria-expanded={searchOpen} onClick={() => { setSearchOpen(true); requestAnimationFrame(() => search.current?.focus()); }}>
+          <Search aria-hidden="true" />
+        </button>
         <button className="filter-button" onClick={() => setDrawer(true)} aria-expanded={drawer} aria-controls="filters">
           <SlidersHorizontal aria-hidden="true" /> Filter{active.length ? ` (${active.length})` : ''}
         </button>
