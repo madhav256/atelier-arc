@@ -26,7 +26,7 @@ export function HeroCarousel({ works }) {
     const from = prev.current;
     prev.current = index;
     frames.forEach((f, i) => f.classList.toggle('is-active', i === index));
-    const copy = el.querySelectorAll('.hero-copy > *');
+    const copy = el.querySelectorAll('.hero-copy > *:not(.hero-brand)');
     if (reducedMotion() || from === index) {
       gsap.set(frames[index], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: 2 });
       if (from === index) gsap.fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: reducedMotion() ? 0 : 1.4, ease: EASE, stagger: 0.08, delay: 0.5, clearProps: 'clipPath,transform' });
@@ -59,6 +59,24 @@ export function HeroCarousel({ works }) {
     else t.pause();
   }, [index, playing, hovered]);
 
+  // Arrow-key navigation while the hero is on screen (ignored while typing or when a dialog is open).
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' || n < 2) return;
+      const el = root.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      const t = e.target;
+      const tag = (t.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || t.isContentEditable || document.querySelector('dialog[open]')) return;
+      e.preventDefault();
+      go(index + (e.key === 'ArrowRight' ? 1 : -1));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [index, n]);
+
   // Parallax: the image drifts slower than the page as you scroll past.
   useEffect(() => {
     if (reducedMotion() || !root.current) return;
@@ -70,6 +88,21 @@ export function HeroCarousel({ works }) {
     return () => ctx.revert();
   }, []);
 
+  const touch = useRef(null);
+  const onTouchStart = (e) => {
+    const t = e.touches[0];
+    touch.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e) => {
+    const s = touch.current;
+    touch.current = null;
+    if (!s || n < 2) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) go(index + (dx < 0 ? 1 : -1));
+  };
+
   const w = slides[index];
   const pad = (x) => String(x).padStart(2, '0');
   return (
@@ -78,6 +111,9 @@ export function HeroCarousel({ works }) {
       ref={root}
       aria-roledescription="carousel"
       aria-label="Featured acquisitions"
+      aria-keyshortcuts="ArrowLeft ArrowRight"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setHovered(true)}
@@ -92,6 +128,7 @@ export function HeroCarousel({ works }) {
       </div>
       <div className="hero-shade" />
       <div className="hero-copy" aria-live={playing ? 'off' : 'polite'}>
+        <p className="hero-brand">Original contemporary art, sourced directly from artists.</p>
         <span className="eyebrow">
           FEATURED ACQUISITION · {pad(index + 1)} / {pad(n)}
         </span>
