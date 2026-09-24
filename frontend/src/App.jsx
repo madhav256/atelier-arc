@@ -33,6 +33,12 @@ const CollectionDetail = named(
 const Advisory = lazy(() => import("./pages/Advisory"));
 const Verify = lazy(() => import("./pages/Verify"));
 const Guarantee = lazy(() => import("./pages/Guarantee"));
+const Privacy = lazy(() =>
+  import("./pages/Legal").then((m) => ({ default: m.Privacy })),
+);
+const Terms = lazy(() =>
+  import("./pages/Legal").then((m) => ({ default: m.Terms })),
+);
 const BookViewing = lazy(() => import("./pages/Viewings"));
 const AccountViewings = named(() => import("./pages/Viewings"), "AccountViewings");
 const TasteQuiz = lazy(() => import("./pages/TasteQuiz"));
@@ -86,6 +92,8 @@ const router = createBrowserRouter([
       { path: "/advisory", element: <Advisory /> },
       { path: "/taste", element: <TasteQuiz /> },
       { path: "/guarantee", element: <Guarantee /> },
+              { path: "/privacy", element: <Privacy /> },
+              { path: "/terms", element: <Terms /> },
       { path: "/viewings/book", element: <BookViewing /> },
       { path: "/verify", element: <Verify /> },
       { path: "/verify/:code", element: <Verify /> },
