@@ -29,6 +29,7 @@ export const address = z.object({
 export const auth = {
   register: z.object({ name: text(120).min(2), email, password }),
   login: z.object({ email, password: z.string().min(1).max(128) }),
+  google: z.object({ credential: z.string().min(20).max(4096) }),
   email: z.object({ email }),
   reset: z.object({ token: z.string().min(20).max(200), password }),
   verify: z.object({ token: z.string().min(20).max(200) }),
