@@ -186,3 +186,6 @@ body{overflow-x:clip}
 .price-list a:hover b,.price-list a:focus-visible b{color:#ceb370}
 .price-list a:hover svg,.price-list a:focus-visible svg{transform:translateX(.5rem)}
 @media(prefers-reduced-motion:reduce){.hero-frame img{transform:none}.page-curtain{display:none}}
+
+/* Keep horizontal overflow from widening the mobile layout viewport (it shrank the hero to half width). */
+html,body{overflow-x:clip}
