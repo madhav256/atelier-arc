@@ -1,0 +1,30 @@
+name: Fetch genre images
+on:
+  push:
+    paths:
+      - '.github/workflows/fetch-genre-images.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and extract images
+        run: |
+          set -e
+          if [ -f frontend/public/art/work-41.jpg ]; then echo "images already present"; exit 0; fi
+          curl -fsSL "https://tmpfiles.org/dl/1790353183.0359136fb2059d27/wiwVEnrHe6Ry/genre-images.tar.gz" -o /tmp/img.tgz
+          tar xzf /tmp/img.tgz -C frontend/public/art --exclude='new-works-plan.json'
+          ls frontend/public/art | sort | tail -20
+      - name: Commit images
+        run: |
+          git config user.name "madhav256"
+          git config user.email "madhav256@users.noreply.github.com"
+          git add frontend/public/art
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "Add 16 genre artwork images (work-26..41)"
+          git push
