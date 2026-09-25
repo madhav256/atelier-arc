@@ -238,7 +238,7 @@ function Input({ def, value, onChange, error, artists }) {
   if (kind === 'image')
     return (
       <div className="field">
-        <Field {...common} type="url" value={value} onChange={(e) => onChange(e.target.value)} hint="Paste a URL or upload" />
+        <Field {...common} type="text" value={value} onChange={(e) => onChange(e.target.value)} hint="Paste a URL or upload" />
         {value && <img src={value} alt="" className="thumb" />}
         <ImageUpload onUploaded={(img) => onChange(img.url)} />
       </div>
