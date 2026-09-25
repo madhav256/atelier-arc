@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Pause, Play } from 'lucide-react';
 import { money } from '../lib/api';
-import { gsap, EASE, EASE_IN_OUT, reducedMotion, ScrollTrigger } from '../lib/motion';
+import { gsap, EASE, EASE_IN_OUT, reducedMotion, ScrollTrigger, revealWords } from '../lib/motion';
 
 const HOLD = 8; // seconds each work stays on screen
 
@@ -26,10 +26,14 @@ export function HeroCarousel({ works }) {
     const from = prev.current;
     prev.current = index;
     frames.forEach((f, i) => f.classList.toggle('is-active', i === index));
-    const copy = el.querySelectorAll('.hero-copy > *:not(.hero-brand)');
+    const copy = el.querySelectorAll('.hero-copy > *:not(.hero-brand):not(h1)');
+    const h1 = el.querySelector('.hero-copy h1');
     if (reducedMotion() || from === index) {
       gsap.set(frames[index], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: 2 });
-      if (from === index) gsap.fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: reducedMotion() ? 0 : 1.4, ease: EASE, stagger: 0.08, delay: 0.5, clearProps: 'clipPath,transform' });
+      if (from === index && !reducedMotion()) {
+        revealWords(h1, { delay: 0.45, duration: 1.3, stagger: 0.07 });
+        gsap.fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: 1.4, ease: EASE, stagger: 0.08, delay: 0.5, clearProps: 'clipPath,transform' });
+      }
       return;
     }
     const next = frames[index];
@@ -40,7 +44,8 @@ export function HeroCarousel({ works }) {
     tl.fromTo(next, { zIndex: 2, clipPath: 'inset(0% 0% 0% 100%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.8, ease: EASE_IN_OUT }, 0)
       .fromTo(img, { scale: 1.18, xPercent: 4 }, { scale: 1.04, xPercent: 0, duration: 2.6, ease: EASE }, 0)
       .to(frames[from].querySelector('img'), { scale: 1.1, xPercent: -6, duration: 1.8, ease: EASE_IN_OUT }, 0)
-      .fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: 1.3, ease: EASE, stagger: 0.08, clearProps: 'clipPath,transform' }, 0.7);
+      .fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: 1.3, ease: EASE, stagger: 0.08, clearProps: 'clipPath,transform' }, 0.7)
+      .add(() => revealWords(h1, { duration: 1.2, stagger: 0.06 }), 0.75);
     return () => tl.progress(1).kill();
   }, [index]);
 
