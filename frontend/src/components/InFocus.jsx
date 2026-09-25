@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -26,7 +26,9 @@ export function InFocus() {
   const works = (q.data || []).map((w, i) => (w ? { ...w, genre: GENRE_WALK[i][0] } : null)).filter(Boolean);
   const root = useRef(null);
   const track = useRef(null);
-  useEffect(() => {
+  // Layout effect: the pin-spacer must unwrap before React detaches this DOM,
+  // or unmounting Home crashes the whole tree (removeChild mismatch).
+  useLayoutEffect(() => {
     if (works.length < 3) return undefined;
     return horizontalScroll(root.current, track.current);
   }, [works.length]);
