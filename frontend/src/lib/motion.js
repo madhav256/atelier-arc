@@ -148,3 +148,28 @@ export function revealWords(el, { delay = 0, duration = 1.15, stagger = 0.055 } 
   if (!targets.length) return;
   gsap.fromTo(targets, { yPercent: 112, rotate: 1.5 }, { yPercent: 0, rotate: 0, duration, delay, ease: EASE, stagger, clearProps: 'transform' });
 }
+
+// Pinned horizontal walk: the section sticks while its track slides across,
+// driven by vertical scroll. Inert under reduced motion (the track stays a
+// native horizontal scroller there).
+export function horizontalScroll(section, track) {
+  if (reducedMotion() || !section || !track) return () => {};
+  const ctx = gsap.context(() => {
+    const distance = () => Math.max(0, track.scrollWidth - section.clientWidth);
+    gsap.to(track, {
+      x: () => -distance(),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: () => '+=' + distance(),
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
+  }, section);
+  ScrollTrigger.refresh();
+  return () => ctx.revert();
+}
