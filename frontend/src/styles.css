@@ -202,3 +202,10 @@ html,body{overflow-x:clip}
 .nav-scrim.show{opacity:1;visibility:visible}
 .site-header:has(nav.open) .header-tools{visibility:hidden}
 .nav-close{display:block;position:absolute;top:1.5rem;right:1.5rem;color:#f4f0e8}
+
+/* Motion helpers */
+.wm{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.12em;margin-bottom:-.12em}
+.wm-i{display:inline-block;will-change:transform}
+.art-zoom{display:block;height:100%;will-change:transform}
+.magnetic{display:inline-block;will-change:transform}
+.detail-info .magnetic{display:block;width:100%}
