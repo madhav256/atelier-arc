@@ -82,12 +82,13 @@ export function HeroCarousel({ works }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [index, n]);
 
-  // Parallax: the image drifts slower than the page as you scroll past.
+  // Scroll exit: the stage sinks and swells while the copy lifts away and fades.
   useEffect(() => {
     if (reducedMotion() || !root.current) return;
     const ctx = gsap.context(() => {
-      gsap.to('.hero-stage', { yPercent: 14, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true } });
-      gsap.to('.hero-copy', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.to('.hero-stage', { yPercent: 16, scale: 1.08, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.to('.hero-copy', { yPercent: -30, autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: '75% top', scrub: true } });
+      gsap.to('.hero-controls, .hero-mark', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: '45% top', scrub: true } });
     }, root);
     ScrollTrigger.refresh();
     return () => ctx.revert();
@@ -135,12 +136,12 @@ export function HeroCarousel({ works }) {
       <div className="hero-copy" aria-live={playing ? 'off' : 'polite'}>
         <p className="hero-brand">Original contemporary art, sourced directly from artists.</p>
         <span className="eyebrow">
-          FEATURED ACQUISITION · {pad(index + 1)} / {pad(n)}
+          FEATURED ACQUISITION Â· {pad(index + 1)} / {pad(n)}
         </span>
         <h1>{w.title}</h1>
         <p className="artist">{w.artist?.name}</p>
         <p>
-          {w.year} · {w.medium}
+          {w.year} Â· {w.medium}
           <br />
           {w.priceOnRequest ? 'Price on request' : money(w.price)}
         </p>
