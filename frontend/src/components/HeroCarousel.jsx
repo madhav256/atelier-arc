@@ -136,12 +136,12 @@ export function HeroCarousel({ works }) {
       <div className="hero-copy" aria-live={playing ? 'off' : 'polite'}>
         <p className="hero-brand">Original contemporary art, sourced directly from artists.</p>
         <span className="eyebrow">
-          FEATURED ACQUISITION Â· {pad(index + 1)} / {pad(n)}
+          FEATURED ACQUISITION · {pad(index + 1)} / {pad(n)}
         </span>
         <h1>{w.title}</h1>
         <p className="artist">{w.artist?.name}</p>
         <p>
-          {w.year} Â· {w.medium}
+          {w.year} · {w.medium}
           <br />
           {w.priceOnRequest ? 'Price on request' : money(w.price)}
         </p>
