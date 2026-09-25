@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api as request } from '../lib/api';
 
 // Opening set: one statement piece per corner of the gallery.
-const HERO_SLUGS = ['night-swimming', 'monsoon-sentinel', 'river-weave', 'sea-face-at-noon', 'the-kiln-keeper', 'temple-court'];
+const HERO_SLUGS = ['night-swimming', 'monsoon-sentinel', 'river-weave', 'sea-face-at-noon', 'ember-jar', 'temple-court'];
 
 function GenreMarquee() {
   const items = ['Paintings', 'Sculptures', 'Photography', 'Ceramics', 'Textiles', 'Prints', 'Works on Paper', 'Mixed Media', 'Digital Art'];
