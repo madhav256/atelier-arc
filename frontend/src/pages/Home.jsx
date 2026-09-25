@@ -46,7 +46,7 @@ export default function Home() {
   const hero = heroWorks[0];
   return (
     <>
-      {hero ? <HeroCarousel works={heroWorks} /> : <section className="hero hero-loading" aria-busy="true" aria-label="Loading featured work" />}
+      {heroQ.data && hero ? <HeroCarousel works={heroWorks} /> : <section className="hero hero-loading" aria-busy="true" aria-label="Loading featured work" />}
       <section className="intro">
         <span className="eyebrow">
           <i>01</i> Curated with intention
