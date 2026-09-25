@@ -10,7 +10,7 @@ import {
   RotateCcw,
   Play,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RETURN_DAYS } from "../content/guarantee";
 import { ArView } from "../components/ArView";
 import { api, apiUrl, money, label } from "../lib/api";
@@ -23,6 +23,9 @@ import { useDocumentMeta } from "../hooks/useDocumentMeta";
 import { useCart } from "../hooks/useCart";
 import { useCollection } from "../hooks/useCollection";
 import { useSession } from "../hooks/useSession";
+import { animate, useInView } from "motion/react";
+import { reducedMotion } from "../lib/motion";
+import { Magnetic } from "../components/Magnetic";
 
 export default function ArtworkDetail() {
   const { slug } = useParams();
@@ -51,6 +54,20 @@ function Detail({ artwork: a }) {
   const [added, setAdded] = useState(false);
   const [view, setView] = useState("image");
   const film = useRef(null);
+  const priceRef = useRef(null);
+  const priceInView = useInView(priceRef, { once: true, margin: "0px 0px -8% 0px" });
+  useEffect(() => {
+    const node = priceRef.current;
+    if (!priceInView || !node || reducedMotion() || a.priceOnRequest || a.price == null) return;
+    const controls = animate(0, a.price, {
+      duration: 1.7,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (v) => {
+        node.textContent = money(Math.max(0, Math.round(v / 100) * 100), a.currency);
+      },
+    });
+    return () => controls.stop();
+  }, [priceInView, a.price, a.priceOnRequest, a.currency]);
   const dialog = useRef(null);
   const fullscreen = useRef(null);
   const alert = useMutation({
@@ -151,7 +168,7 @@ function Detail({ artwork: a }) {
               <dd className={a.availability}>{label(a.availability)}</dd>
             </div>
           </dl>
-          <p className="detail-price">
+          <p className="detail-price" ref={priceRef}>
             {a.priceOnRequest ? "Price on request" : money(a.price, a.currency)}
           </p>
           {purchasable ? (
@@ -160,27 +177,31 @@ function Detail({ artwork: a }) {
                 In your bag · Review
               </Link>
             ) : (
-              <button
-                className="button"
-                onClick={() =>
-                  add.mutate(a._id, { onSuccess: () => setAdded(true) })
-                }
-                disabled={add.isPending}
-              >
-                {add.isPending ? "Adding…" : "Add to acquisition bag"}
-              </button>
+              <Magnetic>
+                <button
+                  className="button"
+                  onClick={() =>
+                    add.mutate(a._id, { onSuccess: () => setAdded(true) })
+                  }
+                  disabled={add.isPending}
+                >
+                  {add.isPending ? "Adding…" : "Add to acquisition bag"}
+                </button>
+              </Magnetic>
             )
           ) : (
-            <button
-              className="button"
-              onClick={() => dialog.current?.showModal()}
-            >
-              {a.availability === "sold"
-                ? "Ask about similar works"
-                : a.priceOnRequest
-                  ? "Request price"
-                  : "Inquire"}
-            </button>
+            <Magnetic>
+              <button
+                className="button"
+                onClick={() => dialog.current?.showModal()}
+              >
+                {a.availability === "sold"
+                  ? "Ask about similar works"
+                  : a.priceOnRequest
+                    ? "Request price"
+                    : "Inquire"}
+              </button>
+            </Magnetic>
           )}
           {add.error && (
             <p className="form-error" role="alert">
