@@ -116,3 +116,35 @@ export function pageEnter(curtain, main) {
   if (main) tl.fromTo(main, { y: 28 }, { y: 0, duration: 1.2, ease: EASE, clearProps: 'transform' }, 0.25);
   return () => tl.kill();
 }
+
+// Splits an element's text into masked word spans so headlines can rise
+// word by word. The original text is preserved as an aria-label; the visual
+// spans are aria-hidden. Re-split after the text changes.
+export function maskWords(el) {
+  if (!el) return [];
+  const text = el.textContent.trim();
+  if (!text) return [];
+  el.textContent = '';
+  el.setAttribute('aria-label', text);
+  const words = text.split(/\s+/);
+  const targets = words.map((word, i) => {
+    const mask = document.createElement('span');
+    mask.className = 'wm';
+    mask.setAttribute('aria-hidden', 'true');
+    const inner = document.createElement('span');
+    inner.className = 'wm-i';
+    inner.textContent = word;
+    mask.appendChild(inner);
+    el.appendChild(mask);
+    if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+    return inner;
+  });
+  return targets;
+}
+
+// Masked-word rise for a headline: words slide up out of their masks.
+export function revealWords(el, { delay = 0, duration = 1.15, stagger = 0.055 } = {}) {
+  const targets = maskWords(el);
+  if (!targets.length) return;
+  gsap.fromTo(targets, { yPercent: 112, rotate: 1.5 }, { yPercent: 0, rotate: 0, duration, delay, ease: EASE, stagger, clearProps: 'transform' });
+}
