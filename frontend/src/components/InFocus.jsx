@@ -55,7 +55,7 @@ export function InFocus() {
             <span className="if-genre">{w.genre}</span>
             <h3>{w.title}</h3>
             <p>
-              {w.artist?.name} Â· {w.priceOnRequest ? 'Price on request' : money(w.price)}
+              {w.artist?.name} · {w.priceOnRequest ? 'Price on request' : money(w.price)}
             </p>
           </Link>
         ))}
