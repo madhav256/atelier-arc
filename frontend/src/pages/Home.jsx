@@ -18,7 +18,7 @@ function GenreMarquee() {
       {items.map((t) => (
         <span key={t}>
           {t}
-          <i aria-hidden="true">Â·</i>
+          <i aria-hidden="true">·</i>
         </span>
       ))}
     </div>
@@ -104,7 +104,7 @@ export default function Home() {
                 <Link to={`/journal/${st.slug}`}>
                   <img src={st.coverImage} alt="" loading="lazy" />
                   <span>
-                    {String(st.type || '').toUpperCase()} Â· {st.readingTime} MIN READ
+                    {String(st.type || '').toUpperCase()} · {st.readingTime} MIN READ
                   </span>
                   <h3>{st.title}</h3>
                 </Link>
@@ -136,11 +136,11 @@ export default function Home() {
 
 function PriceStory() {
   const tiers = [
-    ['Under â¹50,000', 'Discover'],
-    ['â¹50,000 â â¹1L', 'Begin'],
-    ['â¹1L â â¹5L', 'Collect'],
-    ['â¹5L â â¹10L', 'Invest'],
-    ['â¹10L+', 'Acquire'],
+    ['Under ₹50,000', 'Discover'],
+    ['₹50,000 – ₹1L', 'Begin'],
+    ['₹1L – ₹5L', 'Collect'],
+    ['₹5L – ₹10L', 'Invest'],
+    ['₹10L+', 'Acquire'],
   ];
   return (
     <section className="price-story">
