@@ -482,3 +482,7 @@ img{color:transparent}
 .checkout-flow .choice input[type=checkbox]:checked{border-color:var(--gold-text)}
 .checkout-flow .choice input[type=checkbox]:checked:before{transform:rotate(-45deg) scale(1)}
 @media(max-width:640px){.checkout-flow .choice{padding:1.1rem 1.15rem;gap:.9rem}.choice>span{font-size:1.02rem}.choice>b{font-size:1.02rem}}
+
+/* ---- Modal scroll lock: dialog scrolls itself, page behind stays put ---- */
+body:has(dialog[open]){overflow:hidden}
+dialog{max-height:calc(100dvh - 3rem);max-height:calc(100vh - 3rem);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
