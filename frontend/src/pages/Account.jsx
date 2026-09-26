@@ -1013,4 +1013,12 @@ export function AccountSettings() {
         <p>Sign out everywhere, including this device.</p>
         <button
           className="button ghost"
-    
+          onClick={() => logoutAll.mutate()}
+          disabled={logoutAll.isPending}
+        >
+          Sign out of all devices
+        </button>
+      </section>
+    </>
+  );
+}
