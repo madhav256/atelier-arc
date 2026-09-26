@@ -403,3 +403,14 @@ img{color:transparent}
 .site-footer .footer-meta a{display:inline}
 /* Homepage hero: quiet brand-orienting line above the featured-work eyebrow */
 .hero-brand{font:italic 1.05rem var(--serif);color:rgba(255,255,255,.85);margin:0 0 1.1rem;max-width:34ch}
+
+/* Viewport-fit pass: scale vertical rhythm to viewport height (desktop; loads last so it wins over rules above) */
+@media(min-width:901px){
+  section{padding-top:clamp(3rem,8vh,7rem);padding-bottom:clamp(3rem,8vh,7rem)}
+  .section{padding:clamp(3.5rem,9vh,8rem) var(--gutter)}
+  .section-head{margin-bottom:clamp(1.8rem,4vh,3rem);padding-bottom:clamp(1rem,2.5vh,2rem)}
+  .spotlight{padding-top:clamp(3rem,8vh,7rem);padding-bottom:clamp(3rem,8vh,7rem)}
+  .spotlight-image img{height:min(760px,70vh)}
+  .intro{padding:clamp(5rem,13vh,10rem) var(--gutter) clamp(4rem,11vh,9rem)}
+  .advisor-cta{padding:clamp(5rem,14vh,10rem) var(--gutter)}
+}
