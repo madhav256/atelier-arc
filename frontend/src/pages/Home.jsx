@@ -32,7 +32,7 @@ function GenreMarquee() {
 }
 
 export default function Home() {
-  useDocumentMeta('Exceptional contemporary art', 'Discover original contemporary art, private viewings, and collector advisory.');
+  useDocumentMeta('',  'Discover original contemporary art, private viewings, and collector advisory.');
   const featuredQ = useQuery({ queryKey: ['artworks', 'home-featured'], queryFn: () => request('/artworks?featured=true&limit=8') });
   const heroQ = useQuery({ queryKey: ['artworks', 'home-hero'], queryFn: () => Promise.all(HERO_SLUGS.map((s) => request('/artworks/' + s).catch(() => null))) });
   const curated = (heroQ.data || []).filter(Boolean);
