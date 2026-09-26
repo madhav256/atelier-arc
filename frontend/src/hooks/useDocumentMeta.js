@@ -17,7 +17,7 @@ function setMeta(attr, key, content) {
 export function useDocumentMeta(title, description, { image, type = 'website', jsonLd, noindex } = {}) {
   const ld = jsonLd ? JSON.stringify(jsonLd) : '';
   useEffect(() => {
-    const full = title ? `${title} — ${SITE}` : `${SITE} — Contemporary Art`;
+    const full = title ? `${title} — ${SITE}` : SITE;
     document.title = full;
     const url = location.origin + location.pathname;
     setMeta('name', 'description', description);
