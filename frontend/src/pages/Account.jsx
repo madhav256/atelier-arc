@@ -324,7 +324,7 @@ export function AccountOrder() {
             {(o.history || []).map((h, i) => (
               <li key={i}>
                 <b>{label(h.status)}</b> · {when(h.at)}
-                {h.note && ` — ${h.note}`}
+                {h.note && h.status !== "payment_failed" && ` — ${h.note}`}
               </li>
             ))}
           </ol>
@@ -1013,12 +1013,4 @@ export function AccountSettings() {
         <p>Sign out everywhere, including this device.</p>
         <button
           className="button ghost"
-          onClick={() => logoutAll.mutate()}
-          disabled={logoutAll.isPending}
-        >
-          Sign out of all devices
-        </button>
-      </section>
-    </>
-  );
-}
+    
