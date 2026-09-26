@@ -486,3 +486,6 @@ img{color:transparent}
 /* ---- Modal scroll lock: dialog scrolls itself, page behind stays put ---- */
 body:has(dialog[open]){overflow:hidden}
 dialog{max-height:calc(100dvh - 3rem);max-height:calc(100vh - 3rem);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+/* ---- Neutral pill for payment_failed (payments disabled) ---- */
+.pill-payment_failed{background:var(--paper);border-color:var(--line);color:var(--muted)}
