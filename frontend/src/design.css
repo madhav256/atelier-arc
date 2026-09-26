@@ -422,3 +422,18 @@ img{color:transparent}
   .art-grid-editorial>.art-card:nth-child(3){grid-column:7/10;grid-row:1;margin-top:0}
   .art-grid-editorial>.art-card:nth-child(4){grid-column:10/13;grid-row:1;margin-top:0}
 }
+
+/* Viewport-fit pass 2: walk fits with tighter gaps, spotlight contained, journal aligned, acquisitions images fill columns */
+@media(min-width:901px){
+  .in-focus{padding:clamp(2.5rem,6vh,5rem) 0 clamp(2rem,5vh,4rem)}
+  .in-focus-head{padding:0 6vw clamp(1.2rem,3vh,2.5rem)}
+  .in-focus-head h2{font-size:clamp(3rem,8.5vh,5.5rem)}
+  .in-focus-track{gap:clamp(1.5rem,3vw,3rem);align-items:flex-start}
+  .in-focus-card{width:min(24rem,60vw)}
+  .in-focus-card .if-image{height:38vh;max-height:none;width:100%}
+  .art-grid-editorial .art-image{height:40vh;max-height:none}
+  .spotlight-image{overflow:hidden}
+  .spotlight-image::before{inset:4%;transform:none;z-index:2;pointer-events:none}
+  .editorial img,.editorial article:last-child img{height:min(560px,52vh)}
+  .editorial article:first-child{margin-top:0}
+}
