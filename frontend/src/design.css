@@ -442,3 +442,9 @@ img{color:transparent}
 @media(min-width:769px){
   .hero{height:calc(100svh - 76px)}
 }
+
+/* Journal article pages (every category): calmer title scale, descender clearance over the dek, tighter gap under the site header */
+@media(min-width:901px){
+  .plain-page.story{padding-top:4.5rem}
+  .plain-page.story>h1{font-size:clamp(2.6rem,5.2vw,5.2rem);line-height:1.06;letter-spacing:-.045em;margin:0 0 1.4rem}
+}
