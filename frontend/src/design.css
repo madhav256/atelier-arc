@@ -437,3 +437,8 @@ img{color:transparent}
   .editorial img,.editorial article:last-child img{height:min(560px,52vh)}
   .editorial article:first-child{margin-top:0}
 }
+
+/* Hero: subtract the actual 76px header (design pass set it to 76; the 82px offset left a 6px sliver of the next section visible) */
+@media(min-width:769px){
+  .hero{height:calc(100svh - 76px)}
+}
