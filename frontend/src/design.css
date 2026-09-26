@@ -415,10 +415,10 @@ img{color:transparent}
   .advisor-cta{padding:clamp(5rem,14vh,10rem) var(--gutter)}
 }
 
-/* Viewport-fit: acquisitions as one staggered row on desktop (was a 2-row collage ~1258px tall, always cropped) */
+/* Viewport-fit: acquisitions as one aligned row on desktop (was a 2-row collage ~1258px tall, always cropped); user asked for even alignment, no stagger */
 @media(min-width:901px){
   .art-grid-editorial>.art-card:nth-child(1){grid-column:1/4;grid-row:1;margin-top:0}
-  .art-grid-editorial>.art-card:nth-child(2){grid-column:4/7;grid-row:1;margin-top:min(4rem,6vh)}
-  .art-grid-editorial>.art-card:nth-child(3){grid-column:7/10;grid-row:1;margin-top:min(1.5rem,2.5vh)}
-  .art-grid-editorial>.art-card:nth-child(4){grid-column:10/13;grid-row:1;margin-top:min(4.5rem,6.5vh)}
+  .art-grid-editorial>.art-card:nth-child(2){grid-column:4/7;grid-row:1;margin-top:0}
+  .art-grid-editorial>.art-card:nth-child(3){grid-column:7/10;grid-row:1;margin-top:0}
+  .art-grid-editorial>.art-card:nth-child(4){grid-column:10/13;grid-row:1;margin-top:0}
 }
