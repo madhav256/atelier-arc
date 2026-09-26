@@ -489,3 +489,8 @@ dialog{max-height:calc(100dvh - 3rem);max-height:calc(100vh - 3rem);overflow-y:a
 
 /* ---- Neutral pill for payment_failed (payments disabled) ---- */
 .pill-payment_failed{background:var(--paper);border-color:var(--line);color:var(--muted)}
+
+/* ---- Account area + forms: editorial link treatment, themed selects ---- */
+.account>a,.account-cards article>a,.notice a{font:500 .68rem var(--sans);letter-spacing:.13em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:.25rem;transition:color .25s,border-color .25s}
+.account>a:hover,.account-cards article>a:hover,.notice a:hover{color:var(--gold-text);border-color:var(--gold-text)}
+.field select,.checkout-flow select,.advisory-page select,.auth-page select,.admin-page select{appearance:none;-webkit-appearance:none;padding-right:2.4rem;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237a5f2c' stroke-width='1.2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;background-size:.7rem}
