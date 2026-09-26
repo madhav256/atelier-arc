@@ -17,13 +17,19 @@ export function HeroCarousel({ works }) {
   const progress = useRef(null);
   const n = slides.length;
   const go = (i) => {
-    // Advance only once the target slide image is ready, so image and copy land together.
+    // Choreography: outgoing copy exits first, then the image changes, then the new
+    // image and its copy arrive together. Advancement still waits for the target image.
     const target = ((i % n) + n) % n;
     if (target === index) return;
+    const advance = () => {
+      const copy = root.current?.querySelectorAll('.hero-copy > *:not(.hero-brand)');
+      if (!copy?.length || reducedMotion()) { setIndex(target); return; }
+      gsap.to(copy, { clipPath: 'inset(100% 0% 0% 0%)', y: -30, autoAlpha: 0, duration: 0.45, ease: EASE_IN_OUT, stagger: 0.04, onComplete: () => setIndex(target) });
+    };
     const img = root.current?.querySelectorAll('.hero-frame')[target]?.querySelector('img');
-    if (!img || (img.complete && img.naturalWidth > 0)) { setIndex(target); return; }
+    if (!img || (img.complete && img.naturalWidth > 0)) { advance(); return; }
     let done = false;
-    const finish = () => { if (!done) { done = true; setIndex(target); } };
+    const finish = () => { if (!done) { done = true; advance(); } };
     img.decode?.().then(finish).catch(finish);
     img.addEventListener('load', finish, { once: true });
     img.addEventListener('error', finish, { once: true });
@@ -40,6 +46,7 @@ export function HeroCarousel({ works }) {
     frames.forEach((f, i) => f.classList.toggle('is-active', i === index));
     const copy = el.querySelectorAll('.hero-copy > *:not(.hero-brand):not(h1)');
     const h1 = el.querySelector('.hero-copy h1');
+    gsap.set(el.querySelectorAll('.hero-copy > *:not(.hero-brand)'), { autoAlpha: 1 });
     if (reducedMotion() || from === index) {
       gsap.set(frames[index], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: 2 });
       if (from === index && !reducedMotion()) {
@@ -56,8 +63,8 @@ export function HeroCarousel({ works }) {
     tl.fromTo(next, { zIndex: 2, clipPath: 'inset(0% 0% 0% 100%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.8, ease: EASE_IN_OUT }, 0)
       .fromTo(img, { scale: 1.18, xPercent: 4 }, { scale: 1.04, xPercent: 0, duration: 2.6, ease: EASE }, 0)
       .to(frames[from].querySelector('img'), { scale: 1.1, xPercent: -6, duration: 1.8, ease: EASE_IN_OUT }, 0)
-      .fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: 1.3, ease: EASE, stagger: 0.08, clearProps: 'clipPath,transform' }, 0.7)
-      .add(() => revealWords(h1, { duration: 1.2, stagger: 0.06 }), 0.75);
+      .fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: 1.3, ease: EASE, stagger: 0.08, clearProps: 'clipPath,transform' }, 1.1)
+      .add(() => revealWords(h1, { duration: 1.2, stagger: 0.06 }), 1.15);
     return () => tl.progress(1).kill();
   }, [index]);
 
