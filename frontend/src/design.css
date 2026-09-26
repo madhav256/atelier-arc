@@ -453,3 +453,10 @@ img{color:transparent}
 @media(min-width:901px){
   .marquee-set span i{margin-right:1.1rem;font-size:1.2em}
 }
+
+/* Brand lockup images: header wordmark + hero watermark mark */
+.brand-img{height:52px;width:auto;display:block}
+.hero-mark img{width:22rem;height:auto;display:block}
+@media(max-width:900px){
+  .brand-img{height:44px}
+}
