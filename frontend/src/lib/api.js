@@ -69,4 +69,7 @@ export const money = (value, currency = 'INR') =>
 
 export const date = (value, opts = { dateStyle: 'medium' }) => (value ? new Intl.DateTimeFormat('en-IN', opts).format(new Date(value)) : '');
 
-export const label = (s) => String(s || '').replaceAll('_', ' ');
+const STATUS_LABELS = { payment_failed: 'payment not enabled' };
+
+export const label = (s) => STATUS_LABELS[s] || String(s || '').replaceAll('_', ' ');
+
