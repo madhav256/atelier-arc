@@ -11,7 +11,7 @@ const ARTISTS = [
  {
   "name": "Aarav Sen",
   "slug": "aarav-sen",
-  "portrait": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+  "portrait": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
   "biography": "Aarav Sen works across material, memory, and contemporary life. Their measured practice has been shown in independent spaces and private collections across South Asia.",
   "nationality": "Indian",
   "location": "Mumbai",
