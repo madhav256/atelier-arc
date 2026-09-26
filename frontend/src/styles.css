@@ -225,7 +225,7 @@ html,body{overflow-x:clip}
 .intro p{margin:clamp(1.5rem,4vh,3rem) auto 0}
 section{padding:clamp(3.5rem,9vh,7rem) 4vw}
 .section-head{margin-bottom:clamp(1.75rem,4.5vh,3.5rem)}
-.section .art-image{max-height:46vh}
+.section .art-image{max-height:42vh}
 .spotlight-image img{height:min(750px,74vh)}
 .editorial img{height:min(580px,58vh)}
 .editorial article:last-child img{height:min(430px,44vh)}
@@ -235,4 +235,4 @@ section{padding:clamp(3.5rem,9vh,7rem) 4vw}
 .price-story{padding:clamp(4rem,12vh,10rem) 7vw}
 .in-focus{padding:clamp(3rem,8vh,8rem) 0 clamp(2rem,6vh,6rem)}
 .in-focus-head{padding:0 6vw clamp(1.5rem,4vh,3.5rem)}
-.if-image{max-height:46vh}
+.if-image{max-height:42vh}
