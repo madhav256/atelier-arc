@@ -16,7 +16,19 @@ export function HeroCarousel({ works }) {
   const prev = useRef(0);
   const progress = useRef(null);
   const n = slides.length;
-  const go = (i) => setIndex(((i % n) + n) % n);
+  const go = (i) => {
+    // Advance only once the target slide image is ready, so image and copy land together.
+    const target = ((i % n) + n) % n;
+    if (target === index) return;
+    const img = root.current?.querySelectorAll('.hero-frame')[target]?.querySelector('img');
+    if (!img || (img.complete && img.naturalWidth > 0)) { setIndex(target); return; }
+    let done = false;
+    const finish = () => { if (!done) { done = true; setIndex(target); } };
+    img.decode?.().then(finish).catch(finish);
+    img.addEventListener('load', finish, { once: true });
+    img.addEventListener('error', finish, { once: true });
+    setTimeout(finish, 3000);
+  };
 
   // Transition between works
   useEffect(() => {
@@ -49,12 +61,23 @@ export function HeroCarousel({ works }) {
     return () => tl.progress(1).kill();
   }, [index]);
 
+  // Preload every slide image up front so advancing never waits on the network.
+  useEffect(() => {
+    slides.forEach((s) => {
+      const src = s?.images?.[0]?.url;
+      if (!src) return;
+      const im = new Image();
+      im.src = src;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Autoplay with a hairline progress bar; pauses on hover, focus, or the pause button.
   const tween = useRef(null);
   useEffect(() => {
     const bar = progress.current;
     if (!bar || n < 2) return;
-    tween.current = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: HOLD, ease: 'none', paused: true, onComplete: () => setIndex((i) => (i + 1) % n) });
+    tween.current = gsap.fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: HOLD, ease: 'none', paused: true, onComplete: () => go(index + 1) });
     return () => tween.current?.kill();
   }, [index, n]);
   useEffect(() => {
