@@ -448,3 +448,8 @@ img{color:transparent}
   .plain-page.story{padding-top:4.5rem}
   .plain-page.story>h1{font-size:clamp(2.6rem,5.2vw,5.2rem);line-height:1.06;letter-spacing:-.045em;margin:0 0 1.4rem}
 }
+
+/* Genre marquee: more air between the separator dot and the following word, dot slightly larger */
+@media(min-width:901px){
+  .marquee-set span i{margin-right:1.1rem;font-size:1.2em}
+}
