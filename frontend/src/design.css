@@ -455,8 +455,8 @@ img{color:transparent}
 }
 
 /* Brand lockup images: header wordmark + hero watermark mark */
-.brand-img{height:52px;width:auto;display:block}
+.brand-img{height:62px;width:auto;display:block}
 .hero-mark img{width:22rem;height:auto;display:block}
 @media(max-width:900px){
-  .brand-img{height:44px}
+  .brand-img{height:52px}
 }
