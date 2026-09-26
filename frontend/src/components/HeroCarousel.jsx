@@ -46,7 +46,8 @@ export function HeroCarousel({ works }) {
     frames.forEach((f, i) => f.classList.toggle('is-active', i === index));
     const copy = el.querySelectorAll('.hero-copy > *:not(.hero-brand):not(h1)');
     const h1 = el.querySelector('.hero-copy h1');
-    gsap.set(el.querySelectorAll('.hero-copy > *:not(.hero-brand)'), { autoAlpha: 1 });
+    // Clear the exit tween's leftover clip/transform/opacity from the reused copy nodes.
+    gsap.set(el.querySelectorAll('.hero-copy > *:not(.hero-brand)'), { autoAlpha: 1, clearProps: 'clipPath,transform' });
     if (reducedMotion() || from === index) {
       gsap.set(frames[index], { clipPath: 'inset(0% 0% 0% 0%)', zIndex: 2 });
       if (from === index && !reducedMotion()) {
@@ -55,6 +56,8 @@ export function HeroCarousel({ works }) {
       }
       return;
     }
+    // Keep the title hidden until its masked-word reveal lands with the image.
+    gsap.set(h1, { autoAlpha: 0 });
     const next = frames[index];
     const img = next.querySelector('img');
     const tl = gsap.timeline();
@@ -64,7 +67,7 @@ export function HeroCarousel({ works }) {
       .fromTo(img, { scale: 1.18, xPercent: 4 }, { scale: 1.04, xPercent: 0, duration: 2.6, ease: EASE }, 0)
       .to(frames[from].querySelector('img'), { scale: 1.1, xPercent: -6, duration: 1.8, ease: EASE_IN_OUT }, 0)
       .fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)', y: 40 }, { clipPath: 'inset(0% 0% -25% 0%)', y: 0, duration: 1.3, ease: EASE, stagger: 0.08, clearProps: 'clipPath,transform' }, 1.1)
-      .add(() => revealWords(h1, { duration: 1.2, stagger: 0.06 }), 1.15);
+      .add(() => { gsap.set(h1, { autoAlpha: 1 }); revealWords(h1, { duration: 1.2, stagger: 0.06 }); }, 1.15);
     return () => tl.progress(1).kill();
   }, [index]);
 
@@ -164,7 +167,6 @@ export function HeroCarousel({ works }) {
       </div>
       <div className="hero-shade" />
       <div className="hero-copy" aria-live={playing ? 'off' : 'polite'}>
-        <p className="hero-brand">Original contemporary art, sourced directly from artists.</p>
         <span className="eyebrow">
           FEATURED ACQUISITION · {pad(index + 1)} / {pad(n)}
         </span>
