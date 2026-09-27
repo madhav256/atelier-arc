@@ -7,6 +7,7 @@ import { applyPriceParam, bandForPriceParam } from '../lib/priceBands';
 import { ArtworkCard } from '../components/ArtworkCard';
 import { Loading, ErrorState, Empty } from '../components/States';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
+import { kineticize } from '../lib/kinetic';
 
 // Filter option names arrive lowercase from the API; the panel shows them capitalized.
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -146,11 +147,14 @@ export default function Catalog() {
   const [drawer, setDrawer] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const search = useRef(null);
+  const titleRef = useRef(null);
   const apiParams = applyPriceParam(params);
   apiParams.delete('focus');
   if (!apiParams.get('limit')) apiParams.set('limit', '24');
   const query = useQuery({ queryKey: ['artworks', apiParams.toString()], queryFn: () => api(`/artworks?${apiParams}`, { raw: true }), placeholderData: keepPreviousData });
   const facets = useQuery({ queryKey: ['facets'], queryFn: () => api('/artworks/facets'), staleTime: 5 * 60_000 });
+  // Split the display heading into kinetic letters (fill <-> gold outline cycle).
+  useEffect(() => kineticize(titleRef.current), []);
   useEffect(() => {
     if (params.get('focus') === 'search') {
       setSearchOpen(true);
@@ -191,7 +195,7 @@ export default function Catalog() {
     <section className="catalog">
       <div className="catalog-title">
         <span className="eyebrow">THE COLLECTION</span>
-        <h1>Artworks</h1>
+        <h1 ref={titleRef}>Artworks</h1>
         <p>Singular works, selected for depth, material intelligence, and enduring presence.</p>
       </div>
       <div className={`catalog-tools${searchOpen ? ' search-open' : ''}`}>
