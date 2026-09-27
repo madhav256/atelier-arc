@@ -6,12 +6,17 @@ Atelier Arc is a luxury contemporary art dealership platform built with React, E
 
 - **Live Demo:** [https://atelier-arc.onrender.com](https://atelier-arc.onrender.com)
 - **API:** [https://atelier-arc-api.onrender.com/api/v1](https://atelier-arc-api.onrender.com/api/v1)
+- **Stack:** MongoDB · Express · React 18 · Node.js · Vite · Vitest · Playwright
 
 Both services run on Render's free tier, so the first request after an idle stretch can take up to a minute while the instance spins up. That is the hosting plan, not the app.
 
 The interface follows an editorial gallery direction: ink on warm paper, serif display headings, restrained motion that honours `prefers-reduced-motion`, and artwork photography doing the talking.
 
+## Screenshots
+
 ![Storefront hero - curated artwork carousel](docs/screenshots/hero-desktop.png)
+
+![Storefront hero - second curation in the carousel set](docs/screenshots/hero-desktop-alt.png)
 
 <p align="center"><img src="docs/screenshots/hero-mobile.png" alt="Storefront hero on mobile" width="320"></p>
 
