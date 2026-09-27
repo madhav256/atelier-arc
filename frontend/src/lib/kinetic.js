@@ -1,0 +1,39 @@
+// Kinetic display headings (reference: allthingswtf.com kinetic type, restrained
+// to the gallery palette): an element's text is split into per-letter spans that
+// slowly cycle between solid ink and a thin gold outline. The animation itself
+// is CSS (design.css, ktCycle) and only runs under prefers-reduced-motion:
+// no-preference; this helper only prepares the markup. The heading keeps its
+// full text as an aria-label and the letter spans are aria-hidden, so screen
+// readers and accessibility contrast checks see the plain heading.
+
+function kineticizeNode(node) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const frag = document.createDocumentFragment();
+    for (const ch of node.textContent) {
+      const s = document.createElement('span');
+      s.className = 'kt';
+      s.setAttribute('aria-hidden', 'true');
+      s.textContent = ch;
+      // Random negative delay and slightly varied period keep the cycle organic
+      // rather than a metronome sweep across the word.
+      s.style.setProperty('--kt-delay', `${(-Math.random() * 12).toFixed(2)}s`);
+      s.style.setProperty('--kt-dur', `${(7 + Math.random() * 6).toFixed(2)}s`);
+      frag.appendChild(s);
+    }
+    node.replaceWith(frag);
+    return;
+  }
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    [...node.childNodes].forEach(kineticizeNode);
+  }
+}
+
+// Splits el's text (inline markup such as <em> and <br> is preserved) and marks
+// it kinetic. Idempotent; headings are page-permanent, so no teardown is needed.
+export function kineticize(el) {
+  if (!el || el.classList.contains('kinetic')) return () => {};
+  el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim());
+  [...el.childNodes].forEach(kineticizeNode);
+  el.classList.add('kinetic');
+  return () => {};
+}
