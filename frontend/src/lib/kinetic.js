@@ -1,3 +1,5 @@
+import { gsap, reducedMotion } from './motion';
+
 // Kinetic display headings (reference: allthingswtf.com kinetic type, restrained
 // to the gallery palette): an element's text is split into per-letter spans that
 // slowly cycle between solid ink and a thin gold outline. The animation itself
@@ -39,4 +41,29 @@ export function kineticize(el) {
   [...el.childNodes].forEach(kineticizeNode);
   el.classList.add('kinetic');
   return () => {};
+}
+
+// Letters-settle (reference: the wavy statement letters on allthingswtf.com,
+// restrained to a quiet straightening): after kineticize has split a heading
+// into .kt spans, each letter starts a few degrees off-axis and a touch low,
+// then straightens as the heading scrolls into view. Reversible with the
+// scroll. Never runs under reduced motion - letters simply render straight.
+export function settleLetters(el, { tilt = 3, rise = 14 } = {}) {
+  if (!el || reducedMotion()) return () => {};
+  const letters = [...el.querySelectorAll('.kt')];
+  if (!letters.length) return () => {};
+  letters.forEach((s) => {
+    gsap.set(s, { display: 'inline-block', rotation: (Math.random() * 2 - 1) * tilt, y: Math.random() * rise });
+  });
+  const tween = gsap.to(letters, {
+    rotation: 0,
+    y: 0,
+    ease: 'none',
+    stagger: { each: 0.012, from: 'random' },
+    scrollTrigger: { trigger: el, start: 'top 96%', end: 'top 42%', scrub: 1 },
+  });
+  return () => {
+    tween.scrollTrigger?.kill();
+    tween.kill();
+  };
 }
