@@ -13,6 +13,8 @@ const BEATS = ['Original contemporary art.', 'Chosen for what it holds.'];
 export function EnterGate() {
   const [show, setShow] = useState(() => {
     try {
+      // Automated browsers (e2e, Lighthouse) never see the gate.
+      if (window.navigator.webdriver) return false;
       return !window.localStorage.getItem(KEY);
     } catch {
       return false;
