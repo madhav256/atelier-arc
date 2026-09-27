@@ -34,7 +34,7 @@ export function InFocus() {
   }, [works.length]);
   if (!works.length) return null;
   return (
-    <section className="in-focus" ref={root} aria-labelledby="in-focus-title">
+    <section className="in-focus" ref={root} data-cursor="Scroll" aria-labelledby="in-focus-title">
       <div className="in-focus-head">
         <span className="eyebrow">
           <i>03</i> Across the gallery
@@ -47,7 +47,7 @@ export function InFocus() {
       </div>
       <div className="in-focus-track" ref={track}>
         {works.map((w, i) => (
-          <Link to={`/artworks/${w.slug}`} className="in-focus-card" key={w.slug}>
+          <Link to={`/artworks/${w.slug}`} className="in-focus-card" data-cursor="View" key={w.slug}>
             <span className="if-index" aria-hidden="true">
               {String(i + 1).padStart(2, '0')}
             </span>
@@ -61,7 +61,7 @@ export function InFocus() {
             </p>
           </Link>
         ))}
-        <Link to="/artworks" className="in-focus-card if-cta">
+        <Link to="/artworks" className="in-focus-card if-cta" data-cursor="View">
           <span>
             The full
             <br />
