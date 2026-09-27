@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { ArtworkCard } from '../components/ArtworkCard';
@@ -7,6 +8,7 @@ import { InFocus } from '../components/InFocus';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { useQuery } from '@tanstack/react-query';
 import { api as request } from '../lib/api';
+import { kineticize } from '../lib/kinetic';
 
 // Opening set: one statement piece per corner of the gallery.
 const HERO_SLUGS = ['night-swimming', 'monsoon-sentinel', 'river-weave', 'sea-face-at-noon', 'ember-jar', 'temple-court'];
@@ -32,6 +34,9 @@ function GenreMarquee() {
 }
 
 export default function Home() {
+  const introRef = useRef(null);
+  // Kinetic letters on the intro statement (fill <-> gold outline cycle).
+  useEffect(() => kineticize(introRef.current), []);
   useDocumentMeta('',  'Discover original contemporary art, private viewings, and collector advisory.');
   const featuredQ = useQuery({ queryKey: ['artworks', 'home-featured'], queryFn: () => request('/artworks?featured=true&limit=8') });
   const heroQ = useQuery({ queryKey: ['artworks', 'home-hero'], queryFn: () => Promise.all(HERO_SLUGS.map((s) => request('/artworks/' + s).catch(() => null))) });
@@ -51,7 +56,7 @@ export default function Home() {
         <span className="eyebrow">
           <i>01</i> Curated with intention
         </span>
-        <h2>
+        <h2 ref={introRef}>
           Exceptional art.
           <br />
           <em>Considered living.</em>
