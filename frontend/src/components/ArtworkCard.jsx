@@ -32,7 +32,7 @@ export function ArtworkCard({ artwork, index = 0 }) {
       onMouseLeave={() => setHovered(false)}
     >
       <div className="art-image">
-        <Link to={`/artworks/${artwork.slug}`} aria-label={`${artwork.title} by ${artwork.artist?.name || 'the artist'}`}>
+        <Link to={`/artworks/${artwork.slug}`} aria-label={`${artwork.title} by ${artwork.artist?.name || 'the artist'}`} data-cursor="View">
           <animated.div className="art-zoom" style={{ scale: zoom.scale }}>
             <picture>
               {webp?.length > 0 && <source type="image/webp" srcSet={webp.map((v) => `${v.url} ${v.width}w`).join(', ')} sizes="(max-width: 768px) 100vw, 33vw" />}
