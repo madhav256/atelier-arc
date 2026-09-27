@@ -32,7 +32,10 @@ function kineticizeNode(node) {
 // it kinetic. Idempotent; headings are page-permanent, so no teardown is needed.
 export function kineticize(el) {
   if (!el || el.classList.contains('kinetic')) return () => {};
-  el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim());
+  const labelText = [...el.childNodes]
+    .map((n) => (n.nodeType === Node.ELEMENT_NODE && n.tagName === 'BR' ? ' ' : n.textContent))
+    .join('');
+  el.setAttribute('aria-label', labelText.replace(/\s+/g, ' ').trim());
   [...el.childNodes].forEach(kineticizeNode);
   el.classList.add('kinetic');
   return () => {};
