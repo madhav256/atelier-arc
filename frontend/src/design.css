@@ -539,17 +539,18 @@ dialog{max-height:calc(100dvh - 3rem);max-height:calc(100vh - 3rem);overflow-y:a
 
 /* Parallax gallery motifs behind the dark price-story band (Home). */
 .price-story{position:relative;overflow:hidden}
-.price-story .motifs{position:absolute;inset:0;pointer-events:none;color:var(--gold);opacity:.38}
+.price-story .motifs{position:absolute;inset:0;pointer-events:none;color:var(--gold)}
+.price-story .motif.m1,.price-story .motif.m2,.price-story .motif.m5{opacity:.38}
 .price-story .motif{position:absolute}
 .price-story .motif.m1{width:64px;top:10%;left:5%}
 .price-story .motif.m2{width:78px;top:58%;left:13%}
-.price-story .motif.m3{top:16%;right:9%;font:600 .66rem var(--sans);letter-spacing:.3em;text-transform:uppercase}
-.price-story .motif.m4{bottom:13%;right:17%;font:600 .66rem var(--sans);letter-spacing:.3em;text-transform:uppercase}
+.price-story .motif.m3{top:16%;right:9%;font:600 .66rem var(--sans);letter-spacing:.3em;text-transform:uppercase;color:#ad8c50}
+.price-story .motif.m4{bottom:13%;right:17%;font:600 .66rem var(--sans);letter-spacing:.3em;text-transform:uppercase;color:#ad8c50}
 .price-story .motif.m5{width:52px;bottom:22%;left:44%}
 .price-story>div:not(.motifs){position:relative;z-index:1}
 @media (max-width:768px){
   .price-story .motif.m2,.price-story .motif.m5{display:none}
-  .price-story .motifs{opacity:.3}
+  .price-story .motif.m1{opacity:.3}
 }
 
 /* First-visit threshold overlay (components/EnterGate.jsx). */
