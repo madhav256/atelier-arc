@@ -8,7 +8,8 @@ import { InFocus } from '../components/InFocus';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { useQuery } from '@tanstack/react-query';
 import { api as request } from '../lib/api';
-import { kineticize } from '../lib/kinetic';
+import { kineticize, settleLetters } from '../lib/kinetic';
+import { gsap, reducedMotion } from '../lib/motion';
 
 // Opening set: one statement piece per corner of the gallery.
 const HERO_SLUGS = ['night-swimming', 'monsoon-sentinel', 'river-weave', 'sea-face-at-noon', 'ember-jar', 'temple-court'];
@@ -35,8 +36,13 @@ function GenreMarquee() {
 
 export default function Home() {
   const introRef = useRef(null);
-  // Kinetic letters on the intro statement (fill <-> gold outline cycle).
-  useEffect(() => kineticize(introRef.current), []);
+  // Kinetic letters (fill <-> gold outline cycle) that also settle from a
+  // slight scatter as the statement scrolls into view.
+  useEffect(() => {
+    const el = introRef.current;
+    kineticize(el);
+    return settleLetters(el);
+  }, []);
   useDocumentMeta('',  'Discover original contemporary art, private viewings, and collector advisory.');
   const featuredQ = useQuery({ queryKey: ['artworks', 'home-featured'], queryFn: () => request('/artworks?featured=true&limit=8') });
   const heroQ = useQuery({ queryKey: ['artworks', 'home-hero'], queryFn: () => Promise.all(HERO_SLUGS.map((s) => request('/artworks/' + s).catch(() => null))) });
@@ -147,8 +153,40 @@ function PriceStory() {
     ['₹5L – ₹10L', 'Invest'],
     ['₹10L+', 'Acquire'],
   ];
+  const root = useRef(null);
+  // Gold gallery motifs drifting at different depths behind the dark band
+  // (reference: the parallax sticker fields on allthingswtf.com, translated
+  // to frame corners, a seal, and catalogue numbers). Static under reduced
+  // motion.
+  useEffect(() => {
+    if (reducedMotion()) return undefined;
+    const motifs = root.current ? [...root.current.querySelectorAll('.motif')] : [];
+    if (!motifs.length) return undefined;
+    const ctx = gsap.context(() => {
+      const depths = [0.65, 1, 0.5, 0.85, 0.55];
+      motifs.forEach((m, i) => {
+        const d = depths[i % depths.length];
+        gsap.fromTo(m, { y: 110 * d }, { y: -110 * d, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: 1.1 } });
+      });
+    }, root.current);
+    return () => ctx.revert();
+  }, []);
   return (
-    <section className="price-story">
+    <section className="price-story" ref={root}>
+      <div className="motifs" aria-hidden="true">
+        <svg className="motif m1" viewBox="0 0 60 60" fill="none">
+          <path d="M3 23V3h20M37 57h20V37" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+        <svg className="motif m2" viewBox="0 0 60 60" fill="none">
+          <circle cx="30" cy="30" r="21" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="30" cy="30" r="13" stroke="currentColor" strokeWidth="1" />
+        </svg>
+        <span className="motif m3">No. 04</span>
+        <span className="motif m4">Cat. 117</span>
+        <svg className="motif m5" viewBox="0 0 60 60" fill="none">
+          <path d="M3 21V3h18M39 57h18V39" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </div>
       <div>
         <span className="eyebrow">
           <i>04</i> Browse by price
