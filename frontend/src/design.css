@@ -519,23 +519,22 @@ dialog{max-height:calc(100dvh - 3rem);max-height:calc(100vh - 3rem);overflow-y:a
   .marquee:hover .marquee-set,.marquee:focus-within .marquee-set{animation-play-state:paused}
 }
 
-/* Gallery cursor (lib/cursor.js; desktop fine pointers only). Ink dot inside a
-   thin gold ring; the ring opens into a labelled pill over [data-cursor]
-   targets. The native cursor is hidden only once the module mounts. */
+/* Gallery cursor (lib/cursor.js; desktop fine pointers only). A drawn cursor
+   that swaps artwork by context (arrow / hand / I-beam) with a gold echo, plus
+   a paper cue chip over [data-cursor] targets - after allthingswtf.com,
+   translated to ink/gold. The native cursor is hidden only once the module
+   mounts. */
 @media (hover:hover) and (pointer:fine){
   .has-cursor,.has-cursor *{cursor:none!important}
 }
-.cursor{position:fixed;inset:0;z-index:1000;pointer-events:none}
-.cursor-dot,.cursor-ring{position:absolute;top:0;left:0;transition:opacity .3s}
-.cursor-dot{display:block;width:5px;height:5px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 1px rgba(250,248,243,.45)}
-.cursor-ring{display:grid;place-items:center;width:34px;height:34px;border-radius:999px;border:1.5px solid var(--gold);transition:width .35s cubic-bezier(.16,1,.3,1),height .35s cubic-bezier(.16,1,.3,1),background-color .35s,border-color .35s,opacity .3s}
-.cursor-label{font:600 .58rem var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink);white-space:nowrap;opacity:0;transition:opacity .25s}
-.cursor.is-hover .cursor-ring{width:52px;height:52px;background:color-mix(in srgb,var(--gold) 12%,transparent)}
-.cursor.is-down .cursor-ring{width:26px;height:26px}
-.cursor.is-label .cursor-ring{width:auto;height:auto;padding:.6rem 1rem;background:var(--paper);border-color:var(--gold-text)}
-.cursor.is-label .cursor-label{opacity:1}
-.cursor.is-label .cursor-dot{opacity:0}
-.cursor.is-hidden .cursor-dot,.cursor.is-hidden .cursor-ring{opacity:0}
+.cursor{position:fixed;top:0;left:0;z-index:1000;pointer-events:none;transition:opacity .25s}
+.cursor-glyph{display:block;line-height:0}
+.cursor-art{display:block;overflow:visible}
+.cursor-chip{position:absolute;left:16px;top:15px;padding:.42rem .7rem;background:var(--paper);border:1px solid var(--gold-text);font:600 .56rem var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ink);white-space:nowrap;opacity:0;transform:translateY(2px);transition:opacity .25s,transform .25s}
+.cursor.state-chip .cursor-chip{opacity:1;transform:none}
+.cursor.is-down .cursor-glyph{transform:scale(.9)}
+.cursor-glyph{transition:transform .15s}
+.cursor.is-hidden{opacity:0}
 
 /* Parallax gallery motifs behind the dark price-story band (Home). */
 .price-story{position:relative;overflow:hidden}
