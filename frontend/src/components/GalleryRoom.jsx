@@ -158,6 +158,7 @@ function GalleryCanvas({ onError }) {
         frame = requestAnimationFrame(tick);
         complete = true;
         el.dataset.ready = 'true';
+        el.closest('.gallery-visit-stage')?.classList.add('is-rendered');
         release = ((prev) => () => {
           prev();
           scene.traverse((object) => {
@@ -173,6 +174,7 @@ function GalleryCanvas({ onError }) {
       observer?.disconnect(); visibilityObserver?.disconnect(); release();
       textures.forEach((t) => t.dispose());
       if (renderer) { if (!complete) renderer.forceContextLoss(); renderer.dispose(); renderer.domElement.remove(); }
+      host.current?.closest('.gallery-visit-stage')?.classList.remove('is-rendered');
     };
   }, [onError]);
   return <div className="gallery-canvas" ref={host} tabIndex={0} role="group" aria-label="Interactive gallery room. Drag to look around or focus here and use left and right arrow keys." />;
