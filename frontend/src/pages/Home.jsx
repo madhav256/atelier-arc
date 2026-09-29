@@ -5,6 +5,7 @@ import { ArtworkCard } from '../components/ArtworkCard';
 import { AdvisorChat } from '../components/AdvisorChat';
 import { HeroCarousel } from '../components/HeroCarousel';
 import { InFocus } from '../components/InFocus';
+import { GalleryRoom } from '../components/GalleryRoom';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { useQuery } from '@tanstack/react-query';
 import { api as request } from '../lib/api';
@@ -69,6 +70,7 @@ export default function Home() {
         </h2>
         <p>We bring together singular works by established masters and defining voices of a new generation. Each piece is chosen for what it holds, and how it transforms a space.</p>
       </section>
+      <GalleryRoom />
       <GenreMarquee />
       <section className="section">
         <div className="section-head">
