@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Pause, Play, RotateCcw } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpRight, Pause, Play, RotateCcw } from 'lucide-react';
 
 const EXHIBIT = [
   { src: '/art/work-24.jpg', title: 'The Eleventh Tide', artist: 'Zoya Merchant', slug: 'the-eleventh-tide', wall: -1, z: 3.2, w: 1.54, h: 1.92 },
@@ -32,7 +32,7 @@ function GalleryCanvas({ onError, onProgress, onArtwork }) {
         if (disposed || !el) return;
         canvasHost = el;
         renderer = new T.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
-        renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+        renderer.setPixelRatio(Math.min(devicePixelRatio || 1, window.matchMedia('(max-width: 700px)').matches ? 1 : 1.5));
         renderer.outputColorSpace = T.SRGBColorSpace;
         renderer.toneMapping = T.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.6;
@@ -136,7 +136,7 @@ function GalleryCanvas({ onError, onProgress, onArtwork }) {
         scene.add(new T.HemisphereLight('#fff9ec', '#776c5e', 2.15));
         const sun = new T.DirectionalLight('#ffebcd', 2.8);
         sun.position.set(-1.6, 7.5, 5);
-        sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+        sun.castShadow = true; sun.shadow.mapSize.set(window.matchMedia('(max-width: 700px)').matches ? 512 : 1024, window.matchMedia('(max-width: 700px)').matches ? 512 : 1024);
         sun.shadow.camera.left = -7; sun.shadow.camera.right = 7;
         sun.shadow.camera.top = 15; sun.shadow.camera.bottom = -20;
         sun.shadow.bias = -.0006; sun.shadow.normalBias = .03;
@@ -164,9 +164,10 @@ function GalleryCanvas({ onError, onProgress, onArtwork }) {
             lastNotice = now;
           }
         };
-        const down = (e) => { dragDistance = 0; drag = { x: e.clientX, y: e.clientY }; renderer.domElement.setPointerCapture(e.pointerId); renderer.domElement.style.cursor = 'grabbing'; manualUntil = performance.now() + 10000; };
+        const down = (e) => { if (e.pointerType === 'touch') e.preventDefault(); dragDistance = 0; drag = { x: e.clientX, y: e.clientY }; renderer.domElement.setPointerCapture(e.pointerId); renderer.domElement.style.cursor = 'grabbing'; manualUntil = performance.now() + 10000; };
         const move = (e) => {
           if (!drag) return;
+          if (e.pointerType === 'touch') e.preventDefault();
           dragDistance += Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y);
           targetYaw = T.MathUtils.clamp(targetYaw - (e.clientX - drag.x) * .0036, -1.12, 1.12);
           targetPitch = T.MathUtils.clamp(targetPitch - (e.clientY - drag.y) * .0028, -.42, .42);
@@ -174,7 +175,7 @@ function GalleryCanvas({ onError, onProgress, onArtwork }) {
         };
         const up = () => { drag = null; renderer.domElement.style.cursor = 'grab'; };
         const keyDown = (e) => {
-          if (!el.contains(document.activeElement)) return;
+          if (!active || document.activeElement?.matches('input, textarea, select, [contenteditable=true]')) return;
           const key = e.key.toLowerCase();
           if (!['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright',' '].includes(key)) return;
           e.preventDefault(); keys.add(key); manualUntil = performance.now() + 8000;
@@ -187,32 +188,39 @@ function GalleryCanvas({ onError, onProgress, onArtwork }) {
           if (item) callbacks.current.onArtwork(item);
         };
         renderer.domElement.style.cursor = 'grab';
+        renderer.domElement.style.touchAction = 'none';
         renderer.domElement.addEventListener('pointerdown', down);
         renderer.domElement.addEventListener('pointermove', move);
         renderer.domElement.addEventListener('pointerup', up);
         renderer.domElement.addEventListener('pointercancel', up);
         renderer.domElement.addEventListener('click', click);
-        el.addEventListener('keydown', keyDown);
+        window.addEventListener('keydown', keyDown);
         window.addEventListener('keyup', keyUp);
         window.addEventListener('blur', blur);
         const reset = () => { z = 9.2; x = -.3; yaw = targetYaw = pitch = targetPitch = 0; walking = true; manualUntil = 0; };
-        const onCommand = (e) => { if (e.detail === 'reset') reset(); else if (e.detail === 'pause') walking = false; else if (e.detail === 'play') walking = true; };
+        const onCommand = (e) => {
+          if (e.detail === 'reset') reset();
+          else if (e.detail === 'pause') walking = false;
+          else if (e.detail === 'play') walking = true;
+          else if (e.detail?.type === 'move') {
+            if (e.detail.pressed) { keys.add(e.detail.key); manualUntil = performance.now() + 8000; }
+            else keys.delete(e.detail.key);
+          }
+        };
         el.addEventListener('gallery-command', onCommand);
         clean = () => {
           renderer.domElement.removeEventListener('pointerdown', down); renderer.domElement.removeEventListener('pointermove', move);
           renderer.domElement.removeEventListener('pointerup', up); renderer.domElement.removeEventListener('pointercancel', up);
           renderer.domElement.removeEventListener('click', click);
-          el.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp);
+          window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp);
           window.removeEventListener('blur', blur); el.removeEventListener('gallery-command', onCommand);
         };
         const tick = (now) => {
           if (disposed) return;
           const dt = Math.min((now - last) / 1000, .05); last = now;
           if (active && !document.hidden) {
-            const forward = (keys.has('w') || keys.has('arrowup') ? 1 : 0) - (keys.has('s') || keys.has('arrowdown') ? 1 : 0);
-            const strafe = (keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0);
-            if (keys.has('arrowleft')) targetYaw = T.MathUtils.clamp(targetYaw + dt * .75, -1.12, 1.12);
-            if (keys.has('arrowright')) targetYaw = T.MathUtils.clamp(targetYaw - dt * .75, -1.12, 1.12);
+            const forward = ((keys.has('w') || keys.has('arrowup')) ? 1 : 0) - ((keys.has('s') || keys.has('arrowdown')) ? 1 : 0);
+            const strafe = ((keys.has('d') || keys.has('arrowright')) ? 1 : 0) - ((keys.has('a') || keys.has('arrowleft')) ? 1 : 0);
             if (forward || strafe) {
               z -= forward * dt * 2.1 * Math.cos(targetYaw);
               x += (strafe * Math.cos(targetYaw) - forward * Math.sin(targetYaw)) * dt * 2.1;
@@ -244,7 +252,7 @@ function GalleryCanvas({ onError, onProgress, onArtwork }) {
       canvasHost?.closest('.gallery-visit-stage')?.classList.remove('is-rendered');
     };
   }, []);
-  return <div className="gallery-canvas" ref={host} tabIndex={0} role="group" aria-label="Walk-through gallery. Drag to look, focus and use W A S D or arrow keys to walk. The guided visit plays automatically; pause or reset below." />;
+  return <div className="gallery-canvas" ref={host} tabIndex={0} role="group" aria-label="Walk-through gallery. Drag to look, use arrow keys to walk or the touch controls on mobile. The guided visit plays automatically; pause or reset below." />;
 }
 
 export function GalleryRoom() {
@@ -252,7 +260,7 @@ export function GalleryRoom() {
   const stage = useRef(null);
   const [visible, setVisible] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [staticOnly, setStaticOnly] = useState(() => typeof window !== 'undefined' && (window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.matchMedia('(max-width: 700px)').matches));
+  const [staticOnly, setStaticOnly] = useState(() => typeof window !== 'undefined' && (window.matchMedia('(prefers-reduced-motion: reduce)').matches));
   const [playing, setPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [work, setWork] = useState(null);
@@ -263,13 +271,13 @@ export function GalleryRoom() {
   }, []);
   useEffect(() => {
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const narrow = window.matchMedia('(max-width: 700px)');
-    const update = () => setStaticOnly(motion.matches || narrow.matches);
-    motion.addEventListener('change', update); narrow.addEventListener('change', update);
-    return () => { motion.removeEventListener('change', update); narrow.removeEventListener('change', update); };
+    const update = () => setStaticOnly(motion.matches);
+    motion.addEventListener('change', update);
+    return () => motion.removeEventListener('change', update);
   }, []);
   const command = (name) => stage.current?.querySelector('.gallery-canvas')?.dispatchEvent(new CustomEvent('gallery-command', { detail: name }));
   const toggle = () => { command(playing ? 'pause' : 'play'); setPlaying(!playing); };
+  const moveButton = (key, Icon, label) => <button key={key} type="button" aria-label={label} onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); command({ type: 'move', key, pressed: true }); }} onPointerUp={() => command({ type: 'move', key, pressed: false })} onPointerCancel={() => command({ type: 'move', key, pressed: false })} onLostPointerCapture={() => command({ type: 'move', key, pressed: false })}><Icon aria-hidden="true" /></button>;
   return (
     <section className="gallery-visit" ref={section} aria-labelledby="gallery-visit-title">
       <div className="gallery-visit-top"><span className="eyebrow">Atelier Arc / The private viewing</span><span className="gallery-visit-index">A WALK THROUGH THE COLLECTION &nbsp; / &nbsp; 001</span></div>
@@ -280,7 +288,7 @@ export function GalleryRoom() {
         <div className="gallery-visit-overlay"><span>THE PRIVATE VIEWING</span><span>01 &nbsp; / &nbsp; 03</span></div>
         {!staticOnly && !failed && <div className="gallery-visit-ui">
           {work && <div className="gallery-visit-work"><span>NOW VIEWING</span><strong>{work.title}</strong><small>{work.artist}</small>{work.slug && <Link to={`/artworks/${work.slug}`}>Discover the work <ArrowUpRight size={15} aria-hidden="true" /></Link>}</div>}
-          <div className="gallery-visit-controls"><span className="gallery-visit-hint">A PRIVATE WALK THROUGH ART &nbsp; · &nbsp; DRAG TO LOOK &nbsp; · &nbsp; W A S D TO MOVE</span><div><button onClick={toggle} type="button" aria-label={playing ? 'Pause guided visit' : 'Play guided visit'}>{playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}</button><button type="button" onClick={() => { command('reset'); setProgress(0); setPlaying(true); }} aria-label="Restart guided visit"><RotateCcw aria-hidden="true" /></button></div></div>
+          <div className="gallery-visit-controls"><span className="gallery-visit-hint">A PRIVATE WALK THROUGH ART &nbsp; · &nbsp; DRAG TO LOOK &nbsp; · &nbsp; ARROW KEYS TO MOVE</span><div className="gallery-visit-touch" aria-label="Walk controls">{moveButton('arrowleft', ArrowLeft, 'Walk left')}{moveButton('arrowup', ArrowUp, 'Walk forward')}{moveButton('arrowdown', ArrowDown, 'Walk backward')}{moveButton('arrowright', ArrowRight, 'Walk right')}</div><div><button onClick={toggle} type="button" aria-label={playing ? 'Pause guided visit' : 'Play guided visit'}>{playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}</button><button type="button" onClick={() => { command('reset'); setProgress(0); setPlaying(true); }} aria-label="Restart guided visit"><RotateCcw aria-hidden="true" /></button></div></div>
           <div className="gallery-visit-progress" role="progressbar" aria-label="Gallery walk progress" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}><i style={{ transform: `scaleX(${progress / 100})` }} /></div>
         </div>}
       </div>

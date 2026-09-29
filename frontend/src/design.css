@@ -609,3 +609,17 @@ dialog{max-height:calc(100dvh - 3rem);max-height:calc(100vh - 3rem);overflow-y:a
 .gallery-visit-work span{font:600 .54rem var(--sans);letter-spacing:.2em;color:#d6c5a6}.gallery-visit-work strong{font:1.35rem var(--serif)}.gallery-visit-work small{font:italic .85rem var(--serif-text);color:#ddd1bd}.gallery-visit-work a{pointer-events:auto;margin-top:.75rem;font:.58rem var(--sans);letter-spacing:.13em;text-transform:uppercase;display:flex;align-items:center;gap:.55rem;border-top:1px solid #ffffff55;padding-top:.8rem}
 @media(max-width:700px){.gallery-visit-stage{aspect-ratio:1.25;min-height:0;max-height:none}.gallery-visit-overlay{color:#473b30;text-shadow:none}.gallery-visit-ui{display:none}}
 @media(prefers-reduced-motion:reduce){.gallery-visit-ui{display:none}}
+
+/* Touch keeps the real visit accessible without loading desktop-quality pixels. */
+.gallery-visit-touch{display:none!important}
+@media(max-width:700px){
+  .gallery-visit-stage{aspect-ratio:1.05}
+  .gallery-visit-overlay{color:#f7f0e3;text-shadow:0 1px 8px #32281e}
+  .gallery-visit-ui{display:block}
+  .gallery-visit-controls{left:.8rem;right:.8rem;bottom:1.1rem;align-items:flex-end}
+  .gallery-visit-controls .gallery-visit-hint{display:none}
+  .gallery-visit-touch{display:grid!important;grid-template-columns:repeat(2, 40px);gap:.35rem;touch-action:none}
+  .gallery-visit-controls button{width:40px;height:40px;touch-action:none}
+  .gallery-visit-work{right:.8rem;top:2.5rem;transform:none;max-width:175px}
+}
+@media(prefers-reduced-motion:reduce){.gallery-visit-overlay{color:#473b30;text-shadow:none}}
