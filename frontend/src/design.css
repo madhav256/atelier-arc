@@ -593,3 +593,19 @@ dialog{max-height:calc(100dvh - 3rem);max-height:calc(100vh - 3rem);overflow-y:a
 @media(prefers-reduced-motion:reduce){.gallery-canvas{transition:none}.gallery-visit-link{transition:none}}
 
 .gallery-visit-stage.is-rendered .gallery-visit-poster{opacity:0;transition:opacity 1.2s ease}
+
+/* The private viewing is eye-level and quietly cinematic, not a game HUD. */
+.gallery-visit-stage{aspect-ratio:1.9;max-height:81vh;min-height:560px}
+.gallery-visit-overlay{color:#f7f0e3;text-shadow:0 1px 10px #32281e9e}
+.gallery-visit-ui{position:absolute;inset:0;pointer-events:none;z-index:4;color:#fffaf0}
+.gallery-visit-controls{position:absolute;left:2rem;right:2rem;bottom:2.4rem;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
+.gallery-visit-controls .gallery-visit-hint{position:static;transform:none;color:#f7efe0;background:#241f1bba;border:1px solid #ffffff3d;letter-spacing:.19em;line-height:1.5;backdrop-filter:blur(14px)}
+.gallery-visit-controls>div{pointer-events:auto;display:flex;gap:.5rem}
+.gallery-visit-controls button{background:#231e19c9;border:1px solid #ffffff57;color:#f7f0e3;display:grid;place-items:center;width:42px;height:42px;backdrop-filter:blur(14px);transition:background .2s}
+.gallery-visit-controls button:hover{background:#a68856}.gallery-visit-controls button svg{width:16px;height:16px}
+.gallery-visit-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:#28201db8}
+.gallery-visit-progress i{display:block;width:100%;height:100%;background:#cbb483;transform-origin:left;transition:transform .3s linear}
+.gallery-visit-work{position:absolute;top:50%;right:2rem;transform:translateY(-50%);display:grid;gap:.15rem;max-width:215px;padding:1rem 1.2rem;background:#221f1be0;border-left:2px solid #c5a975;backdrop-filter:blur(12px)}
+.gallery-visit-work span{font:600 .54rem var(--sans);letter-spacing:.2em;color:#d6c5a6}.gallery-visit-work strong{font:1.35rem var(--serif)}.gallery-visit-work small{font:italic .85rem var(--serif-text);color:#ddd1bd}.gallery-visit-work a{pointer-events:auto;margin-top:.75rem;font:.58rem var(--sans);letter-spacing:.13em;text-transform:uppercase;display:flex;align-items:center;gap:.55rem;border-top:1px solid #ffffff55;padding-top:.8rem}
+@media(max-width:700px){.gallery-visit-stage{aspect-ratio:1.25;min-height:0;max-height:none}.gallery-visit-overlay{color:#473b30;text-shadow:none}.gallery-visit-ui{display:none}}
+@media(prefers-reduced-motion:reduce){.gallery-visit-ui{display:none}}
