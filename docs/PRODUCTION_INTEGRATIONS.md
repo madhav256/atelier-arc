@@ -9,6 +9,7 @@ Every external service sits behind an adapter with a working local mode, so the 
 | Images | `local`: EXIF-stripped JPEG master + WebP/AVIF derivatives on disk, served at `/uploads` | Cloudinary signed upload | `STORAGE_PROVIDER` |
 | Films | `local`: MP4 (H.264) or WebM stored as uploaded, type-sniffed, size-capped at 80 MB, ClamAV-scanned when configured; ffprobe reads duration and size and ffmpeg takes a poster frame when installed (both free, optional) | Cloudinary signed upload to the `video` resource type (same account and keys as images) | `STORAGE_PROVIDER` |
 | Malware scan | off | ClamAV `INSTREAM` (self-hosted Docker, free) | `CLAMAV_HOST` |
+| Private Advisor (LLM) | `mock`: deterministic keyword matcher, same request and answer shape (dev and CI only; in production with no key the advisor reports itself unavailable) | Google Gemini via REST, free tier | `LLM_PROVIDER`, `GEMINI_API_KEY` |
 | Search | Mongo weighted `$text` + typo-tolerant fallback | Atlas Search `$search` with fuzzy matching | `SEARCH_PROVIDER` |
 | Shipping, insurance, tax | Rule-based quotes, HMAC-signed, 30 min expiry, revalidated at order time | Same `computeQuote()` signature for a carrier/tax API | `ORIGIN_COUNTRY`, `DOMESTIC_TAX_RATE`, `INSURANCE_RATE` |
 | Address checks | Structural validation (IN PIN, US ZIP, UK postcode) | Swap `validateAddress()` for a verification API | - |
@@ -69,3 +70,17 @@ Free signup for test mode (no spend, not done on your behalf):
 4. Check Account & Settings > Payment Methods to see which EMI types are on. Card EMI is on by default for Standard Checkout; cardless EMI needs Razorpay's approval. Going live needs KYC.
 
 Sources: https://razorpay.com/docs/payments/payment-methods/emi/credit-card-emi/ (EMI is on by default in Standard Checkout), https://razorpay.com/docs/payments/payment-methods/emi/faqs (bank minimums from ₹5,000), https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/configure-payment-methods/display-configuration/ (display blocks).
+
+## Private Advisor (Gemini, free tier)
+
+`/advisor` is a concierge chat. A visitor describes a room, mood, palette or budget. The API (`POST /api/v1/advisor/chat`, `GET /api/v1/advisor/status`) loads the published, available works, gives them to the model as the only catalogue it may use, and returns at most three picks with a one-sentence reason each. Any id the model returns that is not a real available work is dropped, and a budget stated in the conversation is enforced on the server.
+
+Swap in a real model:
+
+1. Create a free key at https://aistudio.google.com/apikey.
+2. Set `GEMINI_API_KEY` on the API service (Render: Environment). Optionally set `GEMINI_MODEL` (default `gemini-2.5-flash`).
+3. Redeploy. `LLM_PROVIDER` defaults to `gemini`; no other change is needed.
+
+Behaviour without a key: local dev and CI use the mock provider. In production the advisor page shows a quiet "speak with a person" state instead of pretending to be a model. Set `LLM_PROVIDER=mock` only on purpose.
+
+Free-tier protection: 20 requests per IP per 10 minutes, and `ADVISOR_DAILY_LIMIT` (default 400) answers per UTC day across all visitors. Over the limit the visitor sees a calm message pointing to the human advisors. To use another model, add a provider in `backend/src/providers/llm/` that implements `generate({ system, messages })` and returns `{ reply, picks }`, then register it in `index.js`.

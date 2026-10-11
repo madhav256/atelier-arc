@@ -64,6 +64,7 @@ export function Layout() {
           <NavLink to="/collections">Collections</NavLink>
           <NavLink to="/journal">Journal</NavLink>
           <NavLink to="/advisory">Private advisory</NavLink>
+          <NavLink to="/advisor">Ask the Advisor</NavLink>
           {isStaff && <NavLink to="/admin">Gallery admin</NavLink>}
           <button
             className="nav-close"
@@ -151,6 +152,7 @@ export function Layout() {
                 <i>03</i> Collectors
               </h3>
               <Link to="/advisory">Private advisory</Link>
+              <Link to="/advisor">Private Advisor</Link>
               <Link to="/my-collection">My Collection</Link>
               <Link to="/order-status">Order status</Link>
               <Link to="/guarantee">Returns and guarantee</Link>

@@ -60,6 +60,14 @@ export const env = {
     clamavHost: process.env.CLAMAV_HOST,
     clamavPort: Number(process.env.CLAMAV_PORT || 3310),
   },
+  llm: {
+    provider: process.env.LLM_PROVIDER || 'gemini',
+    geminiApiKey: process.env.GEMINI_API_KEY,
+    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+    timeoutMs: Number(process.env.LLM_TIMEOUT_MS || 15000),
+    // Free-tier guard: total advisor answers per UTC day across all visitors.
+    dailyLimit: Number(process.env.ADVISOR_DAILY_LIMIT || 400),
+  },
   search: { provider: process.env.SEARCH_PROVIDER || 'mongo', atlasIndex: process.env.ATLAS_SEARCH_INDEX || 'artworks' },
   google: { clientId: process.env.GOOGLE_CLIENT_ID || '566562303272-ksqt0kqqmgge27a9sevhafs7p2jltrbp.apps.googleusercontent.com' },
   commerce: {

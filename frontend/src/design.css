@@ -623,3 +623,51 @@ dialog{max-height:calc(100dvh - 3rem);max-height:calc(100vh - 3rem);overflow-y:a
   .gallery-visit-work{right:.8rem;top:2.5rem;transform:none;max-width:175px}
 }
 @media(prefers-reduced-motion:reduce){.gallery-visit-overlay{color:#473b30;text-shadow:none}}
+
+/* Private Advisor: a quiet correspondence, not a chat widget */
+.advisor{max-width:1440px;margin:0 auto;padding:5rem var(--gutter) 8rem;display:grid;grid-template-columns:repeat(12,1fr);column-gap:1.5rem;align-items:start}
+.advisor-head{grid-column:1/6;position:sticky;top:7rem}
+.advisor-head h1{font-size:clamp(3rem,5.6vw,6rem);letter-spacing:-.045em;margin:1.6rem 0 0}
+.advisor-head .lede{max-width:34ch;color:var(--muted)}
+.advisor-room{grid-column:7/13;min-height:28rem;display:flex;flex-direction:column}
+.advisor-log{list-style:none;margin:0;padding:0;display:grid;gap:2.6rem}
+.advisor-hint{font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:0 0 1rem}
+.advisor-openers{display:grid;justify-items:start;border-top:var(--hair)}
+.advisor-opener{background:0;border:0;border-bottom:var(--hair);width:100%;text-align:left;padding:1.3rem 0;font:400 clamp(1.15rem,1.7vw,1.5rem)/1.3 var(--serif);letter-spacing:-.01em;color:inherit;cursor:pointer;transition:padding-left .5s cubic-bezier(.16,1,.3,1),font-style 0s}
+.advisor-opener:hover,.advisor-opener:focus-visible{padding-left:.8rem;font-style:italic}
+.advisor-openers .advisor-hint{margin-top:0;padding-top:1.2rem}
+.advisor-turn{display:grid;gap:.7rem}
+.advisor-who{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-text)}
+.advisor-turn p{margin:0;max-width:52ch}
+.advisor-turn.is-user p{font:italic 400 1.2rem/1.5 var(--serif-text);letter-spacing:-.01em}
+.advisor-turn.is-assistant>p{font-size:1.02rem;line-height:1.7}
+.advisor-turn.is-waiting p{color:var(--muted)}
+.advisor-turn.is-waiting p:after{content:'';display:inline-block;width:1.6rem;height:1px;background:currentColor;margin-left:.7rem;vertical-align:middle;opacity:.6}
+.advisor-picks{list-style:none;margin:1.2rem 0 0;padding:0;display:grid;gap:1.6rem}
+.advisor-pick{display:grid;grid-template-columns:7.5rem 1fr;gap:1.4rem;align-items:start;border-top:var(--hair);padding-top:1.6rem}
+.advisor-pick-image{display:block}
+.advisor-pick-image img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:var(--line)}
+.advisor-pick h3{font:400 1.45rem/1.15 var(--serif);letter-spacing:-.02em;margin:0}
+.advisor-pick h3 a{text-decoration:none}
+.advisor-pick h3 a:hover{font-style:italic}
+.advisor-pick p{margin:.35rem 0 0}
+.advisor-pick-meta{font-size:.82rem;color:var(--muted)}
+.advisor-pick-price{font-size:.9rem;font-variant-numeric:lining-nums tabular-nums}
+.advisor-pick-reason{font:italic 400 .98rem/1.55 var(--serif-text);margin-top:.8rem!important;max-width:42ch}
+.advisor-form{display:flex;align-items:flex-end;gap:1.5rem;border-bottom:1px solid var(--ink);margin-top:3rem;padding-bottom:.9rem}
+.advisor-form textarea{flex:1;border:0;background:0;resize:none;font:400 1.15rem/1.5 var(--serif-text);color:inherit;padding:.4rem 0;min-height:2.4rem;max-height:9rem;field-sizing:content;outline:none}
+.advisor-form textarea::placeholder{color:var(--muted);opacity:.8}
+.advisor-form:focus-within{border-bottom-width:2px;padding-bottom:calc(.9rem - 1px)}
+.advisor-form .text-link{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase}
+.advisor-form .text-link:disabled{opacity:.35;cursor:default}
+.advisor-note{font-size:.74rem;color:var(--muted);margin:1rem 0 0;max-width:52ch}
+.advisor-error{margin:1.6rem 0 0;font-size:.92rem}
+.advisor-closed{border-top:var(--hair);padding-top:2rem;display:grid;gap:1.6rem;justify-items:start}
+.advisor-closed p{font:400 1.5rem/1.3 var(--serif);margin:0;max-width:24ch}
+@media (prefers-reduced-motion:no-preference){.advisor-turn{animation:advisor-in .8s cubic-bezier(.16,1,.3,1) both}}
+@keyframes advisor-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (max-width:900px){
+  .advisor{display:block;padding:3rem var(--gutter) 6rem}
+  .advisor-head{position:static;margin-bottom:3rem}
+  .advisor-pick{grid-template-columns:5.5rem 1fr;gap:1rem}
+}

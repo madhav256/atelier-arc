@@ -16,3 +16,4 @@ export const apiLimiter = make(60_000, 300, 'Too many requests. Please slow down
 export const authLimiter = make(15 * 60_000, 30, 'Too many sign-in attempts. Try again in a few minutes.');
 export const inquiryLimiter = make(60 * 60_000, 20, 'Too many inquiries from this network. Please try later or call the gallery.');
 export const uploadLimiter = make(60_000, 30, 'Too many uploads. Please wait a moment.');
+export const advisorLimiter = make(10 * 60_000, 20, 'The advisor needs a moment. Please try again shortly.');

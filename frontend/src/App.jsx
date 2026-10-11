@@ -41,6 +41,7 @@ const Terms = lazy(() =>
 );
 const BookViewing = lazy(() => import("./pages/Viewings"));
 const AccountViewings = named(() => import("./pages/Viewings"), "AccountViewings");
+const Advisor = lazy(() => import("./pages/Advisor"));
 const TasteQuiz = lazy(() => import("./pages/TasteQuiz"));
 const Auth = lazy(authPages);
 const ForgotPassword = named(authPages, "ForgotPassword");
@@ -90,6 +91,7 @@ const router = createBrowserRouter([
       { path: "/journal", element: <Journal /> },
       { path: "/journal/:slug", element: <JournalStory /> },
       { path: "/advisory", element: <Advisory /> },
+      { path: "/advisor", element: <Advisor /> },
       { path: "/taste", element: <TasteQuiz /> },
       { path: "/guarantee", element: <Guarantee /> },
               { path: "/privacy", element: <Privacy /> },
