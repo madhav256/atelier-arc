@@ -32,6 +32,10 @@ export const geminiProvider = {
       }),
     }).catch(() => null);
     if (!res) throw new AppError(503, 'The advisor is resting. Please try again shortly.', 'ADVISOR_UNAVAILABLE');
+    if (!res.ok) {
+      const detail = await res.clone().json().catch(() => ({}));
+      console.error(JSON.stringify({ level: 'error', msg: 'gemini request failed', status: res.status, reason: detail.error?.status, message: String(detail.error?.message || '').slice(0, 200) }));
+    }
     if (res.status === 429) throw new AppError(429, 'The advisor is busy. Please try again in a minute.', 'ADVISOR_BUSY');
     if (!res.ok) throw new AppError(503, 'The advisor is resting. Please try again shortly.', 'ADVISOR_UNAVAILABLE');
     const data = await res.json().catch(() => ({}));
