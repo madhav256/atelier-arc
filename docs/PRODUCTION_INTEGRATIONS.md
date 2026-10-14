@@ -78,7 +78,7 @@ Sources: https://razorpay.com/docs/payments/payment-methods/emi/credit-card-emi/
 Swap in a real model:
 
 1. Create a free key at https://aistudio.google.com/apikey.
-2. Set `GEMINI_API_KEY` on the API service (Render: Environment). Optionally set `GEMINI_MODEL` (default `gemini-2.5-flash`).
+2. Set `GEMINI_API_KEY` on the API service (Render: Environment). Optionally set `GEMINI_MODEL` (default `gemini-3.8-flash`).
 3. Redeploy. `LLM_PROVIDER` defaults to `gemini`; no other change is needed.
 
 Behaviour without a key: local dev and CI use the mock provider. In production the advisor page shows a quiet "speak with a person" state instead of pretending to be a model. Set `LLM_PROVIDER=mock` only on purpose.

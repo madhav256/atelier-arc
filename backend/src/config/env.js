@@ -63,7 +63,7 @@ export const env = {
   llm: {
     provider: process.env.LLM_PROVIDER || 'gemini',
     geminiApiKey: process.env.GEMINI_API_KEY,
-    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
     timeoutMs: Number(process.env.LLM_TIMEOUT_MS || 15000),
     // Free-tier guard: total advisor answers per UTC day across all visitors.
     dailyLimit: Number(process.env.ADVISOR_DAILY_LIMIT || 400),
