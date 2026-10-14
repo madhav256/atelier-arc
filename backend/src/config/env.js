@@ -64,7 +64,8 @@ export const env = {
     provider: process.env.LLM_PROVIDER || 'gemini',
     geminiApiKey: process.env.GEMINI_API_KEY,
     model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
-    timeoutMs: Number(process.env.LLM_TIMEOUT_MS || 15000),
+    fallbackModels: (process.env.GEMINI_FALLBACK_MODELS || 'gemini-flash-latest,gemini-flash-lite-latest').split(',').map((m) => m.trim()).filter(Boolean),
+    timeoutMs: Number(process.env.LLM_TIMEOUT_MS || 20000),
     // Free-tier guard: total advisor answers per UTC day across all visitors.
     dailyLimit: Number(process.env.ADVISOR_DAILY_LIMIT || 400),
   },

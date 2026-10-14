@@ -126,12 +126,22 @@ describe('gemini provider (network stubbed)', () => {
 
   it('maps quota, outage and malformed answers to calm errors', async () => {
     const spy = vi.spyOn(globalThis, 'fetch');
-    spy.mockResolvedValueOnce(new Response('{}', { status: 429 }));
+    spy.mockImplementation(async () => new Response('{}', { status: 429 }));
     await expect(withKey(run)).rejects.toMatchObject({ code: 'ADVISOR_BUSY' });
-    spy.mockResolvedValueOnce(new Response('{}', { status: 500 }));
-    await expect(withKey(run)).rejects.toMatchObject({ code: 'ADVISOR_UNAVAILABLE' });
-    spy.mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'not json' }] } }] }), { status: 200 }));
+    spy.mockImplementation(async () => new Response(JSON.stringify({ error: { status: 'UNAVAILABLE' } }), { status: 503 }));
+    await expect(withKey(run)).rejects.toMatchObject({ code: 'ADVISOR_UNAVAILABLE', details: { upstreamStatus: 503 } });
+    spy.mockImplementation(async () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'not json' }] } }] }), { status: 200 }));
     await expect(withKey(run)).rejects.toMatchObject({ code: 'ADVISOR_BAD_RESPONSE' });
+  });
+
+  it('falls back to the next model when one is retired or overloaded, but not on a bad key', async () => {
+    const ok = () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"reply":"Hi","picks":[]}' }] } }] }), { status: 200 });
+    const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('{}', { status: 404 })).mockResolvedValueOnce(new Response('{}', { status: 503 })).mockImplementation(async () => ok());
+    expect(await withKey(run)).toEqual({ reply: 'Hi', picks: [] });
+    expect(spy).toHaveBeenCalledTimes(3);
+    spy.mockReset().mockImplementation(async () => new Response('{}', { status: 403 }));
+    await expect(withKey(run)).rejects.toMatchObject({ code: 'ADVISOR_UNAVAILABLE' });
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 
   it('refuses to run without a key', async () => {
